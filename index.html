@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sortable Categorized Dashboard</title>
+  <title>App-Like Link Dashboard</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <!-- SortableJS -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      padding-top: 20px;
+      margin: 0; padding: 0;
       background-image: url('blue_arch_nowatermark.png');
       background-size: cover;
       background-attachment: fixed;
@@ -22,26 +21,35 @@
     }
 
     .container {
-      width: 90%;
+      width: 95%;
       max-width: 1000px;
       margin: auto;
-      background: transparent;
       padding: 20px;
+      background: rgba(0,0,0,0.2);
       border-radius: 15px;
       box-shadow: 0px 0px 20px rgba(0,0,0,0.3);
     }
 
     h1 { color: #4CAF50; margin-bottom: 20px; }
-    h2 { margin-top: 30px; color: #cccccc; }
 
-    .category-section { margin-top: 20px; }
+    .category-header {
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
 
     .link-grid {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
+      gap: 15px;
       margin-top: 10px;
+      transition: max-height 0.3s ease;
+      overflow: hidden;
     }
 
     .link-box {
@@ -49,17 +57,14 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-
-      width: 120px;
-      height: 120px;
-      background: rgba(34, 34, 34, 0.6);
+      width: 120px; height: 120px;
+      background: rgba(34,34,34,0.6);
       border-radius: 20px;
       border: 2px solid #fff;
       text-decoration: none;
       color: white;
       font-weight: bold;
       transition: transform 0.2s ease, opacity 0.2s ease;
-      cursor: grab;
       position: relative;
     }
 
@@ -68,9 +73,7 @@
 
     .edit-overlay {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: rgba(0,0,0,0.7);
       color: white;
       font-size: 12px;
@@ -82,18 +85,10 @@
 
     footer { margin-top: 25px; font-size: 12px; color: gray; }
 
-    #addForm { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    #addForm input, #addForm select { padding: 6px; width: 80%; max-width: 300px; border-radius: 6px; border: 1px solid #ccc; }
-    #addForm button {
-      padding: 8px 12px; border-radius: 8px; border: none; background: #4CAF50; color: white;
-      font-weight: bold; cursor: pointer;
-    }
-    #addForm button:hover { background: #3e8e41; }
-
     /* CATEGORY COLORS */
-    .School { background: rgba(52, 152, 219, 0.8); }      /* Blue */
-    .Personal { background: rgba(155, 89, 182, 0.8); }    /* Purple */
-    .TechNews { background: rgba(230, 126, 34, 0.8); }    /* Orange */
+    .School { background: rgba(52, 152, 219, 0.8); }  
+    .Personal { background: rgba(155, 89, 182, 0.8); } 
+    .TechNews { background: rgba(230, 126, 34, 0.8); }
 
     /* MOBILE */
     @media screen and (max-width: 800px) {
@@ -103,114 +98,179 @@
     }
 
     @media screen and (max-width: 600px) {
-      .link-box { width: 90%; height: 170px; }
+      .link-box { width: 30%; height: 170px; }
       .link-box i { font-size: 50px; }
       .link-label { font-size: 20px; }
     }
+
+    /* Floating Add Button */
+    #addButton {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 999;
+    }
+
+    /* Popup Modal */
+    #popup {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #popupContent {
+      background: rgba(50,50,50,0.95);
+      padding: 20px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #popupContent input, #popupContent select, #popupContent button {
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+
+    #popupContent button { background: #4CAF50; color: white; cursor: pointer; }
   </style>
 </head>
 
 <body>
 <div class="container">
-  <h1><i class="fa-solid fa-link"></i> Sortable Categorized Dashboard</h1>
-
+  <h1><i class="fa-solid fa-link"></i> App-Like Link Dashboard</h1>
   <div id="categoriesContainer"></div>
+  <footer>Tap category to expand/collapse | Drag & Drop | Edit/Add/Remove links</footer>
+</div>
 
-  <form id="addForm">
-    <input type="text" id="linkName" placeholder="Site Name" required>
-    <input type="url" id="linkURL" placeholder="https://example.com" required>
-    <input type="text" id="linkIcon" placeholder="Font Awesome icon class, e.g. fa-solid fa-school">
-    <select id="linkCategory">
+<button id="addButton">+</button>
+
+<div id="popup">
+  <div id="popupContent">
+    <h2>Add New Link</h2>
+    <input type="text" id="newName" placeholder="Site Name" required>
+    <input type="url" id="newURL" placeholder="https://example.com" required>
+    <select id="newCategory">
       <option value="School">School</option>
       <option value="Personal">Personal</option>
       <option value="TechNews">Tech News</option>
     </select>
-    <button type="submit">Add Link</button>
-  </form>
-
-  <footer>Drag & Drop | Double-click or Edit to Remove | Category Colors | Mobile Supported</footer>
+    <button id="saveLink">Add Link</button>
+    <button id="closePopup" style="background:red;">Cancel</button>
+  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
-  const defaultLinks = [
-    {name:"UNOH Portal", url:"https://my.unoh.edu", icon:"fa-solid fa-school", category:"School"},
-    {name:"Canvas", url:"https://canvas.unoh.edu", icon:"fa-solid fa-book", category:"School"},
-    {name:"Gmail", url:"https://gmail.com", icon:"fa-solid fa-envelope", category:"Personal"},
-    {name:"YouTube", url:"https://youtube.com", icon:"fa-brands fa-youtube", category:"Personal"},
-    {name:"GitHub", url:"https://github.com", icon:"fa-brands fa-github", category:"Personal"},
-    {name:"The Verge", url:"https://www.theverge.com", icon:"fa-solid fa-newspaper", category:"TechNews"}
-  ];
+const defaultLinks = [
+  {name:"UNOH Portal", url:"https://my.unoh.edu", icon:"fa-solid fa-school", category:"School"},
+  {name:"Canvas", url:"https://canvas.unoh.edu", icon:"fa-solid fa-book", category:"School"},
+  {name:"Gmail", url:"https://gmail.com", icon:"fa-solid fa-envelope", category:"Personal"},
+  {name:"YouTube", url:"https://youtube.com", icon:"fa-brands fa-youtube", category:"Personal"},
+  {name:"GitHub", url:"https://github.com", icon:"fa-brands fa-github", category:"Personal"},
+  {name:"The Verge", url:"https://www.theverge.com", icon:"fa-solid fa-newspaper", category:"TechNews"}
+];
 
-  let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
-  const categoriesContainer = document.getElementById("categoriesContainer");
+let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
+const categoriesContainer = document.getElementById("categoriesContainer");
 
-  function saveLinks() { localStorage.setItem("dashboardLinks", JSON.stringify(links)); }
+function saveLinks(){ localStorage.setItem("dashboardLinks", JSON.stringify(links)); }
 
-  function renderLinks() {
-    categoriesContainer.innerHTML = "";
-    const categories = [...new Set(links.map(l=>l.category))];
+function renderLinks(){
+  categoriesContainer.innerHTML="";
+  const categories = [...new Set(links.map(l=>l.category))];
+  categories.forEach(cat=>{
+    const section=document.createElement("div");
+    section.className="category-section";
+    section.innerHTML=`
+      <div class="category-header"><i class="fa-solid fa-chevron-down"></i>${cat}</div>
+      <div class="link-grid" data-category="${cat}"></div>`;
+    const grid = section.querySelector(".link-grid");
 
-    categories.forEach(cat => {
-      const section = document.createElement("div");
-      section.className="category-section";
-      section.innerHTML=`<h2>${cat}</h2><div class="link-grid" data-category="${cat}"></div>`;
-      const grid = section.querySelector(".link-grid");
+    links.filter(l=>l.category===cat).forEach((link,index)=>{
+      const a=document.createElement("a");
+      a.href=link.url; a.target="_blank"; a.className="link-box "+link.category; 
+      a.dataset.index=index;
+      a.innerHTML=`<i class="${link.icon||'fa-solid fa-link'}"></i>
+                   <span class="link-label">${link.name}</span>
+                   <div class="edit-overlay">Edit</div>`;
 
-      links.filter(l=>l.category===cat).forEach((link,index)=>{
-        const a=document.createElement("a");
-        a.href=link.url; a.target="_blank"; a.className="link-box "+link.category;
-        a.dataset.index=index;
-        a.innerHTML=`<i class="${link.icon||'fa-solid fa-link'}"></i>
-                     <span class="link-label">${link.name}</span>
-                     <div class="edit-overlay">Edit</div>`;
-
-        // Remove
-        a.addEventListener("dblclick", ()=>{ if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); } });
-
-        // Edit
-        a.querySelector(".edit-overlay").addEventListener("click", ()=>{
-          const newName=prompt("Edit Name:",link.name)||link.name;
-          const newURL=prompt("Edit URL:",link.url)||link.url;
-          const newIcon=prompt("Edit Icon Class:",link.icon)||link.icon;
-          const newCat=prompt("Edit Category:",link.category)||link.category;
-          links[index]={name:newName,url:newURL,icon:newIcon,category:newCat};
-          saveLinks(); renderLinks();
-        });
-
-        grid.appendChild(a);
+      a.querySelector(".edit-overlay").addEventListener("click",()=>{
+        const newName=prompt("Edit Name:",link.name)||link.name;
+        const newURL=prompt("Edit URL:",link.url)||link.url;
+        const newIcon=prompt("Edit Icon Class:",link.icon)||link.icon;
+        const newCat=prompt("Edit Category:",link.category)||link.category;
+        links[index]={name:newName,url:newURL,icon:newIcon,category:newCat};
+        saveLinks(); renderLinks();
       });
 
-      categoriesContainer.appendChild(section);
+      a.addEventListener("dblclick", ()=>{ if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); } });
 
-      // Initialize SortableJS for this grid
-      new Sortable(grid, {
-        animation: 150,
-        ghostClass: 'dragging',
-        onEnd: function (evt) {
-          const catLinks = links.filter(l=>l.category===cat);
-          const moved = catLinks.splice(evt.oldIndex,1)[0];
-          catLinks.splice(evt.newIndex,0,moved);
-          // Rebuild main links array while keeping order of other categories
-          links = links.filter(l=>l.category!==cat).concat(catLinks);
-          saveLinks();
-          renderLinks();
-        }
-      });
+      grid.appendChild(a);
     });
-  }
 
-  renderLinks();
+    categoriesContainer.appendChild(section);
 
-  document.getElementById("addForm").addEventListener("submit", e=>{
-    e.preventDefault();
-    const name=document.getElementById("linkName").value;
-    const url=document.getElementById("linkURL").value;
-    const icon=document.getElementById("linkIcon").value;
-    const category=document.getElementById("linkCategory").value;
-    links.push({name,url,icon,category});
-    saveLinks(); renderLinks();
-    e.target.reset();
+    // Collapsible
+    const header = section.querySelector('.category-header');
+    const chevron = header.querySelector('i');
+    header.addEventListener('click', ()=>{
+      if(grid.style.maxHeight && grid.style.maxHeight!=="0px"){
+        grid.style.maxHeight="0px"; chevron.classList.replace("fa-chevron-down","fa-chevron-right");
+      } else {
+        grid.style.maxHeight=grid.scrollHeight+"px"; chevron.classList.replace("fa-chevron-right","fa-chevron-down");
+      }
+    });
+    grid.style.maxHeight=grid.scrollHeight+"px"; // open by default
+
+    // Sortable
+    new Sortable(grid,{ animation:150, ghostClass:'dragging', onEnd:function(evt){
+      const catLinks = links.filter(l=>l.category===cat);
+      const moved=catLinks.splice(evt.oldIndex,1)[0];
+      catLinks.splice(evt.newIndex,0,moved);
+      links=links.filter(l=>l.category!==cat).concat(catLinks);
+      saveLinks(); renderLinks();
+    }});
   });
+}
+
+renderLinks();
+
+// Floating Add Button
+const addButton = document.getElementById("addButton");
+const popup = document.getElementById("popup");
+const closePopup = document.getElementById("closePopup");
+const saveLink = document.getElementById("saveLink");
+
+addButton.addEventListener("click", ()=>{ popup.style.display="flex"; });
+closePopup.addEventListener("click", ()=>{ popup.style.display="none"; });
+
+saveLink.addEventListener("click", ()=>{
+  const name=document.getElementById("newName").value;
+  const url=document.getElementById("newURL").value;
+  const category=document.getElementById("newCategory").value;
+  if(!name||!url) return alert("Name and URL required!");
+  links.push({name,url,icon:'fa-solid fa-link',category});
+  saveLinks(); renderLinks(); popup.style.display="none";
+  document.getElementById("newName").value=""; document.getElementById("newURL").value="";
+});
 </script>
 </body>
 </html>
