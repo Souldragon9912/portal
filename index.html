@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>App-Like Link Dashboard with Edit Mode</title>
-
+  <title>Final Link Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
   <style>
@@ -27,11 +25,18 @@
       padding: 20px;
       background: rgba(0,0,0,0.2);
       border-radius: 15px;
-      box-shadow: 0px 0px 20px rgba(0,0,0,0.3);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
 
-    h1 { color: #4CAF50; margin-bottom: 20px; display:flex; justify-content:center; align-items:center; gap:10px;}
-    #toggleEdit { background:#fff; color:#4CAF50; font-weight:bold; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:14px; }
+    h1 {
+      color: #4CAF50;
+      margin-bottom: 20px;
+      display:flex; justify-content:center; align-items:center; gap:10px;
+    }
+    #toggleEdit {
+      background:#fff; color:#4CAF50; font-weight:bold;
+      border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:14px;
+    }
 
     .category-header {
       font-size: 20px;
@@ -76,9 +81,8 @@
     .edit-buttons {
       position: absolute;
       bottom: 5px; right: 5px;
-      display: flex;
-      gap: 5px;
       display: none;
+      gap: 5px;
     }
 
     .edit-buttons button {
@@ -109,7 +113,7 @@
 
     @media screen and (max-width: 600px) {
       .link-box { width: 20%; height: 170px; }
-      .link-box i { font-size: 50px; }
+      .link-box i { font-size: 30px; }
       .link-label { font-size: 20px; }
     }
 
@@ -162,9 +166,12 @@
     #popupContent button { background: #4CAF50; color: white; cursor: pointer; }
   </style>
 </head>
+
 <body>
 <div class="container">
-  <h1><i class="fa-solid fa-link"></i> Link Dashboard <button id="toggleEdit">Edit Mode</button></h1>
+  <h1><i class="fa-solid fa-link"></i> Link Dashboard 
+    <button id="toggleEdit">Edit Mode</button>
+  </h1>
   <div id="categoriesContainer"></div>
   <footer>Tap category to expand/collapse | Drag & Drop | Add/Edit/Remove links</footer>
 </div>
@@ -181,12 +188,12 @@
       <option value="Personal">Personal</option>
       <option value="TechNews">Tech News</option>
     </select>
+    <input type="text" id="newIcon" placeholder="Font Awesome Icon class (optional)">
     <button id="saveLink">Add Link</button>
     <button id="closePopup" style="background:red;">Cancel</button>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
 let defaultLinks = [
   {name:"UNOH Portal", url:"https://my.unoh.edu", icon:"fa-solid fa-school", category:"School"},
@@ -198,15 +205,15 @@ let defaultLinks = [
 ];
 
 let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
-let editMode=false;
-
-const categoriesContainer=document.getElementById("categoriesContainer");
+let editMode = false;
+const categoriesContainer = document.getElementById("categoriesContainer");
 
 function saveLinks(){ localStorage.setItem("dashboardLinks", JSON.stringify(links)); }
 
 function renderLinks(){
   categoriesContainer.innerHTML="";
-  const categories=[...new Set(links.map(l=>l.category))];
+  const categories = [...new Set(links.map(l=>l.category))];
+
   categories.forEach(cat=>{
     const section=document.createElement("div");
     section.className="category-section";
@@ -225,8 +232,7 @@ function renderLinks(){
                      <button class="editBtn">✏️</button>
                      <button class="removeBtn">🗑️</button>
                    </div>`;
-
-      const editButtons=a.querySelector('.edit-buttons');
+      if(editMode) a.classList.add("edit-mode");
 
       // Edit
       a.querySelector(".editBtn")?.addEventListener("click", ()=>{
@@ -243,7 +249,6 @@ function renderLinks(){
         if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); }
       });
 
-      if(editMode) a.classList.add("edit-mode");
       grid.appendChild(a);
     });
 
@@ -263,8 +268,8 @@ function renderLinks(){
 
     // Sortable
     new Sortable(grid,{ animation:150, ghostClass:'dragging', onEnd:function(evt){
-      const catLinks=links.filter(l=>l.category===cat);
-      const moved=catLinks.splice(evt.oldIndex,1)[0];
+      const catLinks = links.filter(l=>l.category===cat);
+      const moved = catLinks.splice(evt.oldIndex,1)[0];
       catLinks.splice(evt.newIndex,0,moved);
       links=links.filter(l=>l.category!==cat).concat(catLinks);
       saveLinks(); renderLinks();
@@ -276,7 +281,7 @@ renderLinks();
 
 // Edit Mode Toggle
 document.getElementById("toggleEdit").addEventListener("click", ()=>{
-  editMode=!editMode;
+  editMode = !editMode;
   renderLinks();
 });
 
@@ -292,10 +297,13 @@ saveLink.addEventListener("click", ()=>{
   const name=document.getElementById("newName").value;
   const url=document.getElementById("newURL").value;
   const category=document.getElementById("newCategory").value;
-  if(!name||!url) return alert("Name and URL required!");
-  links.push({name,url,icon:'fa-solid fa-link',category});
+  const icon=document.getElementById("newIcon").value || 'fa-solid fa-link';
+  if(!name || !url) return alert("Name and URL required!");
+  links.push({name, url, icon, category});
   saveLinks(); renderLinks(); popup.style.display="none";
-  document.getElementById("newName").value=""; document.getElementById("newURL").value="";
+  document.getElementById("newName").value="";
+  document.getElementById("newURL").value="";
+  document.getElementById("newIcon").value="";
 });
 </script>
 </body>
