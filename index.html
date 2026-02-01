@@ -1,287 +1,337 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Link Dashboard - Settings Version</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0; padding: 0;
-      text-align: center;
-      color: white;
-      transition: background 0.5s ease;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-    }
-    .container {
-      width: 95%; max-width: 1000px; margin: auto; padding: 20px;
-      background: rgba(0,0,0,0.25); border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-    h1 { color:#4CAF50; margin-bottom:20px; }
-    .category-header {
-      font-size: 20px; cursor:pointer;
-      display:flex; justify-content:center; align-items:center; gap:10px;
-      user-select:none; margin-top:20px;
-    }
-    .link-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:15px; margin-top:10px; transition:max-height 0.3s ease; overflow:hidden; }
-    .link-box {
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      width:120px; height:120px; background:rgba(34,34,34,0.6);
-      border-radius:20px; border:2px solid #fff; text-decoration:none; color:white;
-      font-weight:bold; position:relative; transition:transform 0.2s ease;
-    }
-    .link-box img { margin-bottom:8px; border-radius:6px; }
-    .link-label { font-size:14px; text-align:center; }
-    .edit-buttons { position:absolute; bottom:5px; right:5px; display:none; gap:5px; }
-    .edit-buttons button { background:rgba(255,255,255,0.8); border:none; color:#333; border-radius:5px; padding:2px 5px; font-size:12px; cursor:pointer; }
-    .edit-mode .edit-buttons { display:flex; }
-    footer { margin-top:25px; font-size:12px; color:gray; }
-    @media screen and (max-width:800px){ .link-box{ width:140px; height:140px; } .link-label{ font-size:16px; } }
-    @media screen and (max-width:600px){ .link-box{ width:30%; height:150px; } .link-label{ font-size:20px; } }
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Links Dashboard</title>
 
-    /* Settings popup */
-    .popup { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000; }
-    .popupContent { background:rgba(50,50,50,0.95); padding:20px; border-radius:15px; width:90%; max-width:400px; display:flex; flex-direction:column; gap:10px; }
-    .popupContent input, .popupContent button, .popupContent label { padding:8px; border-radius:6px; border:none; font-size:16px; }
-    .popupContent button { background:#4CAF50; color:white; cursor:pointer; }
-    .popupContent button.cancel { background:red; }
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#111;
+  color:white;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-    /* Settings cog button */
-    #settingsBtn { position:fixed; bottom:25px; right:25px; background:#4CAF50; border:none; border-radius:50%; width:50px; height:50px; font-size:24px; color:white; cursor:pointer; box-shadow:0 4px 8px rgba(0,0,0,0.3); z-index:999; }
-  </style>
+.container{
+  background:rgba(0,0,0,0.6);
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:900px;
+}
+
+.category{
+  margin-bottom:20px;
+}
+
+.category-header{
+  font-size:20px;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.link-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+  gap:15px;
+}
+
+.link-box{
+  background:#222;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  color:white;
+  text-decoration:none;
+  position:relative;
+}
+
+.link-box img{
+  width:36px;
+  height:36px;
+}
+
+.popup{
+  position:fixed;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.popupContent{
+  background:#222;
+  padding:20px;
+  border-radius:10px;
+  width:90%;
+  max-width:500px;
+}
+
+button{
+  margin-top:10px;
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  background:#4CAF50;
+  color:white;
+  cursor:pointer;
+}
+
+.cancel{
+  background:#555;
+}
+</style>
 </head>
+
 <body>
+
 <div class="container">
-  <h1>Link Dashboard</h1>
-  <div id="categoriesContainer"></div>
-  <footer>Tap category to expand/collapse | Drag & Drop | Edit/Remove links | Categories management</footer>
+  <h1>My Dashboard</h1>
+  <div id="categories"></div>
 </div>
 
-<!-- Settings Button -->
-<button id="settingsBtn">⚙️</button>
+<button id="settingsBtn" style="position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;">⚙️</button>
 
-<!-- Settings Menu -->
+<!-- SETTINGS MENU -->
 <div id="settingsPopup" class="popup">
   <div class="popupContent">
     <h2>Settings</h2>
-    <label>Icon Size: <span id="iconSizeValue">36</span>px</label>
+
+    <label>Icon Size</label>
     <input type="range" id="iconSizeSlider" min="30" max="80" value="36">
 
-    <hr>
-    <h3>Categories</h3>
-    <button id="addCategoryBtn">Add Category</button>
-    <button id="manageCategoriesBtn">Rename/Delete Category</button>
-
-    <hr>
     <h3>Links</h3>
     <button id="addLinkBtn">Add Link</button>
+    <button id="manageLinksBtn">Manage Links</button>
 
-    <hr>
-    <button id="changeBackgroundBtn">Background</button>
-    <button id="resetDashboardBtn" style="background:red;">Reset Dashboard</button>
+    <h3>Background</h3>
+    <input type="file" id="bgFile">
+    <input type="text" id="bgURL" placeholder="Image URL or color">
+    <button id="saveBg">Save Background</button>
+
     <button id="closeSettings" class="cancel">Close</button>
   </div>
 </div>
 
-<!-- Add Link Popup -->
-<div id="addLinkPopup" class="popup">
+<!-- ADD LINK POPUP -->
+<div id="addPopup" class="popup">
   <div class="popupContent">
-    <h2>Add New Link</h2>
-    <input type="text" id="newName" placeholder="Site Name" required>
-    <input type="url" id="newURL" placeholder="https://example.com" required>
-    <input type="text" id="newCategory" placeholder="Category" required>
-    <button id="saveLink">Add Link</button>
-    <button id="closeAddLink" class="cancel">Cancel</button>
+    <h2>Add Link</h2>
+    <input id="newName" placeholder="Name"><br>
+    <input id="newURL" placeholder="URL"><br>
+    <input id="newCategory" placeholder="Category"><br>
+
+    <button id="saveLink">Save</button>
+    <button id="cancelAdd" class="cancel">Cancel</button>
   </div>
 </div>
 
-<!-- Background Popup -->
-<div id="bgPopup" class="popup">
+<!-- MANAGE LINKS POPUP -->
+<div id="manageLinksPopup" class="popup">
   <div class="popupContent">
-    <h2>Set Background</h2>
-    <input type="text" id="bgInput" placeholder="Image URL or color code">
-    <input type="file" id="bgFile" accept="image/*">
-    <div style="margin-top:10px;">
-      <button id="previewBg">Preview</button>
-      <button id="saveBg">Save</button>
-      <button id="cancelBg" class="cancel">Cancel</button>
-    </div>
+    <h2>Manage Links</h2>
+    <div id="linksManagerList"></div>
+    <button id="closeManageLinks" class="cancel">Close</button>
   </div>
 </div>
 
 <script>
-let defaultLinks = [
-  {id: Date.now()+1, name:"googlel", url:"https://google.com", category:"personal"},
-  {id: Date.now()+2, name:"gmail", url:"https://mail.google.com/mail", category:"personal"},
-  {id: Date.now()+3, name:"The Verge", url:"https://www.theverge.com", category:"Tech News"}
+let links = JSON.parse(localStorage.getItem("links")) || [
+  {name:"google", url:"https://google.com", category:"personal"},
+  {name:"The Verge", url:"https://theverge.com", category:"Tech News"}
 ];
-let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
-let editMode = false;
-let bgDataURL = null;
-const categoriesContainer = document.getElementById("categoriesContainer");
 
-function saveLinks(){ localStorage.setItem("dashboardLinks", JSON.stringify(links)); }
+function saveLinks(){
+  localStorage.setItem("links", JSON.stringify(links));
+}
 
 function renderLinks(){
-  categoriesContainer.innerHTML="";
+  const container = document.getElementById("categories");
+  container.innerHTML="";
+
   const categories = [...new Set(links.map(l=>l.category))];
+
   categories.forEach(cat=>{
-    const section=document.createElement("div");
-    section.className="category-section";
-    section.innerHTML=`
-      <div class="category-header">
-        <span>▼</span>${cat}
-      </div>
-      <div class="link-grid" data-category="${cat}"></div>`;
+    const section = document.createElement("div");
+    section.className="category";
+
+    section.innerHTML=`<div class="category-header">${cat}</div>
+    <div class="link-grid"></div>`;
+
     const grid = section.querySelector(".link-grid");
 
     links.filter(l=>l.category===cat).forEach(link=>{
-      const currentLink = link;
       const a = document.createElement("a");
-      a.href=currentLink.url; a.target="_blank"; a.className="link-box"; a.dataset.id=currentLink.id;
-      let faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${new URL(currentLink.url).hostname}`;
-      a.innerHTML = `<img src="${faviconUrl}"><span class="link-label">${currentLink.name}</span>
-        <div class="edit-buttons">
-          <button class="editBtn">✏️</button>
-          <button class="removeBtn">🗑️</button>
-        </div>`;
-      if(editMode) a.classList.add("edit-mode");
+      a.href=link.url;
+      a.target="_blank";
+      a.className="link-box";
 
-      a.querySelector(".editBtn")?.addEventListener("click", e=>{
-        e.stopPropagation(); e.preventDefault();
-        const linkIndex = links.findIndex(l=>l.id===currentLink.id);
-        if(linkIndex===-1) return;
-        const l=links[linkIndex];
-        const newName = prompt("Edit Name:", l.name) || l.name;
-        const newURL = prompt("Edit URL:", l.url) || l.url;
-        const newCat = prompt("Edit Category:", l.category) || l.category;
-        links[linkIndex] = {...l, name:newName, url:newURL, category:newCat};
-        saveLinks(); renderLinks();
-      });
+      const icon = document.createElement("img");
+      icon.src=`https://www.google.com/s2/favicons?domain=${link.url}`;
 
-      a.querySelector(".removeBtn")?.addEventListener("click", e=>{
-        e.stopPropagation(); e.preventDefault();
-        const linkIndex = links.findIndex(l=>l.id===currentLink.id);
-        if(linkIndex===-1) return;
-        if(confirm(`Remove "${links[linkIndex].name}"?`)){ links.splice(linkIndex,1); saveLinks(); renderLinks(); }
-      });
+      const label = document.createElement("div");
+      label.textContent=link.name;
+
+      a.appendChild(icon);
+      a.appendChild(label);
 
       grid.appendChild(a);
     });
 
-    categoriesContainer.appendChild(section);
-
-    const header = section.querySelector('.category-header');
-    const span = header.querySelector('span');
-    header.addEventListener('click', ()=>{
-      if(grid.style.maxHeight && grid.style.maxHeight!=="0px"){ grid.style.maxHeight="0px"; span.textContent="►"; }
-      else { grid.style.maxHeight=grid.scrollHeight+"px"; span.textContent="▼"; }
-    });
-    grid.style.maxHeight=grid.scrollHeight+"px";
-
-    new Sortable(grid,{ animation:150, ghostClass:'dragging', onEnd:function(evt){
-      const catLinks = links.filter(l=>l.category===cat);
-      const moved = catLinks.splice(evt.oldIndex,1)[0];
-      catLinks.splice(evt.newIndex,0,moved);
-      links=links.filter(l=>l.category!==cat).concat(catLinks);
-      saveLinks(); renderLinks();
-    }});
+    container.appendChild(section);
   });
+
+  applyIconSize();
 }
+
 renderLinks();
 
-// Settings popup logic
-const settingsBtn = document.getElementById("settingsBtn");
-const settingsPopup = document.getElementById("settingsPopup");
-const closeSettings = document.getElementById("closeSettings");
-settingsBtn.addEventListener("click", ()=>{ settingsPopup.style.display="flex"; });
-closeSettings.addEventListener("click", ()=>{ settingsPopup.style.display="none"; });
+const settingsBtn=document.getElementById("settingsBtn");
+const settingsPopup=document.getElementById("settingsPopup");
+const closeSettings=document.getElementById("closeSettings");
 
-// Icon size slider
-const iconSlider = document.getElementById("iconSizeSlider");
-const iconSizeValue = document.getElementById("iconSizeValue");
-function updateIconSize(size){
-  document.querySelectorAll(".link-box img").forEach(img=>{ img.style.width=size+"px"; img.style.height=size+"px"; });
-  iconSizeValue.textContent = size;
+settingsBtn.onclick=()=>settingsPopup.style.display="flex";
+closeSettings.onclick=()=>settingsPopup.style.display="none";
+
+// ADD LINK
+document.getElementById("addLinkBtn").onclick=()=>{
+  document.getElementById("addPopup").style.display="flex";
+};
+
+document.getElementById("cancelAdd").onclick=()=>{
+  document.getElementById("addPopup").style.display="none";
+};
+
+document.getElementById("saveLink").onclick=()=>{
+  links.push({
+    name:newName.value,
+    url:newURL.value,
+    category:newCategory.value
+  });
+
+  saveLinks();
+  renderLinks();
+  document.getElementById("addPopup").style.display="none";
+};
+
+// MANAGE LINKS
+const manageLinksBtn=document.getElementById("manageLinksBtn");
+const managePopup=document.getElementById("manageLinksPopup");
+const managerList=document.getElementById("linksManagerList");
+
+manageLinksBtn.onclick=openManageLinks;
+
+function openManageLinks(){
+  managerList.innerHTML="";
+
+  links.forEach((link,i)=>{
+    const div=document.createElement("div");
+    div.style.marginBottom="10px";
+
+    div.innerHTML=`
+      <input id="n${i}" value="${link.name}"><br>
+      <input id="u${i}" value="${link.url}"><br>
+      <input id="c${i}" value="${link.category}"><br>
+
+      <button onclick="saveEdit(${i})">Save</button>
+      <button style="background:red" onclick="deleteLink(${i})">Delete</button>
+    `;
+
+    managerList.appendChild(div);
+  });
+
+  managePopup.style.display="flex";
 }
-updateIconSize(iconSlider.value);
-iconSlider.addEventListener("input", ()=>{
-  updateIconSize(iconSlider.value);
-  localStorage.setItem("iconSize", iconSlider.value);
-});
-const savedIconSize = localStorage.getItem("iconSize");
-if(savedIconSize){ iconSlider.value=savedIconSize; updateIconSize(savedIconSize); }
 
-// Add link button
-const addLinkBtn = document.getElementById("addLinkBtn");
-const addLinkPopup = document.getElementById("addLinkPopup");
-const closeAddLink = document.getElementById("closeAddLink");
-const saveLink = document.getElementById("saveLink");
-addLinkBtn.addEventListener("click", ()=>{ addLinkPopup.style.display="flex"; });
-closeAddLink.addEventListener("click", ()=>{ addLinkPopup.style.display="none"; });
-saveLink.addEventListener("click", ()=>{
-  const name = document.getElementById("newName").value.trim();
-  const url = document.getElementById("newURL").value.trim();
-  const cat = document.getElementById("newCategory").value.trim();
-  if(!name||!url||!cat) return alert("Name, URL, and Category required!");
-  links.push({id:Date.now(), name, url, category:cat});
-  saveLinks(); renderLinks(); addLinkPopup.style.display="none";
-  document.getElementById("newName").value=""; document.getElementById("newURL").value=""; document.getElementById("newCategory").value="";
-});
+document.getElementById("closeManageLinks").onclick=()=>{
+  managePopup.style.display="none";
+};
 
-// Manage categories
-document.getElementById("addCategoryBtn").addEventListener("click", ()=>{
-  const name = prompt("New Category Name:");
-  if(!name) return;
-  if(links.find(l=>l.category===name)) return alert("Category already exists!");
-  links.push({id:Date.now(), name:name+" placeholder", url:"https://example.com", category:name});
-  saveLinks(); renderLinks();
-});
-document.getElementById("manageCategoriesBtn").addEventListener("click", ()=>{
-  const cat = prompt("Category to rename/delete:");
-  if(!cat) return;
-  if(!links.find(l=>l.category===cat)) return alert("Category not found!");
-  const action = prompt('Type "rename" to rename, "delete" to delete:');
-  if(action==="rename"){ 
-    const newName = prompt("New Category Name:"); 
-    if(!newName) return;
-    links = links.map(l=> l.category===cat ? {...l, category:newName} : l);
-  }
-  if(action==="delete"){ links = links.filter(l=>l.category!==cat); }
-  saveLinks(); renderLinks();
-});
+window.saveEdit=function(i){
+  links[i]={
+    name:document.getElementById("n"+i).value,
+    url:document.getElementById("u"+i).value,
+    category:document.getElementById("c"+i).value
+  };
 
-// Reset dashboard
-document.getElementById("resetDashboardBtn").addEventListener("click", ()=>{
-  if(confirm("Reset dashboard to defaults?")){ localStorage.clear(); location.reload(); }
-});
+  saveLinks();
+  renderLinks();
+  openManageLinks();
+}
 
-// Background
-const bgPopup = document.getElementById("bgPopup");
-const changeBackgroundBtn = document.getElementById("changeBackgroundBtn");
-const bgInput = document.getElementById("bgInput");
-const bgFile = document.getElementById("bgFile");
-const previewBg = document.getElementById("previewBg");
-const saveBg = document.getElementById("saveBg");
-const cancelBg = document.getElementById("cancelBg");
+window.deleteLink=function(i){
+  if(!confirm("Delete this link?"))return;
+
+  links.splice(i,1);
+  saveLinks();
+  renderLinks();
+  openManageLinks();
+}
+
+// ICON SIZE
+const slider=document.getElementById("iconSizeSlider");
+
+function applyIconSize(){
+  const size=localStorage.getItem("iconSize") || 36;
+
+  document.querySelectorAll(".link-box img").forEach(img=>{
+    img.style.width=size+"px";
+    img.style.height=size+"px";
+  });
+
+  slider.value=size;
+}
+
+slider.oninput=()=>{
+  localStorage.setItem("iconSize", slider.value);
+  applyIconSize();
+};
+
+applyIconSize();
+
+// BACKGROUND
+let bgData=null;
+
+document.getElementById("bgFile").onchange=(e)=>{
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    bgData=ev.target.result;
+    setBackground(bgData);
+  };
+  reader.readAsDataURL(e.target.files[0]);
+};
+
+document.getElementById("saveBg").onclick=()=>{
+  const url=document.getElementById("bgURL").value;
+
+  if(bgData) setBackground(bgData);
+  else if(url) setBackground(url);
+
+  settingsPopup.style.display="none";
+};
 
 function setBackground(bg){
-  if(!bg) return;
-  if(bg.startsWith("data:")||bg.startsWith("http")){ document.body.style.backgroundImage=`url(${bg})`; document.body.style.backgroundColor=""; }
-  else { document.body.style.backgroundImage="none"; document.body.style.backgroundColor=bg; }
-  localStorage.setItem("bg", bg);
-}
-const savedBg = localStorage.getItem("bg");
-if(savedBg) setBackground(savedBg);
+  if(bg.startsWith("data")||bg.startsWith("http")){
+    document.body.style.backgroundImage=`url(${bg})`;
+    document.body.style.backgroundSize="cover";
+  } else {
+    document.body.style.background=bg;
+  }
 
-changeBackgroundBtn.addEventListener("click", ()=>{ bgInput.value=savedBg||""; bgFile.value=""; bgDataURL=null; bgPopup.style.display="flex"; });
-previewBg.addEventListener("click", ()=>{ if(bgDataURL) setBackground(bgDataURL); else setBackground(bgInput.value.trim()); });
-saveBg.addEventListener("click", ()=>{ if(bgDataURL) setBackground(bgDataURL); else setBackground(bgInput.value.trim()); bgPopup.style.display="none"; });
-cancelBg.addEventListener("click", ()=>{ bgPopup.style.display="none"; if(savedBg) setBackground(savedBg); });
-bgFile.addEventListener("change", (e)=>{ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=(evt)=>{ bgDataURL=evt.target.result; setBackground(bgDataURL); }; reader.readAsDataURL(file); });
+  localStorage.setItem("bg",bg);
+}
+
+const savedBg=localStorage.getItem("bg");
+if(savedBg) setBackground(savedBg);
 
 </script>
 </body>
