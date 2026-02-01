@@ -31,9 +31,6 @@ body {
 .category-header{
   font-size:20px;
   margin-bottom:10px;
-  display:flex;
-  align-items:center;
-  gap:10px;
 }
 
 .link-grid{
@@ -49,7 +46,6 @@ body {
   text-align:center;
   color:white;
   text-decoration:none;
-  position:relative;
 }
 
 .link-box img{
@@ -114,8 +110,8 @@ button{
     <button id="manageLinksBtn">Manage Links</button>
 
     <h3>Background</h3>
-    <input type="file" id="bgFile">
-    <input type="text" id="bgURL" placeholder="Image URL or color">
+    <input type="file" id="bgFile"><br>
+    <input type="text" id="bgURL" placeholder="Image URL or color"><br>
     <button id="saveBg">Save Background</button>
 
     <button id="closeSettings" class="cancel">Close</button>
@@ -145,16 +141,19 @@ button{
 </div>
 
 <script>
+
+// ----- DATA -----
 let links = JSON.parse(localStorage.getItem("links")) || [
   {name:"MyUNOH", url:"https://my.unoh.edu", category:"School"},
-  {name:"Canvas", url:"https://canvas.unoh.edu", category:"School"},
   {name:"The Verge", url:"https://theverge.com", category:"Tech News"}
 ];
 
+// ----- SAVE & LOAD -----
 function saveLinks(){
   localStorage.setItem("links", JSON.stringify(links));
 }
 
+// ----- RENDER LINKS -----
 function renderLinks(){
   const container = document.getElementById("categories");
   container.innerHTML="";
@@ -194,16 +193,26 @@ function renderLinks(){
   applyIconSize();
 }
 
-renderLinks();
+// ----- SETTINGS MENU -----
+window.onload = function(){
 
-const settingsBtn=document.getElementById("settingsBtn");
-const settingsPopup=document.getElementById("settingsPopup");
-const closeSettings=document.getElementById("closeSettings");
+  renderLinks();
 
-settingsBtn.onclick=()=>settingsPopup.style.display="flex";
-closeSettings.onclick=()=>settingsPopup.style.display="none";
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPopup = document.getElementById("settingsPopup");
+  const closeSettings = document.getElementById("closeSettings");
 
-// ADD LINK
+  settingsBtn.addEventListener("click", ()=>{
+    settingsPopup.style.display = "flex";
+  });
+
+  closeSettings.addEventListener("click", ()=>{
+    settingsPopup.style.display = "none";
+  });
+
+};
+
+// ----- ADD LINK -----
 document.getElementById("addLinkBtn").onclick=()=>{
   document.getElementById("addPopup").style.display="flex";
 };
@@ -224,14 +233,13 @@ document.getElementById("saveLink").onclick=()=>{
   document.getElementById("addPopup").style.display="none";
 };
 
-// MANAGE LINKS
-const manageLinksBtn=document.getElementById("manageLinksBtn");
-const managePopup=document.getElementById("manageLinksPopup");
-const managerList=document.getElementById("linksManagerList");
-
-manageLinksBtn.onclick=openManageLinks;
+// ----- MANAGE LINKS -----
+document.getElementById("manageLinksBtn").onclick=openManageLinks;
 
 function openManageLinks(){
+  const managePopup=document.getElementById("manageLinksPopup");
+  const managerList=document.getElementById("linksManagerList");
+
   managerList.innerHTML="";
 
   links.forEach((link,i)=>{
@@ -254,7 +262,7 @@ function openManageLinks(){
 }
 
 document.getElementById("closeManageLinks").onclick=()=>{
-  managePopup.style.display="none";
+  document.getElementById("manageLinksPopup").style.display="none";
 };
 
 window.saveEdit=function(i){
@@ -278,7 +286,7 @@ window.deleteLink=function(i){
   openManageLinks();
 }
 
-// ICON SIZE
+// ----- ICON SIZE -----
 const slider=document.getElementById("iconSizeSlider");
 
 function applyIconSize(){
@@ -297,9 +305,7 @@ slider.oninput=()=>{
   applyIconSize();
 };
 
-applyIconSize();
-
-// BACKGROUND
+// ----- BACKGROUND -----
 let bgData=null;
 
 document.getElementById("bgFile").onchange=(e)=>{
@@ -317,7 +323,7 @@ document.getElementById("saveBg").onclick=()=>{
   if(bgData) setBackground(bgData);
   else if(url) setBackground(url);
 
-  settingsPopup.style.display="none";
+  document.getElementById("settingsPopup").style.display="none";
 };
 
 function setBackground(bg){
