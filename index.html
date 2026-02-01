@@ -12,7 +12,7 @@
       text-align: center;
       padding-top: 20px;
 
-     background-image: url('blue_arch_nowatermark.png');
+      background-image: url('blue_arch_nowatermark.png');
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
@@ -30,15 +30,8 @@
       box-shadow: 0px 0px 20px rgba(0,0,0,0.3);
     }
 
-    h1 {
-      color: #4CAF50;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      margin-top: 30px;
-      color: #cccccc;
-    }
+    h1 { color: #4CAF50; margin-bottom: 20px; }
+    h2 { margin-top: 30px; color: #cccccc; }
 
     .link-grid {
       display: flex;
@@ -64,30 +57,16 @@
       font-weight: bold;
       transition: 0.3s;
       cursor: grab;
+      position: relative;
     }
 
-    .link-box.dragging {
-      opacity: 0.5;
-      transform: scale(1.05);
-    }
+    .link-box.dragging { opacity: 0.5; transform: scale(1.05); }
 
-    .link-box i {
-      font-size: 36px;
-      margin-bottom: 8px;
-    }
+    .link-box i { font-size: 36px; margin-bottom: 8px; }
+    .link-label { font-size: 14px; text-align: center; }
 
-    .link-label {
-      font-size: 14px;
-      text-align: center;
-    }
+    footer { margin-top: 25px; font-size: 12px; color: gray; }
 
-    footer {
-      margin-top: 25px;
-      font-size: 12px;
-      color: gray;
-    }
-
-    /* Add / Remove link form */
     #addForm {
       margin-top: 30px;
       display: flex;
@@ -96,57 +75,39 @@
       gap: 8px;
     }
 
-    #addForm input {
-      padding: 6px;
-      width: 80%;
-      max-width: 300px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
+    #addForm input { padding: 6px; width: 80%; max-width: 300px; border-radius: 6px; border: 1px solid #ccc; }
     #addForm button {
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: none;
-      background: #4CAF50;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+      padding: 8px 12px; border-radius: 8px; border: none; background: #4CAF50; color: white;
+      font-weight: bold; cursor: pointer;
     }
+    #addForm button:hover { background: #3e8e41; }
 
-    #addForm button:hover {
-      background: #3e8e41;
-    }
-
-    /* MOBILE RESPONSIVE */
+    /* MOBILE */
     @media screen and (max-width: 800px) {
-      .link-box {
-        width: 140px;
-        height: 140px;
-      }
-
-      .link-box i {
-        font-size: 40px;
-      }
-
-      .link-label {
-        font-size: 16px;
-      }
+      .link-box { width: 140px; height: 140px; }
+      .link-box i { font-size: 40px; }
+      .link-label { font-size: 16px; }
     }
 
     @media screen and (max-width: 600px) {
-      .link-box {
-        width: 50%;
-        height: 170px;
-      }
+      .link-box { width: 30%; height: 170px; }
+      .link-box i { font-size: 50px; }
+      .link-label { font-size: 20px; }
+    }
 
-      .link-box i {
-        font-size: 50px;
-      }
-
-      .link-label {
-        font-size: 20px;
-      }
+    /* Edit overlay */
+    .edit-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      font-size: 12px;
+      padding: 4px;
+      cursor: pointer;
+      border-radius: 0 0 20px 20px;
+      text-align: center;
     }
   </style>
 </head>
@@ -154,12 +115,10 @@
 <body>
 
 <div class="container">
-  <h1><i class="fa-solid fa-link"></i> My Interactive Dashboard</h1>
+  <h1><i class="fa-solid fa-link"></i> Interactive Dashboard</h1>
 
   <h2>Links</h2>
-  <div class="link-grid" id="linkGrid">
-    <!-- Buttons will be dynamically generated -->
-  </div>
+  <div class="link-grid" id="linkGrid"></div>
 
   <form id="addForm">
     <input type="text" id="linkName" placeholder="Site Name" required>
@@ -168,13 +127,10 @@
     <button type="submit">Add Link</button>
   </form>
 
-  <footer>
-    Dashboard powered by GitHub Pages | Drag & Drop to Rearrange
-  </footer>
+  <footer>Dashboard powered by GitHub Pages | Drag & Drop to Rearrange | Double-click or Edit to Remove</footer>
 </div>
 
 <script>
-  // --- INITIAL LINKS ---
   const defaultLinks = [
     {name: "UNOH Portal", url: "https://my.unoh.edu", icon: "fa-solid fa-school"},
     {name: "Canvas", url: "https://canvas.unoh.edu", icon: "fa-solid fa-book"},
@@ -185,12 +141,9 @@
   ];
 
   let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
-
   const linkGrid = document.getElementById("linkGrid");
 
-  function saveLinks() {
-    localStorage.setItem("dashboardLinks", JSON.stringify(links));
-  }
+  function saveLinks() { localStorage.setItem("dashboardLinks", JSON.stringify(links)); }
 
   function renderLinks() {
     linkGrid.innerHTML = "";
@@ -201,39 +154,39 @@
       a.className = "link-box";
       a.setAttribute("draggable", "true");
       a.dataset.index = index;
-
       a.innerHTML = `<i class="${link.icon || 'fa-solid fa-link'}"></i>
-                     <span class="link-label">${link.name}</span>`;
+                     <span class="link-label">${link.name}</span>
+                     <div class="edit-overlay">Edit</div>`;
 
-      // --- Drag and Drop ---
+      // --- Drag & Drop ---
       a.addEventListener("dragstart", e => {
         e.dataTransfer.setData("text/plain", index);
         a.classList.add("dragging");
       });
-
-      a.addEventListener("dragend", () => {
-        a.classList.remove("dragging");
-      });
-
+      a.addEventListener("dragend", () => a.classList.remove("dragging"));
       a.addEventListener("dragover", e => e.preventDefault());
       a.addEventListener("drop", e => {
         e.preventDefault();
         const draggedIndex = e.dataTransfer.getData("text/plain");
         const targetIndex = a.dataset.index;
-
-        // swap
         [links[draggedIndex], links[targetIndex]] = [links[targetIndex], links[draggedIndex]];
-        saveLinks();
-        renderLinks();
+        saveLinks(); renderLinks();
       });
 
       // --- Remove on double click ---
       a.addEventListener("dblclick", () => {
-        if (confirm(`Remove "${link.name}"?`)) {
-          links.splice(index, 1);
-          saveLinks();
-          renderLinks();
+        if(confirm(`Remove "${link.name}"?`)) {
+          links.splice(index, 1); saveLinks(); renderLinks();
         }
+      });
+
+      // --- Edit overlay ---
+      a.querySelector(".edit-overlay").addEventListener("click", () => {
+        const newName = prompt("Edit Name:", link.name) || link.name;
+        const newURL = prompt("Edit URL:", link.url) || link.url;
+        const newIcon = prompt("Edit Icon Class:", link.icon) || link.icon;
+        links[index] = {name: newName, url: newURL, icon: newIcon};
+        saveLinks(); renderLinks();
       });
 
       linkGrid.appendChild(a);
@@ -248,12 +201,8 @@
     const name = document.getElementById("linkName").value;
     const url = document.getElementById("linkURL").value;
     const icon = document.getElementById("linkIcon").value;
-
     links.push({name, url, icon});
-    saveLinks();
-    renderLinks();
-
-    // reset form
+    saveLinks(); renderLinks();
     e.target.reset();
   });
 </script>
