@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>App-Like Link Dashboard</title>
+  <title>App-Like Link Dashboard with Edit Mode</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -30,7 +30,8 @@
       box-shadow: 0px 0px 20px rgba(0,0,0,0.3);
     }
 
-    h1 { color: #4CAF50; margin-bottom: 20px; }
+    h1 { color: #4CAF50; margin-bottom: 20px; display:flex; justify-content:center; align-items:center; gap:10px;}
+    #toggleEdit { background:#fff; color:#4CAF50; font-weight:bold; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:14px; }
 
     .category-header {
       font-size: 20px;
@@ -40,6 +41,7 @@
       align-items: center;
       gap: 10px;
       user-select: none;
+      margin-top:20px;
     }
 
     .link-grid {
@@ -64,24 +66,32 @@
       text-decoration: none;
       color: white;
       font-weight: bold;
-      transition: transform 0.2s ease, opacity 0.2s ease;
       position: relative;
+      transition: transform 0.2s ease;
     }
 
     .link-box i { font-size: 36px; margin-bottom: 8px; }
     .link-label { font-size: 14px; text-align: center; }
 
-    .edit-overlay {
+    .edit-buttons {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      font-size: 12px;
-      padding: 4px;
-      cursor: pointer;
-      border-radius: 0 0 20px 20px;
-      text-align: center;
+      bottom: 5px; right: 5px;
+      display: flex;
+      gap: 5px;
+      display: none;
     }
+
+    .edit-buttons button {
+      background: rgba(255,255,255,0.8);
+      border: none;
+      color: #333;
+      border-radius: 5px;
+      padding: 2px 5px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .edit-mode .edit-buttons { display: flex; }
 
     footer { margin-top: 25px; font-size: 12px; color: gray; }
 
@@ -98,7 +108,7 @@
     }
 
     @media screen and (max-width: 600px) {
-      .link-box { width: 30%; height: 170px; }
+      .link-box { width: 20%; height: 170px; }
       .link-box i { font-size: 50px; }
       .link-label { font-size: 20px; }
     }
@@ -152,12 +162,11 @@
     #popupContent button { background: #4CAF50; color: white; cursor: pointer; }
   </style>
 </head>
-
 <body>
 <div class="container">
-  <h1><i class="fa-solid fa-link"></i> App-Like Link Dashboard</h1>
+  <h1><i class="fa-solid fa-link"></i> Link Dashboard <button id="toggleEdit">Edit Mode</button></h1>
   <div id="categoriesContainer"></div>
-  <footer>Tap category to expand/collapse | Drag & Drop | Edit/Add/Remove links</footer>
+  <footer>Tap category to expand/collapse | Drag & Drop | Add/Edit/Remove links</footer>
 </div>
 
 <button id="addButton">+</button>
@@ -179,7 +188,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
-const defaultLinks = [
+let defaultLinks = [
   {name:"UNOH Portal", url:"https://my.unoh.edu", icon:"fa-solid fa-school", category:"School"},
   {name:"Canvas", url:"https://canvas.unoh.edu", icon:"fa-solid fa-book", category:"School"},
   {name:"Gmail", url:"https://gmail.com", icon:"fa-solid fa-envelope", category:"Personal"},
@@ -189,13 +198,15 @@ const defaultLinks = [
 ];
 
 let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
-const categoriesContainer = document.getElementById("categoriesContainer");
+let editMode=false;
+
+const categoriesContainer=document.getElementById("categoriesContainer");
 
 function saveLinks(){ localStorage.setItem("dashboardLinks", JSON.stringify(links)); }
 
 function renderLinks(){
   categoriesContainer.innerHTML="";
-  const categories = [...new Set(links.map(l=>l.category))];
+  const categories=[...new Set(links.map(l=>l.category))];
   categories.forEach(cat=>{
     const section=document.createElement("div");
     section.className="category-section";
@@ -206,13 +217,19 @@ function renderLinks(){
 
     links.filter(l=>l.category===cat).forEach((link,index)=>{
       const a=document.createElement("a");
-      a.href=link.url; a.target="_blank"; a.className="link-box "+link.category; 
+      a.href=link.url; a.target="_blank"; a.className="link-box "+link.category;
       a.dataset.index=index;
       a.innerHTML=`<i class="${link.icon||'fa-solid fa-link'}"></i>
                    <span class="link-label">${link.name}</span>
-                   <div class="edit-overlay">Edit</div>`;
+                   <div class="edit-buttons">
+                     <button class="editBtn">✏️</button>
+                     <button class="removeBtn">🗑️</button>
+                   </div>`;
 
-      a.querySelector(".edit-overlay").addEventListener("click",()=>{
+      const editButtons=a.querySelector('.edit-buttons');
+
+      // Edit
+      a.querySelector(".editBtn")?.addEventListener("click", ()=>{
         const newName=prompt("Edit Name:",link.name)||link.name;
         const newURL=prompt("Edit URL:",link.url)||link.url;
         const newIcon=prompt("Edit Icon Class:",link.icon)||link.icon;
@@ -221,8 +238,12 @@ function renderLinks(){
         saveLinks(); renderLinks();
       });
 
-      a.addEventListener("dblclick", ()=>{ if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); } });
+      // Remove
+      a.querySelector(".removeBtn")?.addEventListener("click", ()=>{
+        if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); }
+      });
 
+      if(editMode) a.classList.add("edit-mode");
       grid.appendChild(a);
     });
 
@@ -238,11 +259,11 @@ function renderLinks(){
         grid.style.maxHeight=grid.scrollHeight+"px"; chevron.classList.replace("fa-chevron-right","fa-chevron-down");
       }
     });
-    grid.style.maxHeight=grid.scrollHeight+"px"; // open by default
+    grid.style.maxHeight=grid.scrollHeight+"px";
 
     // Sortable
     new Sortable(grid,{ animation:150, ghostClass:'dragging', onEnd:function(evt){
-      const catLinks = links.filter(l=>l.category===cat);
+      const catLinks=links.filter(l=>l.category===cat);
       const moved=catLinks.splice(evt.oldIndex,1)[0];
       catLinks.splice(evt.newIndex,0,moved);
       links=links.filter(l=>l.category!==cat).concat(catLinks);
@@ -253,15 +274,20 @@ function renderLinks(){
 
 renderLinks();
 
+// Edit Mode Toggle
+document.getElementById("toggleEdit").addEventListener("click", ()=>{
+  editMode=!editMode;
+  renderLinks();
+});
+
 // Floating Add Button
-const addButton = document.getElementById("addButton");
-const popup = document.getElementById("popup");
-const closePopup = document.getElementById("closePopup");
-const saveLink = document.getElementById("saveLink");
+const addButton=document.getElementById("addButton");
+const popup=document.getElementById("popup");
+const closePopup=document.getElementById("closePopup");
+const saveLink=document.getElementById("saveLink");
 
 addButton.addEventListener("click", ()=>{ popup.style.display="flex"; });
 closePopup.addEventListener("click", ()=>{ popup.style.display="none"; });
-
 saveLink.addEventListener("click", ()=>{
   const name=document.getElementById("newName").value;
   const url=document.getElementById("newURL").value;
