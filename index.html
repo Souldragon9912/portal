@@ -1,80 +1,121 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Links Hub</title>
+<title>My Links Hub</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #eef2f5;
-      text-align: center;
-      padding-top: 30px;
-    }
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    .container {
-      width: 70%;
-      margin: auto;
-      background: blash;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 0px 10px #ccc;
-    }
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding-top: 30px;
 
-    h1 {
-      color: #333;
-    }
+    /* Custom Background */
+    background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
 
-    h2 {
-      margin-top: 25px;
-      color: #444;
-    }
+    color: white;
+  }
 
-    a {
-      display: block;
-      margin: 8px auto;
-      padding: 10px;
-      width: 60%;
-      text-decoration: none;
-      background: #0078d4;
-      color: white;
-      border-radius: 5px;
-      font-weight: bold;
-    }
+  .container {
+    width: 70%;
+    margin: auto;
+    background: rgba(20, 20, 20, 0.9);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 0px 15px black;
+  }
 
-    a:hover {
-      background: #005ea3;
-    }
+  h1 {
+    color: #4CAF50;
+  }
 
-    footer {
-      margin-top: 20px;
-      font-size: 12px;
-      color: gray;
-    }
-  </style>
+  h2 {
+    margin-top: 25px;
+    color: #cccccc;
+  }
+
+  a {
+    display: block;
+    margin: 10px auto;
+    padding: 12px;
+    width: 70%;
+    text-decoration: none;
+    background: #222;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    border: 1px solid #444;
+    transition: 0.3s;
+  }
+
+  a:hover {
+    background: #4CAF50;
+    color: black;
+  }
+
+  i {
+    margin-right: 8px;
+  }
+
+  footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: gray;
+  }
+
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>My Link Dashboard</h1>
+  <h1><i class="fa-solid fa-link"></i> My Link Dashboard</h1>
 
   <h2>School Links</h2>
-  <a href="https://my.unoh.edu" target="_blank">UNOH Student Portal</a>
-  <a href="https://unoh.instructure.com" target="_blank">Canvas</a>
+  <a href="https://my.unoh.edu" target="_blank">
+    <i class="fa-solid fa-school"></i> UNOH Student Portal
+  </a>
+
+  <a href="https://canvas.unoh.edu" target="_blank">
+    <i class="fa-solid fa-book"></i> Canvas
+  </a>
 
   <h2>Personal Links</h2>
-  <a href="https://gmail.com" target="_blank">Gmail</a>
-  <a href="https://youtube.com" target="_blank">YouTube</a>
-  <a href="https://github.com" target="_blank">GitHub</a>
+
+  <a href="https://gmail.com" target="_blank">
+    <i class="fa-solid fa-envelope"></i> Gmail
+  </a>
+
+  <a href="https://youtube.com" target="_blank">
+    <i class="fa-brands fa-youtube"></i> YouTube
+  </a>
+
+  <a href="https://github.com" target="_blank">
+    <i class="fa-brands fa-github"></i> GitHub
+  </a>
 
   <h2>Tech News</h2>
-  <a href="https://www.theverge.com" target="_blank">The Verge</a>
-  <a href="https://arstechnica.com" target="_blank">Ars Technica</a>
-  <a href="https://techcrunch.com" target="_blank">TechCrunch</a>
+
+  <a href="https://www.theverge.com" target="_blank">
+    <i class="fa-solid fa-newspaper"></i> The Verge
+  </a>
+
+  <a href="https://arstechnica.com" target="_blank">
+    <i class="fa-solid fa-microchip"></i> Ars Technica
+  </a>
+
+  <a href="https://techcrunch.com" target="_blank">
+    <i class="fa-solid fa-rocket"></i> TechCrunch
+  </a>
 
   <footer>
-    Simple links page hosted free with GitHub Pages
+    Custom dashboard powered by GitHub Pages
   </footer>
 
 </div>
