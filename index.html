@@ -12,7 +12,7 @@
     text-align: center;
     padding-top: 20px;
 
-   background-image: url('blue_arch_nowatermark.png');
+    background-image: url('blue_arch_nowatermark.png');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -24,150 +24,10 @@
     width: 90%;
     max-width: 1000px;
     margin: auto;
-    background: rgba(20, 20, 20, 0.9);
+    background: rgba(20, 20, 20, 0.8); /* slightly more transparent */
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0px 0px 15px black;
   }
 
-  h1 {
-    color: #4CAF50;
-    margin-bottom: 20px;
-  }
-
-  h2 {
-    margin-top: 30px;
-    color: #cccccc;
-  }
-
-  /* Flex container for buttons */
-  .link-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 15px;
-  }
-
-  .link-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    width: 100px;
-    height: 100px;
-    background: #222;
-    border-radius: 20px;
-    border: 1px solid #444;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    transition: 0.3s;
-  }
-
-  .link-box:hover {
-    background: #4CAF50;
-    color: black;
-    transform: scale(1.05);
-  }
-
-  .link-box i {
-    font-size: 32px;
-    margin-bottom: 8px;
-  }
-
-  .link-label {
-    font-size: 14px;
-    text-align: center;
-  }
-
-  footer {
-    margin-top: 25px;
-    font-size: 12px;
-    color: gray;
-  }
-
-  /* -------- MOBILE RESPONSIVE -------- */
-  @media screen and (max-width: 600px) {
-    .link-box {
-      width: 80px;
-      height: 80px;
-    }
-
-    .link-box i {
-      font-size: 24px;
-    }
-
-    .link-label {
-      font-size: 12px;
-    }
-  }
-
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-  <h1><i class="fa-solid fa-link"></i> My Link Dashboard</h1>
-
-  <h2>School Links</h2>
-  <div class="link-grid">
-    <a class="link-box" href="https://my.unoh.edu" target="_blank">
-      <i class="fa-solid fa-school"></i>
-      <span class="link-label">UNOH Portal</span>
-    </a>
-
-    <a class="link-box" href="https://canvas.unoh.edu" target="_blank">
-      <i class="fa-solid fa-book"></i>
-      <span class="link-label">Canvas</span>
-    </a>
-  </div>
-
-  <h2>Personal Links</h2>
-  <div class="link-grid">
-    <a class="link-box" href="https://gmail.com" target="_blank">
-      <i class="fa-solid fa-envelope"></i>
-      <span class="link-label">Gmail</span>
-    </a>
-
-    <a class="link-box" href="https://youtube.com" target="_blank">
-      <i class="fa-brands fa-youtube"></i>
-      <span class="link-label">YouTube</span>
-    </a>
-
-    <a class="link-box" href="https://github.com" target="_blank">
-      <i class="fa-brands fa-github"></i>
-      <span class="link-label">GitHub</span>
-    </a>
-  </div>
-
-  <h2>Tech News</h2>
-  <div class="link-grid">
-    <a class="link-box" href="https://www.theverge.com" target="_blank">
-      <i class="fa-solid fa-newspaper"></i>
-      <span class="link-label">The Verge</span>
-    </a>
-
-    <a class="link-box" href="https://arstechnica.com" target="_blank">
-      <i class="fa-solid fa-microchip"></i>
-      <span class="link-label">Ars Technica</span>
-    </a>
-
-    <a class="link-box" href="https://techcrunch.com" target="_blank">
-      <i class="fa-solid fa-rocket"></i>
-      <span class="link-label">TechCrunch</span>
-    </a>
-  </div>
-
-  <footer>
-    Custom dashboard powered by GitHub Pages
-  </footer>
-
-</div>
-
-</body>
-</html>
-
+  h1
