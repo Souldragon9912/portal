@@ -12,6 +12,7 @@
     text-align: center;
     padding-top: 20px;
 
+    /* Background image */
     background-image: url('blue_arch_nowatermark.png');
     background-size: cover;
     background-attachment: fixed;
@@ -20,14 +21,16 @@
     color: white;
   }
 
+  /* Fully transparent container */
   .container {
     width: 90%;
     max-width: 1000px;
     margin: auto;
-    background: rgba(20, 20, 20, 0.8); /* slightly more transparent */
+    background: transparent;
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0px 0px 15px black;
+    /* Optional shadow for depth */
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.3);
   }
 
   h1 {
@@ -40,6 +43,7 @@
     color: #cccccc;
   }
 
+  /* Flex grid for buttons */
   .link-grid {
     display: flex;
     flex-wrap: wrap;
@@ -48,6 +52,7 @@
     margin-top: 15px;
   }
 
+  /* Buttons (icons + labels) */
   .link-box {
     display: flex;
     flex-direction: column;
@@ -56,9 +61,9 @@
 
     width: 120px;
     height: 120px;
-    background: rgba(34, 34, 34, 0.5); /* transparent background */
+    background: rgba(34, 34, 34, 0.5); /* slightly transparent */
     border-radius: 20px;
-    border: 1px solid #444;
+    border: 1px solid #fff;
     text-decoration: none;
     color: white;
     font-weight: bold;
