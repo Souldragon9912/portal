@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Categorized Link Dashboard</title>
+  <title>Colored Categorized Dashboard</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -16,7 +16,6 @@
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
-
       color: white;
     }
 
@@ -53,13 +52,13 @@
 
       width: 120px;
       height: 120px;
-      background: rgba(34, 34, 34, 0.5);
+      background: rgba(34, 34, 34, 0.6);
       border-radius: 20px;
-      border: 1px solid #fff;
+      border: 2px solid #fff;
       text-decoration: none;
       color: white;
       font-weight: bold;
-      transition: 0.3s;
+      transition: transform 0.2s ease, opacity 0.2s ease;
       cursor: grab;
       position: relative;
     }
@@ -67,44 +66,6 @@
     .link-box.dragging { opacity: 0.5; transform: scale(1.05); }
     .link-box i { font-size: 36px; margin-bottom: 8px; }
     .link-label { font-size: 14px; text-align: center; }
-
-    footer { margin-top: 25px; font-size: 12px; color: gray; }
-
-    #addForm {
-      margin-top: 30px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    #addForm input, #addForm select {
-      padding: 6px;
-      width: 80%;
-      max-width: 300px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    #addForm button {
-      padding: 8px 12px; border-radius: 8px; border: none; background: #4CAF50; color: white;
-      font-weight: bold; cursor: pointer;
-    }
-
-    #addForm button:hover { background: #3e8e41; }
-
-    /* MOBILE */
-    @media screen and (max-width: 800px) {
-      .link-box { width: 140px; height: 140px; }
-      .link-box i { font-size: 40px; }
-      .link-label { font-size: 16px; }
-    }
-
-    @media screen and (max-width: 600px) {
-      .link-box { width: 30%; height: 170px; }
-      .link-box i { font-size: 50px; }
-      .link-label { font-size: 20px; }
-    }
 
     .edit-overlay {
       position: absolute;
@@ -119,13 +80,40 @@
       border-radius: 0 0 20px 20px;
       text-align: center;
     }
+
+    footer { margin-top: 25px; font-size: 12px; color: gray; }
+
+    #addForm { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    #addForm input, #addForm select { padding: 6px; width: 80%; max-width: 300px; border-radius: 6px; border: 1px solid #ccc; }
+    #addForm button {
+      padding: 8px 12px; border-radius: 8px; border: none; background: #4CAF50; color: white;
+      font-weight: bold; cursor: pointer;
+    }
+    #addForm button:hover { background: #3e8e41; }
+
+    /* CATEGORY COLORS */
+    .School { background: rgba(52, 152, 219, 0.8); }      /* Blue */
+    .Personal { background: rgba(155, 89, 182, 0.8); }    /* Purple */
+    .TechNews { background: rgba(230, 126, 34, 0.8); }    /* Orange */
+
+    /* MOBILE */
+    @media screen and (max-width: 800px) {
+      .link-box { width: 140px; height: 140px; }
+      .link-box i { font-size: 40px; }
+      .link-label { font-size: 16px; }
+    }
+
+    @media screen and (max-width: 600px) {
+      .link-box { width: 90%; height: 170px; }
+      .link-box i { font-size: 50px; }
+      .link-label { font-size: 20px; }
+    }
   </style>
 </head>
 
 <body>
-
 <div class="container">
-  <h1><i class="fa-solid fa-link"></i> Categorized Dashboard</h1>
+  <h1><i class="fa-solid fa-link"></i> Colored Categorized Dashboard</h1>
 
   <div id="categoriesContainer"></div>
 
@@ -136,12 +124,12 @@
     <select id="linkCategory">
       <option value="School">School</option>
       <option value="Personal">Personal</option>
-      <option value="Tech News">Tech News</option>
+      <option value="TechNews">Tech News</option>
     </select>
     <button type="submit">Add Link</button>
   </form>
 
-  <footer>Dashboard powered by GitHub Pages | Drag & Drop | Double-click or Edit to Remove</footer>
+  <footer>Drag & Drop | Double-click or Edit to Remove | Category Colors</footer>
 </div>
 
 <script>
@@ -151,7 +139,7 @@
     {name:"Gmail", url:"https://gmail.com", icon:"fa-solid fa-envelope", category:"Personal"},
     {name:"YouTube", url:"https://youtube.com", icon:"fa-brands fa-youtube", category:"Personal"},
     {name:"GitHub", url:"https://github.com", icon:"fa-brands fa-github", category:"Personal"},
-    {name:"The Verge", url:"https://www.theverge.com", icon:"fa-solid fa-newspaper", category:"Tech News"}
+    {name:"The Verge", url:"https://www.theverge.com", icon:"fa-solid fa-newspaper", category:"TechNews"}
   ];
 
   let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
@@ -161,21 +149,22 @@
 
   function renderLinks() {
     categoriesContainer.innerHTML = "";
-    const categories = [...new Set(links.map(l => l.category))];
+    const categories = [...new Set(links.map(l=>l.category))];
     categories.forEach(cat => {
       const section = document.createElement("div");
-      section.className = "category-section";
-      section.innerHTML = `<h2>${cat}</h2><div class="link-grid" data-category="${cat}"></div>`;
+      section.className="category-section";
+      section.innerHTML=`<h2>${cat}</h2><div class="link-grid" data-category="${cat}"></div>`;
       const grid = section.querySelector(".link-grid");
 
       links.filter(l=>l.category===cat).forEach((link,index)=>{
-        const a = document.createElement("a");
-        a.href=link.url; a.target="_blank"; a.className="link-box"; a.setAttribute("draggable","true"); 
+        const a=document.createElement("a");
+        a.href=link.url; a.target="_blank"; a.className="link-box "+link.category; a.setAttribute("draggable","true");
         a.dataset.index=index;
-        a.innerHTML=`<i class="${link.icon || 'fa-solid fa-link'}"></i>
+        a.innerHTML=`<i class="${link.icon||'fa-solid fa-link'}"></i>
                      <span class="link-label">${link.name}</span>
                      <div class="edit-overlay">Edit</div>`;
 
+        // Drag & Drop
         a.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", index); a.classList.add("dragging"); });
         a.addEventListener("dragend", ()=>a.classList.remove("dragging"));
         a.addEventListener("dragover", e=>e.preventDefault());
@@ -183,17 +172,19 @@
           e.preventDefault();
           const draggedIndex = e.dataTransfer.getData("text/plain");
           const targetIndex = a.dataset.index;
-          [links[draggedIndex], links[targetIndex]] = [links[targetIndex], links[draggedIndex]];
+          [links[draggedIndex], links[targetIndex]]=[links[targetIndex], links[draggedIndex]];
           saveLinks(); renderLinks();
         });
 
+        // Remove
         a.addEventListener("dblclick", ()=>{ if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); } });
 
+        // Edit
         a.querySelector(".edit-overlay").addEventListener("click", ()=>{
-          const newName = prompt("Edit Name:", link.name)||link.name;
-          const newURL = prompt("Edit URL:", link.url)||link.url;
-          const newIcon = prompt("Edit Icon Class:", link.icon)||link.icon;
-          const newCat = prompt("Edit Category:", link.category)||link.category;
+          const newName=prompt("Edit Name:",link.name)||link.name;
+          const newURL=prompt("Edit URL:",link.url)||link.url;
+          const newIcon=prompt("Edit Icon Class:",link.icon)||link.icon;
+          const newCat=prompt("Edit Category:",link.category)||link.category;
           links[index]={name:newName,url:newURL,icon:newIcon,category:newCat};
           saveLinks(); renderLinks();
         });
@@ -209,15 +200,14 @@
 
   document.getElementById("addForm").addEventListener("submit", e=>{
     e.preventDefault();
-    const name = document.getElementById("linkName").value;
-    const url = document.getElementById("linkURL").value;
-    const icon = document.getElementById("linkIcon").value;
-    const category = document.getElementById("linkCategory").value;
+    const name=document.getElementById("linkName").value;
+    const url=document.getElementById("linkURL").value;
+    const icon=document.getElementById("linkIcon").value;
+    const category=document.getElementById("linkCategory").value;
     links.push({name,url,icon,category});
     saveLinks(); renderLinks();
     e.target.reset();
   });
 </script>
-
 </body>
 </html>
