@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Final Link Dashboard</title>
+  <title>Final Link Dashboard - Fixed Edit Mode</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -112,8 +112,8 @@
     }
 
     @media screen and (max-width: 600px) {
-      .link-box { width: 20%; height: 170px; }
-      .link-box i { font-size: 30px; }
+      .link-box { width: 30%; height: 150px; }
+      .link-box i { font-size: 40px; }
       .link-label { font-size: 20px; }
     }
 
@@ -196,12 +196,12 @@
 
 <script>
 let defaultLinks = [
-  {name:"UNOH Portal", url:"https://my.unoh.edu", icon:"fa-solid fa-school", category:"School"},
-  {name:"Canvas", url:"https://canvas.unoh.edu", icon:"fa-solid fa-book", category:"School"},
-  {name:"Gmail", url:"https://gmail.com", icon:"fa-solid fa-envelope", category:"Personal"},
-  {name:"YouTube", url:"https://youtube.com", icon:"fa-brands fa-youtube", category:"Personal"},
-  {name:"GitHub", url:"https://github.com", icon:"fa-brands fa-github", category:"Personal"},
-  {name:"The Verge", url:"https://www.theverge.com", icon:"fa-solid fa-newspaper", category:"TechNews"}
+  {id: Date.now()+1, name:"UNOH Portal", url:"https://my.unoh.edu", icon:"fa-solid fa-school", category:"School"},
+  {id: Date.now()+2, name:"Canvas", url:"https://canvas.unoh.edu", icon:"fa-solid fa-book", category:"School"},
+  {id: Date.now()+3, name:"Gmail", url:"https://gmail.com", icon:"fa-solid fa-envelope", category:"Personal"},
+  {id: Date.now()+4, name:"YouTube", url:"https://youtube.com", icon:"fa-brands fa-youtube", category:"Personal"},
+  {id: Date.now()+5, name:"GitHub", url:"https://github.com", icon:"fa-brands fa-github", category:"Personal"},
+  {id: Date.now()+6, name:"The Verge", url:"https://www.theverge.com", icon:"fa-solid fa-newspaper", category:"TechNews"}
 ];
 
 let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
@@ -222,10 +222,10 @@ function renderLinks(){
       <div class="link-grid" data-category="${cat}"></div>`;
     const grid = section.querySelector(".link-grid");
 
-    links.filter(l=>l.category===cat).forEach((link,index)=>{
+    links.filter(l=>l.category===cat).forEach((link)=>{
       const a=document.createElement("a");
       a.href=link.url; a.target="_blank"; a.className="link-box "+link.category;
-      a.dataset.index=index;
+      a.dataset.id = link.id;
       a.innerHTML=`<i class="${link.icon||'fa-solid fa-link'}"></i>
                    <span class="link-label">${link.name}</span>
                    <div class="edit-buttons">
@@ -235,18 +235,27 @@ function renderLinks(){
       if(editMode) a.classList.add("edit-mode");
 
       // Edit
-      a.querySelector(".editBtn")?.addEventListener("click", ()=>{
-        const newName=prompt("Edit Name:",link.name)||link.name;
-        const newURL=prompt("Edit URL:",link.url)||link.url;
-        const newIcon=prompt("Edit Icon Class:",link.icon)||link.icon;
-        const newCat=prompt("Edit Category:",link.category)||link.category;
-        links[index]={name:newName,url:newURL,icon:newIcon,category:newCat};
+      a.querySelector(".editBtn")?.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault();
+        const linkIndex = links.findIndex(l=>l.id===link.id);
+        if(linkIndex === -1) return;
+        const l = links[linkIndex];
+        const newName = prompt("Edit Name:", l.name) || l.name;
+        const newURL = prompt("Edit URL:", l.url) || l.url;
+        const newIcon = prompt("Edit Icon Class:", l.icon) || l.icon;
+        const newCat = prompt("Edit Category:", l.category) || l.category;
+        links[linkIndex] = {...l, name:newName, url:newURL, icon:newIcon, category:newCat};
         saveLinks(); renderLinks();
       });
 
       // Remove
-      a.querySelector(".removeBtn")?.addEventListener("click", ()=>{
-        if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); }
+      a.querySelector(".removeBtn")?.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault();
+        const linkIndex = links.findIndex(l=>l.id===link.id);
+        if(linkIndex === -1) return;
+        if(confirm(`Remove "${links[linkIndex].name}"?`)){
+          links.splice(linkIndex,1); saveLinks(); renderLinks();
+        }
       });
 
       grid.appendChild(a);
@@ -299,7 +308,7 @@ saveLink.addEventListener("click", ()=>{
   const category=document.getElementById("newCategory").value;
   const icon=document.getElementById("newIcon").value || 'fa-solid fa-link';
   if(!name || !url) return alert("Name and URL required!");
-  links.push({name, url, icon, category});
+  links.push({id: Date.now(), name, url, icon, category});
   saveLinks(); renderLinks(); popup.style.display="none";
   document.getElementById("newName").value="";
   document.getElementById("newURL").value="";
