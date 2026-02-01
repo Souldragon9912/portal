@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Link Dashboard - Fixed Removal</title>
+  <title>Link Dashboard - Favicons</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       margin: 0; padding: 0;
-      background-image: url('blue_arch_nowatermark.png');
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
       color: white;
+      transition: background 0.5s ease;
     }
 
     .container {
@@ -75,7 +70,7 @@
       transition: transform 0.2s ease;
     }
 
-    .link-box i { font-size: 36px; margin-bottom: 8px; }
+    .link-box img { width:36px; height:36px; margin-bottom:8px; border-radius:6px; }
     .link-label { font-size: 14px; text-align: center; }
 
     .edit-buttons {
@@ -99,74 +94,46 @@
 
     footer { margin-top: 25px; font-size: 12px; color: gray; }
 
-    /* CATEGORY COLORS */
     .School { background: rgba(52, 152, 219, 0.8); }  
     .Personal { background: rgba(155, 89, 182, 0.8); } 
     .TechNews { background: rgba(230, 126, 34, 0.8); }
 
-    /* MOBILE */
     @media screen and (max-width: 800px) {
       .link-box { width: 140px; height: 140px; }
-      .link-box i { font-size: 40px; }
+      .link-box img { width:40px; height:40px; }
       .link-label { font-size: 16px; }
     }
 
     @media screen and (max-width: 600px) {
       .link-box { width: 30%; height: 150px; }
-      .link-box i { font-size: 50px; }
+      .link-box img { width:50px; height:50px; }
       .link-label { font-size: 20px; }
     }
 
-    /* Floating Add Button */
-    #addButton {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      font-size: 30px;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      z-index: 999;
+    .floatingBtn {
+      position: fixed; bottom: 25px; right: 25px;
+      background: #4CAF50; color:white; border:none; border-radius:50%;
+      width:60px; height:60px; font-size:30px; cursor:pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index:999;
     }
+    #changeBackgroundBtn { right:100px; width:auto; height:auto; border-radius:8px; font-size:16px; padding:10px 15px; }
 
-    /* Popup Modal */
-    #popup {
-      position: fixed;
-      top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+    .popup {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.8); display: none;
+      justify-content: center; align-items: center; z-index: 1000;
     }
-
-    #popupContent {
-      background: rgba(50,50,50,0.95);
-      padding: 20px;
-      border-radius: 15px;
-      width: 90%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .popupContent {
+      background: rgba(50,50,50,0.95); padding:20px; border-radius:15px;
+      width:90%; max-width:400px; display:flex; flex-direction:column; gap:10px;
     }
-
-    #popupContent input, #popupContent select, #popupContent button {
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-      font-size: 16px;
+    .popupContent input, .popupContent select, .popupContent button {
+      padding: 8px; border-radius:6px; border:none; font-size:16px;
     }
-
-    #popupContent button { background: #4CAF50; color: white; cursor: pointer; }
+    .popupContent button { background: #4CAF50; color:white; cursor:pointer; }
+    .popupContent button.cancel { background: red; }
   </style>
 </head>
-
 <body>
 <div class="container">
   <h1><i class="fa-solid fa-link"></i> Link Dashboard 
@@ -176,10 +143,12 @@
   <footer>Tap category to expand/collapse | Drag & Drop | Add/Edit/Remove links</footer>
 </div>
 
-<button id="addButton">+</button>
+<button id="addButton" class="floatingBtn">+</button>
+<button id="changeBackgroundBtn">Background</button>
 
-<div id="popup">
-  <div id="popupContent">
+<!-- Add Link Popup -->
+<div id="popup" class="popup">
+  <div class="popupContent">
     <h2>Add New Link</h2>
     <input type="text" id="newName" placeholder="Site Name" required>
     <input type="url" id="newURL" placeholder="https://example.com" required>
@@ -188,20 +157,32 @@
       <option value="Personal">Personal</option>
       <option value="TechNews">Tech News</option>
     </select>
-    <input type="text" id="newIcon" placeholder="Font Awesome Icon class (optional)">
     <button id="saveLink">Add Link</button>
-    <button id="closePopup" style="background:red;">Cancel</button>
+    <button id="closePopup" class="cancel">Cancel</button>
+  </div>
+</div>
+
+<!-- Background Popup -->
+<div id="bgPopup" class="popup">
+  <div class="popupContent">
+    <h2>Set Background</h2>
+    <input type="text" id="bgInput" placeholder="Image URL or color code">
+    <div style="margin-top:10px;">
+      <button id="previewBg">Preview</button>
+      <button id="saveBg">Save</button>
+      <button id="cancelBg" class="cancel">Cancel</button>
+    </div>
   </div>
 </div>
 
 <script>
 let defaultLinks = [
-  {id: Date.now()+1, name:"UNOH Portal", url:"https://my.unoh.edu", icon:"fa-solid fa-school", category:"School"},
-  {id: Date.now()+2, name:"Canvas", url:"https://canvas.unoh.edu", icon:"fa-solid fa-book", category:"School"},
-  {id: Date.now()+3, name:"Gmail", url:"https://gmail.com", icon:"fa-solid fa-envelope", category:"Personal"},
-  {id: Date.now()+4, name:"YouTube", url:"https://youtube.com", icon:"fa-brands fa-youtube", category:"Personal"},
-  {id: Date.now()+5, name:"GitHub", url:"https://github.com", icon:"fa-brands fa-github", category:"Personal"},
-  {id: Date.now()+6, name:"The Verge", url:"https://www.theverge.com", icon:"fa-solid fa-newspaper", category:"TechNews"}
+  {id: Date.now()+1, name:"UNOH Portal", url:"https://my.unoh.edu", category:"School"},
+  {id: Date.now()+2, name:"Canvas", url:"https://canvas.unoh.edu", category:"School"},
+  {id: Date.now()+3, name:"Gmail", url:"https://gmail.com", category:"Personal"},
+  {id: Date.now()+4, name:"YouTube", url:"https://youtube.com", category:"Personal"},
+  {id: Date.now()+5, name:"GitHub", url:"https://github.com", category:"Personal"},
+  {id: Date.now()+6, name:"The Verge", url:"https://www.theverge.com", category:"TechNews"}
 ];
 
 let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
@@ -218,41 +199,44 @@ function renderLinks(){
     const section=document.createElement("div");
     section.className="category-section";
     section.innerHTML=`
-      <div class="category-header"><i class="fa-solid fa-chevron-down"></i>${cat}</div>
+      <div class="category-header"><span>▼</span>${cat}</div>
       <div class="link-grid" data-category="${cat}"></div>`;
     const grid = section.querySelector(".link-grid");
 
-    links.filter(l=>l.category===cat).forEach((link)=>{
-      const currentLink = link; // FIX: capture current link
-      const a=document.createElement("a");
-      a.href=currentLink.url;
-      a.target="_blank";
-      a.className="link-box "+currentLink.category;
+    links.filter(l=>l.category===cat).forEach(link=>{
+      const currentLink = link;
+      const a = document.createElement("a");
+      a.href = currentLink.url;
+      a.target = "_blank";
+      a.className = "link-box " + currentLink.category;
       a.dataset.id = currentLink.id;
-      a.innerHTML=`<i class="${currentLink.icon||'fa-solid fa-link'}"></i>
-                   <span class="link-label">${currentLink.name}</span>
-                   <div class="edit-buttons">
-                     <button class="editBtn">✏️</button>
-                     <button class="removeBtn">🗑️</button>
-                   </div>`;
+
+      // Favicon automatically
+      let faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${new URL(currentLink.url).hostname}`;
+
+      a.innerHTML = `
+        <img src="${faviconUrl}">
+        <span class="link-label">${currentLink.name}</span>
+        <div class="edit-buttons">
+          <button class="editBtn">✏️</button>
+          <button class="removeBtn">🗑️</button>
+        </div>`;
+
       if(editMode) a.classList.add("edit-mode");
 
-      // EDIT button
-      a.querySelector(".editBtn")?.addEventListener("click", function(e){
+      a.querySelector(".editBtn")?.addEventListener("click", e=>{
         e.stopPropagation(); e.preventDefault();
         const linkIndex = links.findIndex(l=>l.id===currentLink.id);
         if(linkIndex === -1) return;
         const l = links[linkIndex];
         const newName = prompt("Edit Name:", l.name) || l.name;
         const newURL = prompt("Edit URL:", l.url) || l.url;
-        const newIcon = prompt("Edit Icon Class:", l.icon) || l.icon;
         const newCat = prompt("Edit Category:", l.category) || l.category;
-        links[linkIndex] = {...l, name:newName, url:newURL, icon:newIcon, category:newCat};
+        links[linkIndex] = {...l, name:newName, url:newURL, category:newCat};
         saveLinks(); renderLinks();
       });
 
-      // REMOVE button
-      a.querySelector(".removeBtn")?.addEventListener("click", function(e){
+      a.querySelector(".removeBtn")?.addEventListener("click", e=>{
         e.stopPropagation(); e.preventDefault();
         const linkIndex = links.findIndex(l=>l.id===currentLink.id);
         if(linkIndex === -1) return;
@@ -266,19 +250,17 @@ function renderLinks(){
 
     categoriesContainer.appendChild(section);
 
-    // Collapsible
     const header = section.querySelector('.category-header');
-    const chevron = header.querySelector('i');
+    const span = header.querySelector('span');
     header.addEventListener('click', ()=>{
       if(grid.style.maxHeight && grid.style.maxHeight!=="0px"){
-        grid.style.maxHeight="0px"; chevron.classList.replace("fa-chevron-down","fa-chevron-right");
+        grid.style.maxHeight="0px"; span.textContent = "►";
       } else {
-        grid.style.maxHeight=grid.scrollHeight+"px"; chevron.classList.replace("fa-chevron-right","fa-chevron-down");
+        grid.style.maxHeight=grid.scrollHeight+"px"; span.textContent = "▼";
       }
     });
     grid.style.maxHeight=grid.scrollHeight+"px";
 
-    // Sortable
     new Sortable(grid,{ animation:150, ghostClass:'dragging', onEnd:function(evt){
       const catLinks = links.filter(l=>l.category===cat);
       const moved = catLinks.splice(evt.oldIndex,1)[0];
@@ -291,13 +273,13 @@ function renderLinks(){
 
 renderLinks();
 
-// Edit Mode Toggle
+// Edit Mode
 document.getElementById("toggleEdit").addEventListener("click", ()=>{
   editMode = !editMode;
   renderLinks();
 });
 
-// Floating Add Button
+// Add Link Popup
 const addButton=document.getElementById("addButton");
 const popup=document.getElementById("popup");
 const closePopup=document.getElementById("closePopup");
@@ -309,14 +291,44 @@ saveLink.addEventListener("click", ()=>{
   const name=document.getElementById("newName").value;
   const url=document.getElementById("newURL").value;
   const category=document.getElementById("newCategory").value;
-  const icon=document.getElementById("newIcon").value || 'fa-solid fa-link';
   if(!name || !url) return alert("Name and URL required!");
-  links.push({id: Date.now(), name, url, icon, category});
+  links.push({id: Date.now(), name, url, category});
   saveLinks(); renderLinks(); popup.style.display="none";
   document.getElementById("newName").value="";
   document.getElementById("newURL").value="";
-  document.getElementById("newIcon").value="";
 });
+
+// Background Popup
+const bgPopup = document.getElementById("bgPopup");
+const changeBgBtn = document.getElementById("changeBackgroundBtn");
+const bgInput = document.getElementById("bgInput");
+const previewBg = document.getElementById("previewBg");
+const saveBg = document.getElementById("saveBg");
+const cancelBg = document.getElementById("cancelBg");
+
+function setBackground(bg){
+  if(bg.startsWith("http")){
+    document.body.style.backgroundImage=`url(${bg})`;
+    document.body.style.backgroundSize="cover";
+    document.body.style.backgroundPosition="center";
+    document.body.style.backgroundColor="";
+  } else {
+    document.body.style.backgroundImage="none";
+    document.body.style.backgroundColor=bg;
+  }
+  localStorage.setItem("bg", bg);
+}
+
+const savedBg = localStorage.getItem("bg");
+if(savedBg) setBackground(savedBg);
+
+changeBgBtn.addEventListener("click", ()=>{ 
+  bgInput.value = savedBg || ""; 
+  bgPopup.style.display="flex"; 
+});
+previewBg.addEventListener("click", ()=>{ setBackground(bgInput.value.trim()); });
+saveBg.addEventListener("click", ()=>{ setBackground(bgInput.value.trim()); bgPopup.style.display="none"; });
+cancelBg.addEventListener("click", ()=>{ bgPopup.style.display="none"; if(savedBg) setBackground(savedBg); });
 </script>
 </body>
 </html>
