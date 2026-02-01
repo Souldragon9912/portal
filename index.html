@@ -37,16 +37,17 @@
       border-radius: 20px; border: 2px solid #fff; text-decoration: none; color: white;
       font-weight: bold; position: relative; transition: transform 0.2s ease;
     }
-    .link-box img { width:36px; height:36px; margin-bottom:8px; border-radius:6px; }
+    .link-box img { margin-bottom:8px; border-radius:6px; }
     .link-label { font-size: 14px; text-align: center; }
     .edit-buttons { position: absolute; bottom: 5px; right: 5px; display: none; gap: 5px; }
     .edit-buttons button { background: rgba(255,255,255,0.8); border: none; color: #333; border-radius: 5px; padding: 2px 5px; font-size: 12px; cursor: pointer; }
     .edit-mode .edit-buttons { display: flex; }
     footer { margin-top: 25px; font-size: 12px; color: gray; }
-    @media screen and (max-width: 800px) { .link-box { width: 140px; height: 140px; } .link-box img { width:40px; height:40px; } .link-label { font-size: 16px; } }
-    @media screen and (max-width: 600px) { .link-box { width: 30%; height: 150px; } .link-box img { width:50px; height:50px; } .link-label { font-size: 20px; } }
+    @media screen and (max-width: 800px) { .link-box { width: 140px; height: 140px; } .link-label { font-size: 16px; } }
+    @media screen and (max-width: 600px) { .link-box { width: 90%; height: 170px; } .link-label { font-size: 20px; } }
     .floatingBtn { position: fixed; bottom: 25px; right: 25px; background: #4CAF50; color:white; border:none; border-radius:50%; width:60px; height:60px; font-size:30px; cursor:pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index:999; }
     #changeBackgroundBtn { right:100px; width:auto; height:auto; border-radius:8px; font-size:16px; padding:10px 15px; }
+    #iconSizeSlider { position:fixed; bottom:5px; left:25px; z-index:1000; }
     .popup { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
     .popupContent { background: rgba(50,50,50,0.95); padding:20px; border-radius:15px; width:90%; max-width:400px; display:flex; flex-direction:column; gap:10px; }
     .popupContent input, .popupContent button { padding: 8px; border-radius:6px; border:none; font-size:16px; }
@@ -62,6 +63,8 @@
 </div>
 <button id="addButton" class="floatingBtn">+</button>
 <button id="changeBackgroundBtn">Background</button>
+<label for="iconSizeSlider" style="color:white; font-size:14px;">Icon Size</label>
+<input type="range" id="iconSizeSlider" min="30" max="80" value="36">
 
 <!-- Add Link Popup -->
 <div id="popup" class="popup">
@@ -91,14 +94,14 @@
 
 <script>
 let defaultLinks = [
-  {id: Date.now()+1, name:"Gmail", url:"https://gmail.com", category:"Personal"},
-  {id: Date.now()+2, name:"YouTube", url:"https://youtube.com", category:"Personal"},
-  {id: Date.now()+3, name:"GitHub", url:"https://github.com", category:"Personal"},
-
+  {id: Date.now()+1, name:"UNOH Portal", url:"https://my.unoh.edu", category:"School"},
+  {id: Date.now()+2, name:"Canvas", url:"https://canvas.unoh.edu", category:"School"},
+  {id: Date.now()+3, name:"The Verge", url:"https://www.theverge.com", category:"Tech News"}
 ];
 
 let links = JSON.parse(localStorage.getItem("dashboardLinks")) || defaultLinks;
 let editMode = false;
+let bgDataURL = null;
 const categoriesContainer = document.getElementById("categoriesContainer");
 
 function saveLinks(){ localStorage.setItem("dashboardLinks", JSON.stringify(links)); }
@@ -106,7 +109,6 @@ function saveLinks(){ localStorage.setItem("dashboardLinks", JSON.stringify(link
 function renderLinks(){
   categoriesContainer.innerHTML="";
   const categories = [...new Set(links.map(l=>l.category))];
-
   categories.forEach(cat=>{
     const section=document.createElement("div");
     section.className="category-section";
@@ -118,7 +120,6 @@ function renderLinks(){
       <div class="link-grid" data-category="${cat}"></div>`;
     const grid = section.querySelector(".link-grid");
 
-    // Category options
     const catBtn = section.querySelector(".categoryOptionsBtn");
     catBtn.addEventListener("click", e=>{
       e.stopPropagation();
@@ -207,18 +208,16 @@ function renderLinks(){
 
 renderLinks();
 
-// Edit Mode toggle
 document.getElementById("toggleEdit").addEventListener("click", ()=>{
   editMode = !editMode;
   renderLinks();
 });
 
-// Add Link popup logic
+// Add Link popup
 const addButton=document.getElementById("addButton");
 const popup=document.getElementById("popup");
 const closePopup=document.getElementById("closePopup");
 const saveLink=document.getElementById("saveLink");
-
 addButton.addEventListener("click", ()=>{ popup.style.display="flex"; });
 closePopup.addEventListener("click", ()=>{ popup.style.display="none"; });
 saveLink.addEventListener("click", ()=>{
@@ -233,7 +232,7 @@ saveLink.addEventListener("click", ()=>{
   document.getElementById("newCategory").value="";
 });
 
-// Background popup logic
+// Background popup
 const bgPopup = document.getElementById("bgPopup");
 const changeBgBtn = document.getElementById("changeBackgroundBtn");
 const bgInput = document.getElementById("bgInput");
@@ -261,17 +260,48 @@ function setBackground(bg){
 const savedBg = localStorage.getItem("bg");
 if(savedBg) setBackground(savedBg);
 
-changeBgBtn.addEventListener("click", ()=>{ bgInput.value = savedBg || ""; bgFile.value=""; bgPopup.style.display="flex"; });
-previewBg.addEventListener("click", ()=>{ setBackground(bgInput.value.trim()); });
-saveBg.addEventListener("click", ()=>{ setBackground(bgInput.value.trim()); bgPopup.style.display="none"; });
+changeBgBtn.addEventListener("click", ()=>{ bgInput.value = savedBg || ""; bgFile.value=""; bgDataURL=null; bgPopup.style.display="flex"; });
+previewBg.addEventListener("click", ()=>{
+  if(bgDataURL) setBackground(bgDataURL); else setBackground(bgInput.value.trim());
+});
+saveBg.addEventListener("click", ()=>{
+  if(bgDataURL){
+    setBackground(bgDataURL);
+  } else {
+    setBackground(bgInput.value.trim());
+  }
+  bgPopup.style.display="none";
+});
 cancelBg.addEventListener("click", ()=>{ bgPopup.style.display="none"; if(savedBg) setBackground(savedBg); });
 bgFile.addEventListener("change", (e)=>{
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = function(evt){ bgInput.value = evt.target.result; setBackground(evt.target.result); }
+  reader.onload = function(evt){
+    bgDataURL = evt.target.result;
+    setBackground(bgDataURL);
+  }
   reader.readAsDataURL(file);
 });
+
+// Icon size slider
+const iconSlider = document.getElementById("iconSizeSlider");
+function updateIconSize(size){
+  document.querySelectorAll(".link-box img").forEach(img => {
+    img.style.width = size + "px";
+    img.style.height = size + "px";
+  });
+}
+updateIconSize(iconSlider.value);
+iconSlider.addEventListener("input", ()=>{
+  updateIconSize(iconSlider.value);
+  localStorage.setItem("iconSize", iconSlider.value);
+});
+const savedIconSize = localStorage.getItem("iconSize");
+if(savedIconSize){
+  iconSlider.value = savedIconSize;
+  updateIconSize(savedIconSize);
+}
 </script>
 </body>
 </html>
