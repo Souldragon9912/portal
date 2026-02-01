@@ -96,7 +96,7 @@
   @media screen and (max-width: 900px) {
     .link-box {
       width: 140px;
-      height: 140px;
+      height: 300px;
     }
 
     .link-box i {
@@ -108,20 +108,25 @@
     }
   }
 
-  @media screen and (max-width: 600px) {
-    .link-box {
-      width: 160px;
-      height: 160px;
-    }
-
-    .link-box i {
-      font-size: 44px;
-    }
-
-    .link-label {
-      font-size: 18px;
-    }
+ @media screen and (max-width: 800px) {  /* covers phones like S25 Plus */
+  .link-grid {
+    gap: 15px;
   }
+
+  .link-box {
+    width: 90%;           /* almost full width */
+    height: 170px;        /* taller buttons for easy tapping */
+  }
+
+  .link-box i {
+    font-size: 50px;      /* bigger icon */
+  }
+
+  .link-label {
+    font-size: 20px;      /* larger text */
+  }
+}
+
 
 </style>
 </head>
