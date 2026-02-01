@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Colored Categorized Dashboard</title>
+  <title>Sortable Categorized Dashboard</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- SortableJS -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       padding-top: 20px;
-
       background-image: url('blue_arch_nowatermark.png');
       background-size: cover;
       background-attachment: fixed;
@@ -32,9 +34,7 @@
     h1 { color: #4CAF50; margin-bottom: 20px; }
     h2 { margin-top: 30px; color: #cccccc; }
 
-    .category-section {
-      margin-top: 20px;
-    }
+    .category-section { margin-top: 20px; }
 
     .link-grid {
       display: flex;
@@ -63,7 +63,6 @@
       position: relative;
     }
 
-    .link-box.dragging { opacity: 0.5; transform: scale(1.05); }
     .link-box i { font-size: 36px; margin-bottom: 8px; }
     .link-label { font-size: 14px; text-align: center; }
 
@@ -113,7 +112,7 @@
 
 <body>
 <div class="container">
-  <h1><i class="fa-solid fa-link"></i> Colored Categorized Dashboard</h1>
+  <h1><i class="fa-solid fa-link"></i> Sortable Categorized Dashboard</h1>
 
   <div id="categoriesContainer"></div>
 
@@ -129,7 +128,7 @@
     <button type="submit">Add Link</button>
   </form>
 
-  <footer>Drag & Drop | Double-click or Edit to Remove | Category Colors</footer>
+  <footer>Drag & Drop | Double-click or Edit to Remove | Category Colors | Mobile Supported</footer>
 </div>
 
 <script>
@@ -150,6 +149,7 @@
   function renderLinks() {
     categoriesContainer.innerHTML = "";
     const categories = [...new Set(links.map(l=>l.category))];
+
     categories.forEach(cat => {
       const section = document.createElement("div");
       section.className="category-section";
@@ -158,23 +158,11 @@
 
       links.filter(l=>l.category===cat).forEach((link,index)=>{
         const a=document.createElement("a");
-        a.href=link.url; a.target="_blank"; a.className="link-box "+link.category; a.setAttribute("draggable","true");
+        a.href=link.url; a.target="_blank"; a.className="link-box "+link.category;
         a.dataset.index=index;
         a.innerHTML=`<i class="${link.icon||'fa-solid fa-link'}"></i>
                      <span class="link-label">${link.name}</span>
                      <div class="edit-overlay">Edit</div>`;
-
-        // Drag & Drop
-        a.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", index); a.classList.add("dragging"); });
-        a.addEventListener("dragend", ()=>a.classList.remove("dragging"));
-        a.addEventListener("dragover", e=>e.preventDefault());
-        a.addEventListener("drop", e=>{
-          e.preventDefault();
-          const draggedIndex = e.dataTransfer.getData("text/plain");
-          const targetIndex = a.dataset.index;
-          [links[draggedIndex], links[targetIndex]]=[links[targetIndex], links[draggedIndex]];
-          saveLinks(); renderLinks();
-        });
 
         // Remove
         a.addEventListener("dblclick", ()=>{ if(confirm(`Remove "${link.name}"?`)){ links.splice(index,1); saveLinks(); renderLinks(); } });
@@ -193,6 +181,21 @@
       });
 
       categoriesContainer.appendChild(section);
+
+      // Initialize SortableJS for this grid
+      new Sortable(grid, {
+        animation: 150,
+        ghostClass: 'dragging',
+        onEnd: function (evt) {
+          const catLinks = links.filter(l=>l.category===cat);
+          const moved = catLinks.splice(evt.oldIndex,1)[0];
+          catLinks.splice(evt.newIndex,0,moved);
+          // Rebuild main links array while keeping order of other categories
+          links = links.filter(l=>l.category!==cat).concat(catLinks);
+          saveLinks();
+          renderLinks();
+        }
+      });
     });
   }
 
