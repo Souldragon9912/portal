@@ -235,6 +235,32 @@
             font-size: 1rem;
         }
 
+        /* --- Icon Search Styles --- */
+        .icon-search-results {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .icon-result {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #444;
+            border: 1px solid #555;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-result:hover { background: #007AFF; border-color: #007AFF; }
+        .icon-result img { width: 24px; height: 24px; }
+
         .btn-group { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
         .btn {
             padding: 10px 20px;
@@ -263,7 +289,7 @@
 <body>
 
     <div class="search-container">
-        <form action="https://www.google.com/search" method="GET">
+        <form action="https://www.google.com/search" method="GET" target="_blank" onsubmit="setTimeout(() => this.reset(), 500)">
             <input type="text" name="q" class="search-bar" placeholder="Search Google..." autocomplete="off">
         </form>
     </div>
@@ -303,10 +329,19 @@
                 <label>URL</label>
                 <input type="url" id="itemUrl" placeholder="https://youtube.com">
             </div>
+            
             <div class="form-group">
-                <label>Custom Icon (Optional)</label>
+                <label>Icon</label>
+                <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                    <input type="text" id="iconSearchInput" placeholder="Search icon (e.g. twitter)" style="margin-bottom:0">
+                    <button class="btn btn-secondary" onclick="app.searchIcons()">🔍</button>
+                </div>
+                <div id="iconResults" class="icon-search-results" style="display:none;"></div>
+                
+                <div style="text-align: center; margin: 10px 0; font-size: 0.8rem; color: #888;">- OR -</div>
+                
                 <input type="file" id="itemIconInput" accept="image/*">
-                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Upload a custom image for this folder or link.</p>
+                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Upload your own image</p>
             </div>
 
             <div class="btn-group">
@@ -341,7 +376,6 @@
                     <button class="btn btn-secondary" style="width: 48%" onclick="document.getElementById('importFile').click()">⬆️ Import</button>
                     <input type="file" id="importFile" style="display: none" accept=".json" onchange="app.importData(this)">
                 </div>
-                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Transfer your setup to another device.</p>
             </div>
 
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
@@ -369,6 +403,7 @@ const app = (() => {
     
     let currentFolderId = null; 
     let isEditMode = false;
+    let selectedIconData = null; // Stores icon from search
 
     // --- Core Functions ---
     const init = () => {
@@ -383,7 +418,6 @@ const app = (() => {
         render();
     };
 
-    // --- Helper to read files as Base64 ---
     const readFileAsBase64 = (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -391,6 +425,60 @@ const app = (() => {
             reader.onerror = reject;
             reader.readAsDataURL(file);
         });
+    };
+
+    // --- Icon Search Logic (Iconify API) ---
+    const searchIcons = async () => {
+        const query = document.getElementById('iconSearchInput').value.trim();
+        if(!query) return;
+
+        const resultsContainer = document.getElementById('iconResults');
+        resultsContainer.style.display = 'grid';
+        resultsContainer.innerHTML = '<div style="color:#aaa; grid-column:span 5; text-align:center">Searching...</div>';
+
+        try {
+            // 1. Search for icons
+            const req = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=15`);
+            const res = await req.json();
+
+            resultsContainer.innerHTML = '';
+            
+            if(!res.icons || res.icons.length === 0) {
+                resultsContainer.innerHTML = '<div style="color:#aaa; grid-column:span 5; text-align:center">No icons found</div>';
+                return;
+            }
+
+            // 2. Render buttons
+            res.icons.forEach(iconName => {
+                const btn = document.createElement('div');
+                btn.className = 'icon-result';
+                // Use the API to generate a preview URL
+                const iconUrl = `https://api.iconify.design/${iconName}.svg`;
+                btn.innerHTML = `<img src="${iconUrl}">`;
+                
+                btn.onclick = async () => {
+                    // Visual feedback
+                    document.querySelectorAll('.icon-result').forEach(b => b.style.borderColor = '#555');
+                    btn.style.borderColor = '#007AFF';
+                    btn.style.background = '#007AFF';
+
+                    // 3. Fetch the actual SVG code to save it permanently
+                    try {
+                        const svgReq = await fetch(iconUrl);
+                        const svgText = await svgReq.text();
+                        // Convert SVG text to Base64 Data URI
+                        selectedIconData = "data:image/svg+xml;base64," + btoa(svgText);
+                    } catch(e) {
+                        console.error(e);
+                        alert("Could not load icon data");
+                    }
+                };
+                resultsContainer.appendChild(btn);
+            });
+
+        } catch(e) {
+            resultsContainer.innerHTML = '<div style="color:#f55; grid-column:span 5; text-align:center">Error searching icons</div>';
+        }
     };
 
     // --- Data Export / Import ---
@@ -407,75 +495,46 @@ const app = (() => {
     const importData = (input) => {
         const file = input.files[0];
         if (!file) return;
-        
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const imported = JSON.parse(e.target.result);
-                if (!imported.root || !imported.folders) {
-                    throw new Error("Invalid backup file format");
-                }
-                if(confirm("This will overwrite your current links. Continue?")) {
+                if (!imported.root || !imported.folders) throw new Error("Invalid format");
+                if(confirm("Overwrite current links?")) {
                     data = imported;
                     localStorage.setItem('speedDialData', JSON.stringify(data));
-                    alert("Import successful! Reloading...");
                     location.reload();
                 }
-            } catch (err) {
-                alert("Error importing file: " + err.message);
-            }
+            } catch (err) { alert("Error: " + err.message); }
         };
         reader.readAsText(file);
     };
 
-    // --- Weather Logic (Open-Meteo) ---
+    // --- Weather Logic ---
     const fetchWeather = async (forceRefresh = false) => {
         const el = document.getElementById('weather');
-        
         try {
             let lat, lon, locationName;
-
             if (data.city) {
                 const geoReq = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.city)}&count=1&language=en&format=json`);
                 const geoRes = await geoReq.json();
-                
-                if (!geoRes.results || geoRes.results.length === 0) {
-                    el.innerHTML = "🚫 City not found";
-                    return;
-                }
+                if (!geoRes.results || geoRes.results.length === 0) { el.innerHTML = "🚫 City not found"; return; }
                 lat = geoRes.results[0].latitude;
                 lon = geoRes.results[0].longitude;
                 locationName = geoRes.results[0].name;
             } else {
-                if (!navigator.geolocation) {
-                    el.innerHTML = "📍 Location unavailable";
-                    return;
-                }
-                const pos = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
-                });
+                if (!navigator.geolocation) { el.innerHTML = "📍 Location unavailable"; return; }
+                const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject));
                 lat = pos.coords.latitude;
                 lon = pos.coords.longitude;
                 locationName = "My Location";
             }
-
             const weatherReq = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&weathercode=true`);
             const weatherRes = await weatherReq.json();
-            
             const temp = Math.round(weatherRes.current_weather.temperature);
-            const code = weatherRes.current_weather.weathercode;
-            const icon = getWeatherIcon(code);
-
+            const icon = getWeatherIcon(weatherRes.current_weather.weathercode);
             el.innerHTML = `${icon} ${temp}°F • ${locationName}`;
-
-        } catch (err) {
-            console.error(err);
-            if (data.city) {
-                el.innerHTML = "⚠️ Weather Error";
-            } else {
-                el.innerHTML = "📍 Enable GPS or set City";
-            }
-        }
+        } catch (err) { el.innerHTML = data.city ? "⚠️ Weather Error" : "📍 Enable GPS or set City"; }
     };
 
     const getWeatherIcon = (code) => {
@@ -490,22 +549,18 @@ const app = (() => {
     };
 
     const saveCity = () => {
-        const input = document.getElementById('cityInput');
-        data.city = input.value.trim();
-        save();
-        fetchWeather(true);
-        closeModals();
+        data.city = document.getElementById('cityInput').value.trim();
+        save(); fetchWeather(true); closeModals();
     };
 
     // --- Rendering ---
     const render = () => {
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
-        
         const items = currentFolderId ? (data.folders[currentFolderId] || []) : data.root;
-
         const breadcrumbs = document.getElementById('breadcrumbs');
         const folderName = document.getElementById('folder-name');
+
         if (currentFolderId) {
             breadcrumbs.style.display = 'block';
             const parentList = data.root; 
@@ -518,15 +573,12 @@ const app = (() => {
         items.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'card';
-            
-            let iconSrc = item.icon || ''; // Use custom icon if available
+            let iconSrc = item.icon || ''; 
 
             if (!iconSrc) {
                 if (item.type === 'folder') {
-                    // Default Blue Folder
                     iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
                 } else {
-                    // Default Google Favicon
                     try {
                         const domain = new URL(item.url).hostname;
                         iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
@@ -541,26 +593,18 @@ const app = (() => {
                 <img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'">
                 <div class="card-title">${item.name}</div>
             `;
-
             card.onclick = () => {
                 if (isEditMode) return;
-                if (item.type === 'folder') {
-                    openFolder(item.id);
-                } else {
-                    window.location.href = item.url;
-                }
+                if (item.type === 'folder') openFolder(item.id);
+                else window.open(item.url, '_blank');
             };
-
             grid.appendChild(card);
         });
-
         grid.className = isEditMode ? 'grid edit-mode' : 'grid';
     };
 
-    // --- Actions ---
     const openFolder = (id) => { currentFolderId = id; render(); };
     const goHome = () => { currentFolderId = null; render(); };
-
     const deleteItem = (index) => {
         if (!confirm('Delete this item?')) return;
         const list = currentFolderId ? data.folders[currentFolderId] : data.root;
@@ -570,7 +614,6 @@ const app = (() => {
         save();
     };
 
-    // UPDATED: Now supports Custom Icons
     const saveItem = async () => {
         const type = document.getElementById('itemType').value;
         const name = document.getElementById('itemName').value;
@@ -580,17 +623,15 @@ const app = (() => {
         if (!name) return alert('Please enter a name');
         if (type === 'link' && !url) return alert('Please enter a URL');
 
-        // Handle Icon Upload
-        let customIcon = null;
+        // Priority: 1. Uploaded File, 2. Search Result, 3. None (Default)
+        let finalIcon = null;
+
         if (iconInput.files && iconInput.files[0]) {
             const file = iconInput.files[0];
-            if (file.size > 2000000) return alert('Icon too large (<2MB only)');
-            try {
-                customIcon = await readFileAsBase64(file);
-            } catch (e) {
-                console.error("Icon read error", e);
-                return alert("Failed to load icon");
-            }
+            if (file.size > 2000000) return alert('Icon too large (<2MB)');
+            finalIcon = await readFileAsBase64(file);
+        } else if (selectedIconData) {
+            finalIcon = selectedIconData;
         }
 
         const newItem = {
@@ -598,7 +639,7 @@ const app = (() => {
             type,
             name,
             url: type === 'link' ? (url.startsWith('http') ? url : `https://${url}`) : null,
-            icon: customIcon // Save the icon data
+            icon: finalIcon
         };
 
         if (type === 'folder') data.folders[newItem.id] = [];
@@ -607,41 +648,29 @@ const app = (() => {
         save();
         closeModals();
         
-        // Clear inputs
+        // Reset inputs
         document.getElementById('itemName').value = '';
         document.getElementById('itemUrl').value = '';
         document.getElementById('itemIconInput').value = ''; 
+        document.getElementById('iconSearchInput').value = '';
+        document.getElementById('iconResults').style.display = 'none';
+        selectedIconData = null;
     };
 
     const handleBgUpload = async (input) => {
         const file = input.files[0];
         if (!file) return;
-        if (file.size > 12000000) return alert('Image too large (<12MB only)');
-        try {
-            data.bg = await readFileAsBase64(file);
-            save();
-            applyBg();
-        } catch (e) {
-            alert("Failed to load background");
-        }
+        if (file.size > 12000000) return alert('Image too large (<12MB)');
+        try { data.bg = await readFileAsBase64(file); save(); applyBg(); } 
+        catch (e) { alert("Failed to load background"); }
     };
 
-    const applyBg = () => {
-        if (data.bg) document.body.style.backgroundImage = `url('${data.bg}')`;
-    };
-
-    const resetAll = () => {
-        if(confirm("Delete all data?")){
-            localStorage.removeItem('speedDialData');
-            location.reload();
-        }
-    };
-
+    const applyBg = () => { if (data.bg) document.body.style.backgroundImage = `url('${data.bg}')`; };
+    const resetAll = () => { if(confirm("Delete all data?")) { localStorage.removeItem('speedDialData'); location.reload(); }};
     const toggleEditMode = () => { isEditMode = !isEditMode; render(); };
     const openAddModal = () => document.getElementById('addModal').classList.add('active');
     const openSettings = () => document.getElementById('settingsModal').classList.add('active');
     const closeModals = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-    
     const toggleTypeInputs = () => {
         const type = document.getElementById('itemType').value;
         document.getElementById('urlInputGroup').style.display = type === 'folder' ? 'none' : 'block';
@@ -651,7 +680,7 @@ const app = (() => {
         init, saveItem, deleteItem, openFolder, goHome, 
         toggleEditMode, openAddModal, openSettings, closeModals, 
         toggleTypeInputs, handleBgUpload, resetAll,
-        saveCity, fetchWeather, exportData, importData
+        saveCity, fetchWeather, exportData, importData, searchIcons
     };
 })();
 
