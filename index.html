@@ -33,14 +33,12 @@
             margin: 40px auto 20px;
             position: relative;
             border-radius: 30px;
-            padding: 3px; /* Width of the rotating border */
+            padding: 3px;
             overflow: hidden;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            /* Fix for Safari border-radius clipping */
             transform: translateZ(0); 
         }
 
-        /* The Rotating Gradient Layer */
         .search-container::before {
             content: '';
             position: absolute;
@@ -49,28 +47,22 @@
             width: 200%;
             height: 200%;
             background: conic-gradient(
-                #4285F4, 
-                #DB4437, 
-                #F4B400, 
-                #0F9D58, 
-                #4285F4 /* Repeat first color for smooth loop */
+                #4285F4, #DB4437, #F4B400, #0F9D58, #4285F4
             );
             animation: rotate 4s linear infinite;
             z-index: 0;
         }
 
-        @keyframes rotate {
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
 
         .search-bar {
             position: relative;
             z-index: 1;
             width: 100%;
             padding: 15px 25px;
-            border-radius: 28px; /* Must match container minus padding */
+            border-radius: 28px;
             border: none; 
-            background: rgba(30, 30, 30, 0.9); /* Dark bg to block the gradient inside */
+            background: rgba(30, 30, 30, 0.9);
             color: white;
             font-size: 1.1rem;
             backdrop-filter: blur(10px);
@@ -113,7 +105,7 @@
             padding-bottom: 80px;
         }
 
-        /* --- Cards (Links & Folders) --- */
+        /* --- Cards --- */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -177,7 +169,7 @@
 
         @keyframes shake { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
 
-        /* --- Floating Action Buttons --- */
+        /* --- FABs --- */
         .fab-container {
             position: fixed;
             bottom: 20px;
@@ -311,6 +303,12 @@
                 <label>URL</label>
                 <input type="url" id="itemUrl" placeholder="https://youtube.com">
             </div>
+            <div class="form-group">
+                <label>Custom Icon (Optional)</label>
+                <input type="file" id="itemIconInput" accept="image/*">
+                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Upload a custom image for this folder or link.</p>
+            </div>
+
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="app.closeModals()">Cancel</button>
                 <button class="btn btn-primary" onclick="app.saveItem()">Save</button>
@@ -385,6 +383,16 @@ const app = (() => {
         render();
     };
 
+    // --- Helper to read files as Base64 ---
+    const readFileAsBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    };
+
     // --- Data Export / Import ---
     const exportData = () => {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
@@ -407,7 +415,6 @@ const app = (() => {
                 if (!imported.root || !imported.folders) {
                     throw new Error("Invalid backup file format");
                 }
-                
                 if(confirm("This will overwrite your current links. Continue?")) {
                     data = imported;
                     localStorage.setItem('speedDialData', JSON.stringify(data));
@@ -444,11 +451,9 @@ const app = (() => {
                     el.innerHTML = "📍 Location unavailable";
                     return;
                 }
-                
                 const pos = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 });
-                
                 lat = pos.coords.latitude;
                 lon = pos.coords.longitude;
                 locationName = "My Location";
@@ -514,15 +519,20 @@ const app = (() => {
             const card = document.createElement('div');
             card.className = 'card';
             
-            let iconSrc = '';
-            if (item.type === 'folder') {
-                iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
-            } else {
-                try {
-                    const domain = new URL(item.url).hostname;
-                    iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-                } catch (e) {
-                    iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E";
+            let iconSrc = item.icon || ''; // Use custom icon if available
+
+            if (!iconSrc) {
+                if (item.type === 'folder') {
+                    // Default Blue Folder
+                    iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
+                } else {
+                    // Default Google Favicon
+                    try {
+                        const domain = new URL(item.url).hostname;
+                        iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                    } catch (e) {
+                        iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E";
+                    }
                 }
             }
 
@@ -560,19 +570,35 @@ const app = (() => {
         save();
     };
 
-    const saveItem = () => {
+    // UPDATED: Now supports Custom Icons
+    const saveItem = async () => {
         const type = document.getElementById('itemType').value;
         const name = document.getElementById('itemName').value;
         const url = document.getElementById('itemUrl').value;
+        const iconInput = document.getElementById('itemIconInput');
 
         if (!name) return alert('Please enter a name');
         if (type === 'link' && !url) return alert('Please enter a URL');
+
+        // Handle Icon Upload
+        let customIcon = null;
+        if (iconInput.files && iconInput.files[0]) {
+            const file = iconInput.files[0];
+            if (file.size > 2000000) return alert('Icon too large (<2MB only)');
+            try {
+                customIcon = await readFileAsBase64(file);
+            } catch (e) {
+                console.error("Icon read error", e);
+                return alert("Failed to load icon");
+            }
+        }
 
         const newItem = {
             id: Date.now().toString(),
             type,
             name,
-            url: type === 'link' ? (url.startsWith('http') ? url : `https://${url}`) : null
+            url: type === 'link' ? (url.startsWith('http') ? url : `https://${url}`) : null,
+            icon: customIcon // Save the icon data
         };
 
         if (type === 'folder') data.folders[newItem.id] = [];
@@ -581,21 +607,23 @@ const app = (() => {
         save();
         closeModals();
         
+        // Clear inputs
         document.getElementById('itemName').value = '';
         document.getElementById('itemUrl').value = '';
+        document.getElementById('itemIconInput').value = ''; 
     };
 
-    const handleBgUpload = (input) => {
+    const handleBgUpload = async (input) => {
         const file = input.files[0];
         if (!file) return;
         if (file.size > 12000000) return alert('Image too large (<12MB only)');
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            data.bg = reader.result;
+        try {
+            data.bg = await readFileAsBase64(file);
             save();
             applyBg();
-        };
-        reader.readAsDataURL(file);
+        } catch (e) {
+            alert("Failed to load background");
+        }
     };
 
     const applyBg = () => {
