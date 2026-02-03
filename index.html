@@ -512,7 +512,7 @@ const app = (() => {
     const handleBgUpload = (input) => {
         const file = input.files[0];
         if (!file) return;
-        if (file.size > 2000000) return alert('Image too large (<2MB only)');
+        if (file.size > 12000000) return alert('Image too large (<12MB only)');
         const reader = new FileReader();
         reader.onloadend = () => {
             data.bg = reader.result;
