@@ -30,7 +30,7 @@
         /* --- Search Bar --- */
         .search-container {
             max-width: 600px;
-            margin: 40px auto 40px;
+            margin: 40px auto 20px; /* Reduced bottom margin for weather */
             position: relative;
         }
 
@@ -45,6 +45,32 @@
             backdrop-filter: blur(10px);
             outline: none;
             box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        /* --- Weather Widget --- */
+        .weather-widget {
+            max-width: 300px;
+            margin: 0 auto 40px;
+            text-align: center;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        
+        .weather-widget:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: scale(1.02);
         }
 
         /* --- Grid Layout --- */
@@ -87,7 +113,7 @@
             height: 48px;
             border-radius: 8px;
             margin-bottom: 10px;
-            object-fit: contain; /* Changed to contain for better folder fit */
+            object-fit: contain;
         }
 
         .card-title {
@@ -111,7 +137,7 @@
             width: 20px;
             height: 20px;
             font-size: 12px;
-            display: none; /* Hidden by default */
+            display: none;
             cursor: pointer;
             z-index: 10;
         }
@@ -196,7 +222,7 @@
         .btn-primary { background: #007AFF; color: white; }
         .btn-secondary { background: #444; color: white; }
 
-        /* --- Folder Breadcrumbs --- */
+        /* --- Breadcrumbs --- */
         .breadcrumbs {
             max-width: 1000px;
             margin: 0 auto 20px;
@@ -215,6 +241,10 @@
         <form action="https://www.google.com/search" method="GET">
             <input type="text" name="q" class="search-bar" placeholder="Search Google..." autocomplete="off">
         </form>
+    </div>
+
+    <div id="weather" class="weather-widget" onclick="app.fetchWeather(true)">
+        <span>Loading Weather...</span>
     </div>
 
     <div class="breadcrumbs" id="breadcrumbs" style="display: none;">
@@ -258,15 +288,26 @@
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <h2>Settings</h2>
+            
             <div class="form-group">
                 <label>Background Image</label>
                 <input type="file" id="bgInput" accept="image/*" onchange="app.handleBgUpload(this)">
                 <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Images are saved to your browser storage.</p>
             </div>
+
             <div class="form-group">
-                <label>Reset</label>
-                <button class="btn btn-secondary" style="background: #a33; width: 100%" onclick="app.resetAll()">Delete All Data</button>
+                <label>Weather Location (City)</label>
+                <input type="text" id="cityInput" placeholder="Leave empty to use GPS">
+                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveCity()">Update Weather</button>
             </div>
+
+            <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+
+            <div class="form-group">
+                <label>Danger Zone</label>
+                <button class="btn btn-secondary" style="background: #a33; width: 100%" onclick="app.resetAll()">Reset All Data</button>
+            </div>
+            
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="app.closeModals()">Close</button>
             </div>
@@ -279,16 +320,19 @@ const app = (() => {
     let data = JSON.parse(localStorage.getItem('speedDialData')) || {
         root: [],
         folders: {},
-        bg: null
+        bg: null,
+        city: '' // New: Stores city name
     };
     
-    let currentFolderId = null; // null = root
+    let currentFolderId = null; 
     let isEditMode = false;
 
     // --- Core Functions ---
     const init = () => {
         applyBg();
         render();
+        fetchWeather();
+        document.getElementById('cityInput').value = data.city || '';
     };
 
     const save = () => {
@@ -296,20 +340,93 @@ const app = (() => {
         render();
     };
 
+    // --- Weather Logic (Open-Meteo) ---
+    const fetchWeather = async (forceRefresh = false) => {
+        const el = document.getElementById('weather');
+        
+        try {
+            let lat, lon, locationName;
+
+            // 1. Check if user typed a city
+            if (data.city) {
+                const geoReq = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.city)}&count=1&language=en&format=json`);
+                const geoRes = await geoReq.json();
+                
+                if (!geoRes.results || geoRes.results.length === 0) {
+                    el.innerHTML = "🚫 City not found";
+                    return;
+                }
+                lat = geoRes.results[0].latitude;
+                lon = geoRes.results[0].longitude;
+                locationName = geoRes.results[0].name;
+            } else {
+                // 2. Use Browser GPS
+                if (!navigator.geolocation) {
+                    el.innerHTML = "📍 Location unavailable";
+                    return;
+                }
+                
+                // Wrap geolocation in a promise
+                const pos = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+                
+                lat = pos.coords.latitude;
+                lon = pos.coords.longitude;
+                locationName = "My Location";
+            }
+
+            // 3. Fetch Forecast (Fahrenheit)
+            const weatherReq = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&weathercode=true`);
+            const weatherRes = await weatherReq.json();
+            
+            const temp = Math.round(weatherRes.current_weather.temperature);
+            const code = weatherRes.current_weather.weathercode;
+            const icon = getWeatherIcon(code);
+
+            el.innerHTML = `${icon} ${temp}°F • ${locationName}`;
+
+        } catch (err) {
+            console.error(err);
+            if (data.city) {
+                el.innerHTML = "⚠️ Weather Error";
+            } else {
+                el.innerHTML = "📍 Enable GPS or set City";
+            }
+        }
+    };
+
+    const getWeatherIcon = (code) => {
+        // WMO Weather interpretation codes
+        if (code === 0) return '☀️';
+        if (code >= 1 && code <= 3) return '☁️';
+        if (code >= 45 && code <= 48) return '🌫️';
+        if (code >= 51 && code <= 67) return '🌧️';
+        if (code >= 71 && code <= 77) return '❄️';
+        if (code >= 80 && code <= 82) return '🌧️';
+        if (code >= 95) return '⛈️';
+        return '🌡️';
+    };
+
+    const saveCity = () => {
+        const input = document.getElementById('cityInput');
+        data.city = input.value.trim();
+        save();
+        fetchWeather(true);
+        closeModals();
+    };
+
     // --- Rendering ---
     const render = () => {
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
         
-        // Decide which list to show (Root or a specific Folder)
         const items = currentFolderId ? (data.folders[currentFolderId] || []) : data.root;
 
-        // Update Breadcrumbs
         const breadcrumbs = document.getElementById('breadcrumbs');
         const folderName = document.getElementById('folder-name');
         if (currentFolderId) {
             breadcrumbs.style.display = 'block';
-            // Find folder name from root list
             const parentList = data.root; 
             const folderObj = parentList.find(i => i.id === currentFolderId);
             folderName.innerText = folderObj ? ` > 📁 ${folderObj.name}` : ' > Folder';
@@ -317,18 +434,14 @@ const app = (() => {
             breadcrumbs.style.display = 'none';
         }
 
-        // Generate Cards
         items.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'card';
             
-            // Icon Logic
             let iconSrc = '';
             if (item.type === 'folder') {
-                // FIXED: URL Encoded SVG to prevent "text spill" bug and made it Blue
                 iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
             } else {
-                // Use Google's favicon service
                 try {
                     const domain = new URL(item.url).hostname;
                     iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
@@ -343,9 +456,8 @@ const app = (() => {
                 <div class="card-title">${item.name}</div>
             `;
 
-            // Click Handler
             card.onclick = () => {
-                if (isEditMode) return; // Prevent clicks while editing
+                if (isEditMode) return;
                 if (item.type === 'folder') {
                     openFolder(item.id);
                 } else {
@@ -356,31 +468,18 @@ const app = (() => {
             grid.appendChild(card);
         });
 
-        // Toggle shake effect
         grid.className = isEditMode ? 'grid edit-mode' : 'grid';
     };
 
     // --- Actions ---
-    const openFolder = (id) => {
-        currentFolderId = id;
-        render();
-    };
-
-    const goHome = () => {
-        currentFolderId = null;
-        render();
-    };
+    const openFolder = (id) => { currentFolderId = id; render(); };
+    const goHome = () => { currentFolderId = null; render(); };
 
     const deleteItem = (index) => {
         if (!confirm('Delete this item?')) return;
         const list = currentFolderId ? data.folders[currentFolderId] : data.root;
         const item = list[index];
-        
-        // If deleting a folder, clean up its contents from storage
-        if (item.type === 'folder' && data.folders[item.id]) {
-            delete data.folders[item.id];
-        }
-
+        if (item.type === 'folder' && data.folders[item.id]) delete data.folders[item.id];
         list.splice(index, 1);
         save();
     };
@@ -400,31 +499,20 @@ const app = (() => {
             url: type === 'link' ? (url.startsWith('http') ? url : `https://${url}`) : null
         };
 
-        if (type === 'folder') {
-            data.folders[newItem.id] = [];
-        }
-
+        if (type === 'folder') data.folders[newItem.id] = [];
         const targetList = currentFolderId ? data.folders[currentFolderId] : data.root;
         targetList.push(newItem);
-        
         save();
         closeModals();
         
-        // Clear inputs
         document.getElementById('itemName').value = '';
         document.getElementById('itemUrl').value = '';
     };
 
-    // --- Background Handling ---
     const handleBgUpload = (input) => {
         const file = input.files[0];
         if (!file) return;
-
-        if (file.size > 12000000) {
-            alert('Image is too large! Please choose an image under 12MB.');
-            return;
-        }
-
+        if (file.size > 2000000) return alert('Image too large (<2MB only)');
         const reader = new FileReader();
         reader.onloadend = () => {
             data.bg = reader.result;
@@ -435,29 +523,20 @@ const app = (() => {
     };
 
     const applyBg = () => {
-        if (data.bg) {
-            document.body.style.backgroundImage = `url('${data.bg}')`;
-        }
+        if (data.bg) document.body.style.backgroundImage = `url('${data.bg}')`;
     };
 
     const resetAll = () => {
-        if(confirm("Are you sure? This deletes all links and wallpapers.")){
+        if(confirm("Delete all data?")){
             localStorage.removeItem('speedDialData');
             location.reload();
         }
     };
 
-    // --- UI Logic ---
-    const toggleEditMode = () => {
-        isEditMode = !isEditMode;
-        render();
-    };
-
+    const toggleEditMode = () => { isEditMode = !isEditMode; render(); };
     const openAddModal = () => document.getElementById('addModal').classList.add('active');
     const openSettings = () => document.getElementById('settingsModal').classList.add('active');
-    const closeModals = () => {
-        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-    };
+    const closeModals = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
     
     const toggleTypeInputs = () => {
         const type = document.getElementById('itemType').value;
@@ -467,11 +546,11 @@ const app = (() => {
     return { 
         init, saveItem, deleteItem, openFolder, goHome, 
         toggleEditMode, openAddModal, openSettings, closeModals, 
-        toggleTypeInputs, handleBgUpload, resetAll 
+        toggleTypeInputs, handleBgUpload, resetAll,
+        saveCity, fetchWeather
     };
 })();
 
-// Start the app
 app.init();
 </script>
 </body>
