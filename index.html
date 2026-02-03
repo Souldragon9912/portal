@@ -26,12 +26,36 @@
             background-attachment: fixed;
             color: var(--text-color);
             transition: background-image 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center everything vertically */
+        }
+
+        /* --- CLOCK WIDGET (New) --- */
+        .clock-container {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .clock-time {
+            font-size: 4rem;
+            font-weight: 200;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .clock-date {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-weight: 400;
         }
 
         /* --- Animated Google Search Bar --- */
         .search-container {
+            width: 100%;
             max-width: 600px;
-            margin: 40px auto 20px;
+            margin: 20px auto;
             position: relative;
             border-radius: 30px;
             padding: 3px;
@@ -56,19 +80,44 @@
 
         @keyframes rotate { 100% { transform: rotate(360deg); } }
 
-        .search-bar {
+        .search-wrapper {
             position: relative;
             z-index: 1;
-            width: 100%;
-            padding: 15px 25px;
-            border-radius: 28px;
-            border: none; 
             background: rgba(30, 30, 30, 0.9);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            padding: 5px 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Search Engine Switcher Icon */
+        .search-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            background: #444;
+            color: white;
+            user-select: none;
+        }
+        .search-icon:hover { transform: scale(1.1); background: #555; }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 5px;
+            border: none; 
+            background: transparent;
             color: white;
             font-size: 1.1rem;
-            backdrop-filter: blur(10px);
             outline: none;
-            text-align: center;
         }
 
         /* --- Weather Widget --- */
@@ -98,6 +147,7 @@
 
         /* --- Grid Layout --- */
         .grid {
+            width: 100%;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 20px;
@@ -124,7 +174,7 @@
             position: relative;
             padding: 10px;
             text-align: center;
-            user-select: none; /* Prevent text selection while dragging */
+            user-select: none;
             -webkit-user-select: none;
         }
 
@@ -139,7 +189,7 @@
             border-radius: 8px;
             margin-bottom: 10px;
             object-fit: contain;
-            pointer-events: none; /* Helps with drag handling */
+            pointer-events: none;
         }
 
         .card-title {
@@ -153,7 +203,6 @@
             pointer-events: none;
         }
 
-        /* Delete Button */
         .delete-btn {
             position: absolute;
             top: 5px;
@@ -171,23 +220,11 @@
         }
 
         .edit-mode .delete-btn { display: block; }
-        
-        /* Wiggle Animation for Edit Mode */
-        .edit-mode .card { 
-            animation: shake 0.3s infinite alternate; 
-            cursor: grab;
-        }
-        .edit-mode .card:active {
-            cursor: grabbing;
-        }
+        .edit-mode .card { animation: shake 0.3s infinite alternate; cursor: grab; }
+        .edit-mode .card:active { cursor: grabbing; }
 
         @keyframes shake { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
-
-        /* Drag Ghost (The item being dragged) */
-        .sortable-ghost {
-            opacity: 0.4;
-            background: rgba(255, 255, 255, 0.1);
-        }
+        .sortable-ghost { opacity: 0.4; background: rgba(255, 255, 255, 0.1); }
 
         /* --- FABs --- */
         .fab-container {
@@ -216,13 +253,8 @@
 
         .fab.settings { background: #333; }
         .fab.edit { background: #ff9500; }
-        
-        /* Active state for Edit button */
-        .fab.edit.active { 
-            background: white; 
-            color: #ff9500; 
-            border: 2px solid #ff9500;
-        }
+        .fab.notes { background: #ffd60a; color: #333; }
+        .fab.edit.active { background: white; color: #ff9500; border: 2px solid #ff9500; }
 
         /* --- Modals --- */
         .modal {
@@ -262,7 +294,21 @@
             font-size: 1rem;
         }
 
-        /* --- Icon Search Styles --- */
+        .notes-area {
+            width: 100%;
+            height: 300px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+        }
+        .notes-area:focus { border-color: #ffd60a; }
+
         .icon-search-results {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -300,9 +346,9 @@
         .btn-primary { background: #007AFF; color: white; }
         .btn-secondary { background: #444; color: white; }
 
-        /* --- Breadcrumbs --- */
         .breadcrumbs {
             max-width: 1000px;
+            width: 100%;
             margin: 0 auto 20px;
             padding: 0 10px;
             font-size: 1.2rem;
@@ -315,9 +361,17 @@
 </head>
 <body>
 
+    <div class="clock-container">
+        <div class="clock-time" id="clockTime">00:00</div>
+        <div class="clock-date" id="clockDate">Loading Date...</div>
+    </div>
+
     <div class="search-container">
-        <form action="https://www.google.com/search" method="GET" target="_blank" onsubmit="setTimeout(() => this.reset(), 500)">
-            <input type="text" name="q" class="search-bar" placeholder="Search Google..." autocomplete="off">
+        <form id="searchForm" action="https://www.google.com/search" method="GET" target="_blank" onsubmit="setTimeout(() => this.reset(), 500)">
+            <div class="search-wrapper">
+                <div class="search-icon" id="searchIcon" onclick="app.toggleSearchEngine()" title="Switch Search Engine">G</div>
+                <input type="text" name="q" id="searchInput" class="search-bar" placeholder="Search Google..." autocomplete="off">
+            </div>
         </form>
     </div>
 
@@ -329,10 +383,10 @@
         <span class="breadcrumb-item" onclick="app.goHome()">🏠 Home</span> <span id="folder-name"></span>
     </div>
 
-    <div class="grid" id="grid">
-        </div>
+    <div class="grid" id="grid"></div>
 
     <div class="fab-container">
+        <button class="fab notes" onclick="app.openNotes()" title="Notes">📝</button>
         <button id="editBtn" class="fab edit" onclick="app.toggleEditMode()" title="Edit/Delete">✎</button>
         <button class="fab settings" onclick="app.openSettings()" title="Settings">⚙️</button>
         <button class="fab" onclick="app.openAddModal()" title="Add New">+</button>
@@ -356,7 +410,6 @@
                 <label>URL</label>
                 <input type="url" id="itemUrl" placeholder="https://youtube.com">
             </div>
-            
             <div class="form-group">
                 <label>Icon</label>
                 <div style="display: flex; gap: 5px; margin-bottom: 5px;">
@@ -368,7 +421,6 @@
                 <input type="file" id="itemIconInput" accept="image/*">
                 <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Upload your own image</p>
             </div>
-
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="app.closeModals()">Cancel</button>
                 <button class="btn btn-primary" onclick="app.saveItem()">Save</button>
@@ -376,24 +428,31 @@
         </div>
     </div>
 
+    <div class="modal" id="notesModal">
+        <div class="modal-content">
+            <h2>Notepad</h2>
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Auto-saves as you type.</p>
+            <textarea id="notesInput" class="notes-area" placeholder="Type your notes here..." oninput="app.saveNotes()"></textarea>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="app.closeModals()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <h2>Settings</h2>
-            
             <div class="form-group">
                 <label>Background Image</label>
                 <input type="file" id="bgInput" accept="image/*" onchange="app.handleBgUpload(this)">
                 <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Images are saved to your browser storage.</p>
             </div>
-
             <div class="form-group">
                 <label>Weather Location (City)</label>
                 <input type="text" id="cityInput" placeholder="Leave empty to use GPS">
                 <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveCity()">Update Weather</button>
             </div>
-
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
-
             <div class="form-group">
                 <label>Backup & Restore</label>
                 <div class="btn-group" style="justify-content: space-between; margin-top: 5px;">
@@ -402,14 +461,11 @@
                     <input type="file" id="importFile" style="display: none" accept=".json" onchange="app.importData(this)">
                 </div>
             </div>
-
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
-
             <div class="form-group">
                 <label>Danger Zone</label>
                 <button class="btn btn-secondary" style="background: #a33; width: 100%" onclick="app.resetAll()">Reset All Data</button>
             </div>
-            
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="app.closeModals()">Close</button>
             </div>
@@ -418,34 +474,35 @@
 
 <script>
 const app = (() => {
-    // --- State ---
     let data = JSON.parse(localStorage.getItem('speedDialData')) || {
-        root: [],
-        folders: {},
-        bg: null,
-        city: '' 
+        root: [], folders: {}, bg: null, city: '', notes: ''
     };
-    
     let currentFolderId = null; 
     let isEditMode = false;
     let selectedIconData = null;
-    let sortableInstance = null; // Store the sortable instance
+    let sortableInstance = null;
+    
+    // Search Engine State
+    const engines = [
+        { name: 'Google', url: 'https://www.google.com/search', icon: 'G', placeholder: 'Search Google...' },
+        { name: 'DuckDuckGo', url: 'https://duckduckgo.com/', icon: 'D', placeholder: 'Search DuckDuckGo...' },
+        { name: 'YouTube', url: 'https://www.youtube.com/results', icon: 'Y', placeholder: 'Search YouTube...' },
+        { name: 'Reddit', url: 'https://www.reddit.com/search', icon: 'R', placeholder: 'Search Reddit...' }
+    ];
+    let currentEngineIndex = 0;
 
-    // --- Core Functions ---
     const init = () => {
         applyBg();
         render();
         fetchWeather();
+        startClock(); // Start Clock
         document.getElementById('cityInput').value = data.city || '';
+        document.getElementById('notesInput').value = data.notes || '';
         
-        // Initialize Sortable (Disabled by default)
         const grid = document.getElementById('grid');
         sortableInstance = Sortable.create(grid, {
-            animation: 150,
-            disabled: true, // Only enabled in edit mode
-            ghostClass: 'sortable-ghost',
+            animation: 150, disabled: true, ghostClass: 'sortable-ghost',
             onEnd: function (evt) {
-                // Reorder Data
                 const list = currentFolderId ? data.folders[currentFolderId] : data.root;
                 const item = list.splice(evt.oldIndex, 1)[0];
                 list.splice(evt.newIndex, 0, item);
@@ -454,192 +511,163 @@ const app = (() => {
         });
     };
 
-    const save = () => {
-        localStorage.setItem('speedDialData', JSON.stringify(data));
-        render(); // Re-render to ensure DOM matches state
+    const save = () => { localStorage.setItem('speedDialData', JSON.stringify(data)); render(); };
+
+    // --- CLOCK Logic ---
+    const startClock = () => {
+        const update = () => {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            
+            document.getElementById('clockTime').innerText = `${hours}:${minutes} ${ampm}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('clockDate').innerText = now.toLocaleDateString(undefined, options);
+        };
+        update();
+        setInterval(update, 1000);
     };
 
-    const readFileAsBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
+    // --- SEARCH Logic ---
+    const toggleSearchEngine = () => {
+        currentEngineIndex = (currentEngineIndex + 1) % engines.length;
+        const engine = engines[currentEngineIndex];
+        
+        // Update Form
+        const form = document.getElementById('searchForm');
+        form.action = engine.url;
+        
+        // Update Icon
+        const icon = document.getElementById('searchIcon');
+        icon.innerText = engine.icon;
+        
+        // Update Input
+        const input = document.getElementById('searchInput');
+        input.placeholder = engine.placeholder;
+        
+        // Special handling for YouTube/Reddit param names if needed (Google/DDG/Reddit use 'q', YT uses 'search_query')
+        if (engine.name === 'YouTube') {
+            input.name = 'search_query';
+        } else {
+            input.name = 'q';
+        }
     };
 
-    // --- Icon Search (Iconify) ---
+    const readFileAsBase64 = (file) => new Promise((res, rej) => {
+        const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
+    });
+
+    // --- Standard Functions (Same as before) ---
+    const openNotes = () => document.getElementById('notesModal').classList.add('active');
+    const saveNotes = () => { data.notes = document.getElementById('notesInput').value; localStorage.setItem('speedDialData', JSON.stringify(data)); };
+    
     const searchIcons = async () => {
         const query = document.getElementById('iconSearchInput').value.trim();
         if(!query) return;
-        const resultsContainer = document.getElementById('iconResults');
-        resultsContainer.style.display = 'grid';
-        resultsContainer.innerHTML = '<div style="color:#aaa; grid-column:span 5; text-align:center">Searching...</div>';
+        const c = document.getElementById('iconResults'); c.style.display = 'grid'; c.innerHTML = '...';
         try {
             const req = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=15`);
             const res = await req.json();
-            resultsContainer.innerHTML = '';
-            if(!res.icons || res.icons.length === 0) {
-                resultsContainer.innerHTML = '<div style="color:#aaa; grid-column:span 5; text-align:center">No icons found</div>';
-                return;
-            }
-            res.icons.forEach(iconName => {
-                const btn = document.createElement('div');
-                btn.className = 'icon-result';
-                const iconUrl = `https://api.iconify.design/${iconName}.svg`;
-                btn.innerHTML = `<img src="${iconUrl}">`;
-                btn.onclick = async () => {
-                    document.querySelectorAll('.icon-result').forEach(b => b.style.borderColor = '#555');
-                    btn.style.borderColor = '#007AFF';
-                    btn.style.background = '#007AFF';
-                    try {
-                        const svgReq = await fetch(iconUrl);
-                        const svgText = await svgReq.text();
-                        selectedIconData = "data:image/svg+xml;base64," + btoa(svgText);
-                    } catch(e) { console.error(e); }
+            c.innerHTML = '';
+            res.icons.forEach(n => {
+                const b = document.createElement('div'); b.className = 'icon-result';
+                const u = `https://api.iconify.design/${n}.svg`;
+                b.innerHTML = `<img src="${u}">`;
+                b.onclick = async () => {
+                    document.querySelectorAll('.icon-result').forEach(x => x.style.borderColor = '#555');
+                    b.style.borderColor = '#007AFF'; b.style.background = '#007AFF';
+                    const t = await (await fetch(u)).text();
+                    selectedIconData = "data:image/svg+xml;base64," + btoa(t);
                 };
-                resultsContainer.appendChild(btn);
+                c.appendChild(b);
             });
-        } catch(e) { resultsContainer.innerHTML = '<div style="color:#f55; grid-column:span 5; text-align:center">Error</div>'; }
+        } catch(e) { c.innerHTML = 'Error'; }
     };
 
-    // --- Data Export/Import ---
     const exportData = () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-        const anchor = document.createElement('a');
-        anchor.setAttribute("href", dataStr);
-        anchor.setAttribute("download", "speed-dial-backup.json");
-        document.body.appendChild(anchor); anchor.click(); anchor.remove();
+        const s = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const a = document.createElement('a'); a.href = s; a.download = "backup.json"; document.body.appendChild(a); a.click(); a.remove();
     };
 
     const importData = (input) => {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
+        const f = input.files[0]; if (!f) return;
+        const r = new FileReader(); r.onload = (e) => {
             try {
-                const imported = JSON.parse(e.target.result);
-                if (!imported.root) throw new Error("Invalid format");
-                if(confirm("Overwrite current links?")) {
-                    data = imported;
-                    localStorage.setItem('speedDialData', JSON.stringify(data));
-                    location.reload();
-                }
-            } catch (err) { alert("Error: " + err.message); }
-        };
-        reader.readAsText(file);
+                const d = JSON.parse(e.target.result); if (!d.root) throw new Error();
+                if(confirm("Overwrite?")) { data = d; localStorage.setItem('speedDialData', JSON.stringify(data)); location.reload(); }
+            } catch (err) { alert("Error"); }
+        }; r.readAsText(f);
     };
 
-    // --- Weather ---
-    const fetchWeather = async (forceRefresh = false) => {
+    const fetchWeather = async () => {
         const el = document.getElementById('weather');
         try {
             let lat, lon, name;
             if (data.city) {
-                const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.city)}&count=1&language=en&format=json`);
-                const geoRes = await geo.json();
-                if (!geoRes.results) { el.innerHTML = "🚫 City not found"; return; }
-                lat = geoRes.results[0].latitude; lon = geoRes.results[0].longitude; name = geoRes.results[0].name;
+                const g = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.city)}&count=1&language=en&format=json`)).json();
+                if (!g.results) { el.innerHTML = "🚫 City not found"; return; }
+                lat = g.results[0].latitude; lon = g.results[0].longitude; name = g.results[0].name;
             } else {
                 if (!navigator.geolocation) { el.innerHTML = "📍 Location unavailable"; return; }
                 const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
                 lat = pos.coords.latitude; lon = pos.coords.longitude; name = "My Location";
             }
-            const wReq = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&weathercode=true`);
-            const wRes = await wReq.json();
-            el.innerHTML = `${getWeatherIcon(wRes.current_weather.weathercode)} ${Math.round(wRes.current_weather.temperature)}°F • ${name}`;
-        } catch (err) { el.innerHTML = data.city ? "⚠️ Weather Error" : "📍 Enable GPS or set City"; }
+            const w = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&weathercode=true`)).json();
+            el.innerHTML = `${getWeatherIcon(w.current_weather.weathercode)} ${Math.round(w.current_weather.temperature)}°F • ${name}`;
+        } catch (err) { el.innerHTML = data.city ? "⚠️ Weather Error" : "📍 Enable GPS"; }
     };
 
-    const getWeatherIcon = (code) => {
-        if (code === 0) return '☀️';
-        if (code <= 3) return '☁️';
-        if (code <= 48) return '🌫️';
-        if (code <= 67) return '🌧️';
-        if (code <= 77) return '❄️';
-        if (code <= 82) return '🌧️';
-        return '⛈️';
-    };
+    const getWeatherIcon = (c) => (c===0?'☀️':c<=3?'☁️':c<=48?'🌫️':c<=67?'🌧️':c<=77?'❄️':c<=82?'🌧️':'⛈️');
+    const saveCity = () => { data.city = document.getElementById('cityInput').value.trim(); save(); fetchWeather(); closeModals(); };
 
-    const saveCity = () => { data.city = document.getElementById('cityInput').value.trim(); save(); fetchWeather(true); closeModals(); };
-
-    // --- Rendering ---
     const render = () => {
-        const grid = document.getElementById('grid');
-        // NOTE: SortableJS requires we don't nuke innerHTML completely if we want to keep state, 
-        // but for this simple app, re-rendering is safer for data consistency.
-        grid.innerHTML = '';
-        
+        const grid = document.getElementById('grid'); grid.innerHTML = '';
         const items = currentFolderId ? (data.folders[currentFolderId] || []) : data.root;
-        
-        // Update Breadcrumbs
-        const breadcrumbs = document.getElementById('breadcrumbs');
-        const folderName = document.getElementById('folder-name');
+        const bc = document.getElementById('breadcrumbs');
+        const fn = document.getElementById('folder-name');
+
         if (currentFolderId) {
-            breadcrumbs.style.display = 'block';
+            bc.style.display = 'block';
             const f = data.root.find(i => i.id === currentFolderId);
-            folderName.innerText = f ? ` > 📁 ${f.name}` : ' > Folder';
-        } else {
-            breadcrumbs.style.display = 'none';
-        }
+            fn.innerText = f ? ` > 📁 ${f.name}` : ' > Folder';
+        } else { bc.style.display = 'none'; }
 
         items.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            // Set data-id for SortableJS (optional but good practice)
-            card.setAttribute('data-id', item.id);
-            
+            const card = document.createElement('div'); card.className = 'card'; card.setAttribute('data-id', item.id);
             let iconSrc = item.icon || '';
             if (!iconSrc) {
-                if (item.type === 'folder') {
-                    iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
-                } else {
-                    try {
-                        const domain = new URL(item.url).hostname;
-                        iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-                    } catch (e) {
-                        iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E";
-                    }
+                if (item.type === 'folder') iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
+                else {
+                    try { const d = new URL(item.url).hostname; iconSrc = `https://www.google.com/s2/favicons?domain=${d}&sz=64`; } 
+                    catch (e) { iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E"; }
                 }
             }
-
-            card.innerHTML = `
-                <button class="delete-btn" onclick="event.stopPropagation(); app.deleteItem(${index})">×</button>
-                <img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'">
-                <div class="card-title">${item.name}</div>
-            `;
-            
+            card.innerHTML = `<button class="delete-btn" onclick="event.stopPropagation(); app.deleteItem(${index})">×</button><img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'"><div class="card-title">${item.name}</div>`;
             card.onclick = (e) => {
-                if (isEditMode) {
-                    e.preventDefault(); // Prevent clicks during edit
-                } else {
-                    if (item.type === 'folder') openFolder(item.id);
-                    else window.open(item.url, '_blank');
-                }
+                if (isEditMode) e.preventDefault();
+                else if (item.type === 'folder') openFolder(item.id);
+                else window.open(item.url, '_blank');
             };
             grid.appendChild(card);
         });
-
-        // Update Edit Mode UI
+        
         grid.className = isEditMode ? 'grid edit-mode' : 'grid';
         document.getElementById('editBtn').classList.toggle('active', isEditMode);
-        
-        // Update Sortable State
-        if(sortableInstance) {
-            sortableInstance.option("disabled", !isEditMode);
-        }
+        if(sortableInstance) sortableInstance.option("disabled", !isEditMode);
     };
 
     const openFolder = (id) => { currentFolderId = id; render(); };
     const goHome = () => { currentFolderId = null; render(); };
-    
     const deleteItem = (index) => {
-        if (!confirm('Delete this item?')) return;
+        if (!confirm('Delete?')) return;
         const list = currentFolderId ? data.folders[currentFolderId] : data.root;
         const item = list[index];
         if (item.type === 'folder' && data.folders[item.id]) delete data.folders[item.id];
-        list.splice(index, 1);
-        save();
+        list.splice(index, 1); save();
     };
 
     const saveItem = async () => {
@@ -647,74 +675,40 @@ const app = (() => {
         const name = document.getElementById('itemName').value;
         const url = document.getElementById('itemUrl').value;
         const iconInput = document.getElementById('itemIconInput');
-
-        if (!name) return alert('Please enter a name');
-        if (type === 'link' && !url) return alert('Please enter a URL');
-
+        if (!name) return alert('Name required');
+        if (type === 'link' && !url) return alert('URL required');
+        
         let finalIcon = null;
         if (iconInput.files && iconInput.files[0]) {
-            const file = iconInput.files[0];
-            if (file.size > 2000000) return alert('Icon too large (<2MB)');
-            finalIcon = await readFileAsBase64(file);
-        } else if (selectedIconData) {
-            finalIcon = selectedIconData;
-        }
+            if (iconInput.files[0].size > 2000000) return alert('Icon too large');
+            finalIcon = await readFileAsBase64(iconInput.files[0]);
+        } else if (selectedIconData) finalIcon = selectedIconData;
 
-        const newItem = {
-            id: Date.now().toString(),
-            type,
-            name,
-            url: type === 'link' ? (url.startsWith('http') ? url : `https://${url}`) : null,
-            icon: finalIcon
-        };
-
+        const newItem = { id: Date.now().toString(), type, name, url: type === 'link' ? (url.startsWith('http') ? url : `https://${url}`) : null, icon: finalIcon };
         if (type === 'folder') data.folders[newItem.id] = [];
-        const targetList = currentFolderId ? data.folders[currentFolderId] : data.root;
-        targetList.push(newItem);
-        save();
-        closeModals();
-        
-        // Reset
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemUrl').value = '';
-        document.getElementById('itemIconInput').value = ''; 
-        document.getElementById('iconSearchInput').value = '';
-        document.getElementById('iconResults').style.display = 'none';
-        selectedIconData = null;
+        (currentFolderId ? data.folders[currentFolderId] : data.root).push(newItem);
+        save(); closeModals();
+        document.getElementById('itemName').value = ''; document.getElementById('itemUrl').value = ''; 
+        document.getElementById('itemIconInput').value = ''; document.getElementById('iconSearchInput').value = ''; 
+        document.getElementById('iconResults').style.display = 'none'; selectedIconData = null;
     };
 
     const handleBgUpload = async (input) => {
-        const file = input.files[0];
-        if (!file) return;
-        if (file.size > 12000000) return alert('Image too large (<12MB)');
-        try { data.bg = await readFileAsBase64(file); save(); applyBg(); } 
-        catch (e) { alert("Failed to load background"); }
+        if (input.files && input.files[0]) {
+            if (input.files[0].size > 12000000) return alert('Image too large');
+            try { data.bg = await readFileAsBase64(input.files[0]); save(); applyBg(); } catch (e) { alert("Error"); }
+        }
     };
 
     const applyBg = () => { if (data.bg) document.body.style.backgroundImage = `url('${data.bg}')`; };
-    
-    const resetAll = () => { if(confirm("Delete all data?")) { localStorage.removeItem('speedDialData'); location.reload(); }};
-    
-    const toggleEditMode = () => { 
-        isEditMode = !isEditMode; 
-        render(); 
-    };
-    
+    const resetAll = () => { if(confirm("Reset all?")) { localStorage.removeItem('speedDialData'); location.reload(); } };
+    const toggleEditMode = () => { isEditMode = !isEditMode; render(); };
     const openAddModal = () => document.getElementById('addModal').classList.add('active');
     const openSettings = () => document.getElementById('settingsModal').classList.add('active');
     const closeModals = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-    
-    const toggleTypeInputs = () => {
-        const type = document.getElementById('itemType').value;
-        document.getElementById('urlInputGroup').style.display = type === 'folder' ? 'none' : 'block';
-    };
+    const toggleTypeInputs = () => { document.getElementById('urlInputGroup').style.display = document.getElementById('itemType').value === 'folder' ? 'none' : 'block'; };
 
-    return { 
-        init, saveItem, deleteItem, openFolder, goHome, 
-        toggleEditMode, openAddModal, openSettings, closeModals, 
-        toggleTypeInputs, handleBgUpload, resetAll,
-        saveCity, fetchWeather, exportData, importData, searchIcons
-    };
+    return { init, saveItem, deleteItem, openFolder, goHome, toggleEditMode, openAddModal, openSettings, closeModals, toggleTypeInputs, handleBgUpload, resetAll, saveCity, fetchWeather, exportData, importData, searchIcons, openNotes, saveNotes, toggleSearchEngine };
 })();
 
 app.init();
