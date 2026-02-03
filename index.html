@@ -27,24 +27,54 @@
             transition: background-image 0.3s ease;
         }
 
-        /* --- Search Bar --- */
+        /* --- Animated Google Search Bar --- */
         .search-container {
             max-width: 600px;
-            margin: 40px auto 20px; /* Reduced bottom margin for weather */
+            margin: 40px auto 20px;
             position: relative;
+            border-radius: 30px;
+            padding: 3px; /* Width of the rotating border */
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            /* Fix for Safari border-radius clipping */
+            transform: translateZ(0); 
+        }
+
+        /* The Rotating Gradient Layer */
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                #4285F4, 
+                #DB4437, 
+                #F4B400, 
+                #0F9D58, 
+                #4285F4 /* Repeat first color for smooth loop */
+            );
+            animation: rotate 4s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
         }
 
         .search-bar {
+            position: relative;
+            z-index: 1;
             width: 100%;
             padding: 15px 25px;
-            border-radius: 30px;
-            border: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.4);
+            border-radius: 28px; /* Must match container minus padding */
+            border: none; 
+            background: rgba(30, 30, 30, 0.9); /* Dark bg to block the gradient inside */
             color: white;
             font-size: 1.1rem;
             backdrop-filter: blur(10px);
             outline: none;
-            box-shadow: var(--shadow);
             text-align: center;
         }
 
@@ -195,6 +225,8 @@
             width: 90%;
             max-width: 400px;
             color: white;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-content h2 { margin-top: 0; }
@@ -218,6 +250,7 @@
             border: none;
             cursor: pointer;
             font-weight: bold;
+            text-align: center;
         }
         .btn-primary { background: #007AFF; color: white; }
         .btn-secondary { background: #444; color: white; }
@@ -304,6 +337,18 @@
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
 
             <div class="form-group">
+                <label>Backup & Restore</label>
+                <div class="btn-group" style="justify-content: space-between; margin-top: 5px;">
+                    <button class="btn btn-secondary" style="width: 48%" onclick="app.exportData()">⬇️ Export</button>
+                    <button class="btn btn-secondary" style="width: 48%" onclick="document.getElementById('importFile').click()">⬆️ Import</button>
+                    <input type="file" id="importFile" style="display: none" accept=".json" onchange="app.importData(this)">
+                </div>
+                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Transfer your setup to another device.</p>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+
+            <div class="form-group">
                 <label>Danger Zone</label>
                 <button class="btn btn-secondary" style="background: #a33; width: 100%" onclick="app.resetAll()">Reset All Data</button>
             </div>
@@ -321,7 +366,7 @@ const app = (() => {
         root: [],
         folders: {},
         bg: null,
-        city: '' // New: Stores city name
+        city: '' 
     };
     
     let currentFolderId = null; 
@@ -340,6 +385,42 @@ const app = (() => {
         render();
     };
 
+    // --- Data Export / Import ---
+    const exportData = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "speed-dial-backup.json");
+        document.body.appendChild(downloadAnchorNode); 
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    };
+
+    const importData = (input) => {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (!imported.root || !imported.folders) {
+                    throw new Error("Invalid backup file format");
+                }
+                
+                if(confirm("This will overwrite your current links. Continue?")) {
+                    data = imported;
+                    localStorage.setItem('speedDialData', JSON.stringify(data));
+                    alert("Import successful! Reloading...");
+                    location.reload();
+                }
+            } catch (err) {
+                alert("Error importing file: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+
     // --- Weather Logic (Open-Meteo) ---
     const fetchWeather = async (forceRefresh = false) => {
         const el = document.getElementById('weather');
@@ -347,7 +428,6 @@ const app = (() => {
         try {
             let lat, lon, locationName;
 
-            // 1. Check if user typed a city
             if (data.city) {
                 const geoReq = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.city)}&count=1&language=en&format=json`);
                 const geoRes = await geoReq.json();
@@ -360,13 +440,11 @@ const app = (() => {
                 lon = geoRes.results[0].longitude;
                 locationName = geoRes.results[0].name;
             } else {
-                // 2. Use Browser GPS
                 if (!navigator.geolocation) {
                     el.innerHTML = "📍 Location unavailable";
                     return;
                 }
                 
-                // Wrap geolocation in a promise
                 const pos = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 });
@@ -376,7 +454,6 @@ const app = (() => {
                 locationName = "My Location";
             }
 
-            // 3. Fetch Forecast (Fahrenheit)
             const weatherReq = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&weathercode=true`);
             const weatherRes = await weatherReq.json();
             
@@ -397,7 +474,6 @@ const app = (() => {
     };
 
     const getWeatherIcon = (code) => {
-        // WMO Weather interpretation codes
         if (code === 0) return '☀️';
         if (code >= 1 && code <= 3) return '☁️';
         if (code >= 45 && code <= 48) return '🌫️';
@@ -547,7 +623,7 @@ const app = (() => {
         init, saveItem, deleteItem, openFolder, goHome, 
         toggleEditMode, openAddModal, openSettings, closeModals, 
         toggleTypeInputs, handleBgUpload, resetAll,
-        saveCity, fetchWeather
+        saveCity, fetchWeather, exportData, importData
     };
 })();
 
