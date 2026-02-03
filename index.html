@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Speed Dial</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.15);
@@ -123,6 +124,8 @@
             position: relative;
             padding: 10px;
             text-align: center;
+            user-select: none; /* Prevent text selection while dragging */
+            -webkit-user-select: none;
         }
 
         .card:hover {
@@ -136,6 +139,7 @@
             border-radius: 8px;
             margin-bottom: 10px;
             object-fit: contain;
+            pointer-events: none; /* Helps with drag handling */
         }
 
         .card-title {
@@ -146,8 +150,10 @@
             white-space: nowrap;
             width: 100%;
             text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            pointer-events: none;
         }
 
+        /* Delete Button */
         .delete-btn {
             position: absolute;
             top: 5px;
@@ -165,9 +171,23 @@
         }
 
         .edit-mode .delete-btn { display: block; }
-        .edit-mode .card { animation: shake 0.3s infinite alternate; }
+        
+        /* Wiggle Animation for Edit Mode */
+        .edit-mode .card { 
+            animation: shake 0.3s infinite alternate; 
+            cursor: grab;
+        }
+        .edit-mode .card:active {
+            cursor: grabbing;
+        }
 
         @keyframes shake { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
+
+        /* Drag Ghost (The item being dragged) */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(255, 255, 255, 0.1);
+        }
 
         /* --- FABs --- */
         .fab-container {
@@ -196,6 +216,13 @@
 
         .fab.settings { background: #333; }
         .fab.edit { background: #ff9500; }
+        
+        /* Active state for Edit button */
+        .fab.edit.active { 
+            background: white; 
+            color: #ff9500; 
+            border: 2px solid #ff9500;
+        }
 
         /* --- Modals --- */
         .modal {
@@ -306,7 +333,7 @@
         </div>
 
     <div class="fab-container">
-        <button class="fab edit" onclick="app.toggleEditMode()" title="Edit/Delete">✎</button>
+        <button id="editBtn" class="fab edit" onclick="app.toggleEditMode()" title="Edit/Delete">✎</button>
         <button class="fab settings" onclick="app.openSettings()" title="Settings">⚙️</button>
         <button class="fab" onclick="app.openAddModal()" title="Add New">+</button>
     </div>
@@ -337,9 +364,7 @@
                     <button class="btn btn-secondary" onclick="app.searchIcons()">🔍</button>
                 </div>
                 <div id="iconResults" class="icon-search-results" style="display:none;"></div>
-                
                 <div style="text-align: center; margin: 10px 0; font-size: 0.8rem; color: #888;">- OR -</div>
-                
                 <input type="file" id="itemIconInput" accept="image/*">
                 <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Upload your own image</p>
             </div>
@@ -403,7 +428,8 @@ const app = (() => {
     
     let currentFolderId = null; 
     let isEditMode = false;
-    let selectedIconData = null; // Stores icon from search
+    let selectedIconData = null;
+    let sortableInstance = null; // Store the sortable instance
 
     // --- Core Functions ---
     const init = () => {
@@ -411,11 +437,26 @@ const app = (() => {
         render();
         fetchWeather();
         document.getElementById('cityInput').value = data.city || '';
+        
+        // Initialize Sortable (Disabled by default)
+        const grid = document.getElementById('grid');
+        sortableInstance = Sortable.create(grid, {
+            animation: 150,
+            disabled: true, // Only enabled in edit mode
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                // Reorder Data
+                const list = currentFolderId ? data.folders[currentFolderId] : data.root;
+                const item = list.splice(evt.oldIndex, 1)[0];
+                list.splice(evt.newIndex, 0, item);
+                save();
+            }
+        });
     };
 
     const save = () => {
         localStorage.setItem('speedDialData', JSON.stringify(data));
-        render();
+        render(); // Re-render to ensure DOM matches state
     };
 
     const readFileAsBase64 = (file) => {
@@ -427,69 +468,48 @@ const app = (() => {
         });
     };
 
-    // --- Icon Search Logic (Iconify API) ---
+    // --- Icon Search (Iconify) ---
     const searchIcons = async () => {
         const query = document.getElementById('iconSearchInput').value.trim();
         if(!query) return;
-
         const resultsContainer = document.getElementById('iconResults');
         resultsContainer.style.display = 'grid';
         resultsContainer.innerHTML = '<div style="color:#aaa; grid-column:span 5; text-align:center">Searching...</div>';
-
         try {
-            // 1. Search for icons
             const req = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=15`);
             const res = await req.json();
-
             resultsContainer.innerHTML = '';
-            
             if(!res.icons || res.icons.length === 0) {
                 resultsContainer.innerHTML = '<div style="color:#aaa; grid-column:span 5; text-align:center">No icons found</div>';
                 return;
             }
-
-            // 2. Render buttons
             res.icons.forEach(iconName => {
                 const btn = document.createElement('div');
                 btn.className = 'icon-result';
-                // Use the API to generate a preview URL
                 const iconUrl = `https://api.iconify.design/${iconName}.svg`;
                 btn.innerHTML = `<img src="${iconUrl}">`;
-                
                 btn.onclick = async () => {
-                    // Visual feedback
                     document.querySelectorAll('.icon-result').forEach(b => b.style.borderColor = '#555');
                     btn.style.borderColor = '#007AFF';
                     btn.style.background = '#007AFF';
-
-                    // 3. Fetch the actual SVG code to save it permanently
                     try {
                         const svgReq = await fetch(iconUrl);
                         const svgText = await svgReq.text();
-                        // Convert SVG text to Base64 Data URI
                         selectedIconData = "data:image/svg+xml;base64," + btoa(svgText);
-                    } catch(e) {
-                        console.error(e);
-                        alert("Could not load icon data");
-                    }
+                    } catch(e) { console.error(e); }
                 };
                 resultsContainer.appendChild(btn);
             });
-
-        } catch(e) {
-            resultsContainer.innerHTML = '<div style="color:#f55; grid-column:span 5; text-align:center">Error searching icons</div>';
-        }
+        } catch(e) { resultsContainer.innerHTML = '<div style="color:#f55; grid-column:span 5; text-align:center">Error</div>'; }
     };
 
-    // --- Data Export / Import ---
+    // --- Data Export/Import ---
     const exportData = () => {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "speed-dial-backup.json");
-        document.body.appendChild(downloadAnchorNode); 
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", "speed-dial-backup.json");
+        document.body.appendChild(anchor); anchor.click(); anchor.remove();
     };
 
     const importData = (input) => {
@@ -499,7 +519,7 @@ const app = (() => {
         reader.onload = (e) => {
             try {
                 const imported = JSON.parse(e.target.result);
-                if (!imported.root || !imported.folders) throw new Error("Invalid format");
+                if (!imported.root) throw new Error("Invalid format");
                 if(confirm("Overwrite current links?")) {
                     data = imported;
                     localStorage.setItem('speedDialData', JSON.stringify(data));
@@ -510,62 +530,55 @@ const app = (() => {
         reader.readAsText(file);
     };
 
-    // --- Weather Logic ---
+    // --- Weather ---
     const fetchWeather = async (forceRefresh = false) => {
         const el = document.getElementById('weather');
         try {
-            let lat, lon, locationName;
+            let lat, lon, name;
             if (data.city) {
-                const geoReq = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.city)}&count=1&language=en&format=json`);
-                const geoRes = await geoReq.json();
-                if (!geoRes.results || geoRes.results.length === 0) { el.innerHTML = "🚫 City not found"; return; }
-                lat = geoRes.results[0].latitude;
-                lon = geoRes.results[0].longitude;
-                locationName = geoRes.results[0].name;
+                const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(data.city)}&count=1&language=en&format=json`);
+                const geoRes = await geo.json();
+                if (!geoRes.results) { el.innerHTML = "🚫 City not found"; return; }
+                lat = geoRes.results[0].latitude; lon = geoRes.results[0].longitude; name = geoRes.results[0].name;
             } else {
                 if (!navigator.geolocation) { el.innerHTML = "📍 Location unavailable"; return; }
-                const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject));
-                lat = pos.coords.latitude;
-                lon = pos.coords.longitude;
-                locationName = "My Location";
+                const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+                lat = pos.coords.latitude; lon = pos.coords.longitude; name = "My Location";
             }
-            const weatherReq = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&weathercode=true`);
-            const weatherRes = await weatherReq.json();
-            const temp = Math.round(weatherRes.current_weather.temperature);
-            const icon = getWeatherIcon(weatherRes.current_weather.weathercode);
-            el.innerHTML = `${icon} ${temp}°F • ${locationName}`;
+            const wReq = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&weathercode=true`);
+            const wRes = await wReq.json();
+            el.innerHTML = `${getWeatherIcon(wRes.current_weather.weathercode)} ${Math.round(wRes.current_weather.temperature)}°F • ${name}`;
         } catch (err) { el.innerHTML = data.city ? "⚠️ Weather Error" : "📍 Enable GPS or set City"; }
     };
 
     const getWeatherIcon = (code) => {
         if (code === 0) return '☀️';
-        if (code >= 1 && code <= 3) return '☁️';
-        if (code >= 45 && code <= 48) return '🌫️';
-        if (code >= 51 && code <= 67) return '🌧️';
-        if (code >= 71 && code <= 77) return '❄️';
-        if (code >= 80 && code <= 82) return '🌧️';
-        if (code >= 95) return '⛈️';
-        return '🌡️';
+        if (code <= 3) return '☁️';
+        if (code <= 48) return '🌫️';
+        if (code <= 67) return '🌧️';
+        if (code <= 77) return '❄️';
+        if (code <= 82) return '🌧️';
+        return '⛈️';
     };
 
-    const saveCity = () => {
-        data.city = document.getElementById('cityInput').value.trim();
-        save(); fetchWeather(true); closeModals();
-    };
+    const saveCity = () => { data.city = document.getElementById('cityInput').value.trim(); save(); fetchWeather(true); closeModals(); };
 
     // --- Rendering ---
     const render = () => {
         const grid = document.getElementById('grid');
+        // NOTE: SortableJS requires we don't nuke innerHTML completely if we want to keep state, 
+        // but for this simple app, re-rendering is safer for data consistency.
         grid.innerHTML = '';
+        
         const items = currentFolderId ? (data.folders[currentFolderId] || []) : data.root;
+        
+        // Update Breadcrumbs
         const breadcrumbs = document.getElementById('breadcrumbs');
         const folderName = document.getElementById('folder-name');
-
         if (currentFolderId) {
             breadcrumbs.style.display = 'block';
-            const parentList = data.root; 
-            const folderObj = parentList.find(i => i.id === currentFolderId);
-            folderName.innerText = folderObj ? ` > 📁 ${folderObj.name}` : ' > Folder';
+            const f = data.root.find(i => i.id === currentFolderId);
+            folderName.innerText = f ? ` > 📁 ${f.name}` : ' > Folder';
         } else {
             breadcrumbs.style.display = 'none';
         }
@@ -573,8 +586,10 @@ const app = (() => {
         items.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'card';
-            let iconSrc = item.icon || ''; 
-
+            // Set data-id for SortableJS (optional but good practice)
+            card.setAttribute('data-id', item.id);
+            
+            let iconSrc = item.icon || '';
             if (!iconSrc) {
                 if (item.type === 'folder') {
                     iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
@@ -593,18 +608,31 @@ const app = (() => {
                 <img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'">
                 <div class="card-title">${item.name}</div>
             `;
-            card.onclick = () => {
-                if (isEditMode) return;
-                if (item.type === 'folder') openFolder(item.id);
-                else window.open(item.url, '_blank');
+            
+            card.onclick = (e) => {
+                if (isEditMode) {
+                    e.preventDefault(); // Prevent clicks during edit
+                } else {
+                    if (item.type === 'folder') openFolder(item.id);
+                    else window.open(item.url, '_blank');
+                }
             };
             grid.appendChild(card);
         });
+
+        // Update Edit Mode UI
         grid.className = isEditMode ? 'grid edit-mode' : 'grid';
+        document.getElementById('editBtn').classList.toggle('active', isEditMode);
+        
+        // Update Sortable State
+        if(sortableInstance) {
+            sortableInstance.option("disabled", !isEditMode);
+        }
     };
 
     const openFolder = (id) => { currentFolderId = id; render(); };
     const goHome = () => { currentFolderId = null; render(); };
+    
     const deleteItem = (index) => {
         if (!confirm('Delete this item?')) return;
         const list = currentFolderId ? data.folders[currentFolderId] : data.root;
@@ -623,9 +651,7 @@ const app = (() => {
         if (!name) return alert('Please enter a name');
         if (type === 'link' && !url) return alert('Please enter a URL');
 
-        // Priority: 1. Uploaded File, 2. Search Result, 3. None (Default)
         let finalIcon = null;
-
         if (iconInput.files && iconInput.files[0]) {
             const file = iconInput.files[0];
             if (file.size > 2000000) return alert('Icon too large (<2MB)');
@@ -648,7 +674,7 @@ const app = (() => {
         save();
         closeModals();
         
-        // Reset inputs
+        // Reset
         document.getElementById('itemName').value = '';
         document.getElementById('itemUrl').value = '';
         document.getElementById('itemIconInput').value = ''; 
@@ -666,11 +692,18 @@ const app = (() => {
     };
 
     const applyBg = () => { if (data.bg) document.body.style.backgroundImage = `url('${data.bg}')`; };
+    
     const resetAll = () => { if(confirm("Delete all data?")) { localStorage.removeItem('speedDialData'); location.reload(); }};
-    const toggleEditMode = () => { isEditMode = !isEditMode; render(); };
+    
+    const toggleEditMode = () => { 
+        isEditMode = !isEditMode; 
+        render(); 
+    };
+    
     const openAddModal = () => document.getElementById('addModal').classList.add('active');
     const openSettings = () => document.getElementById('settingsModal').classList.add('active');
     const closeModals = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    
     const toggleTypeInputs = () => {
         const type = document.getElementById('itemType').value;
         document.getElementById('urlInputGroup').style.display = type === 'folder' ? 'none' : 'block';
