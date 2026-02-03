@@ -416,7 +416,7 @@ const app = (() => {
         if (!file) return;
 
         // Limit size to prevent localStorage errors (max ~2MB usually safe)
-        if (file.size > 2000000) {
+        if (file.size > 12000000) {
             alert('Image is too large! Please choose an image under 2MB.');
             return;
         }
