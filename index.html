@@ -87,8 +87,7 @@
             height: 48px;
             border-radius: 8px;
             margin-bottom: 10px;
-            object-fit: cover;
-            background: white; /* Fallback for transparency */
+            object-fit: contain; /* Changed to contain for better folder fit */
         }
 
         .card-title {
@@ -204,6 +203,7 @@
             padding: 0 10px;
             font-size: 1.2rem;
             cursor: pointer;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
         .breadcrumb-item:hover { text-decoration: underline; }
 
@@ -278,7 +278,7 @@ const app = (() => {
     // --- State ---
     let data = JSON.parse(localStorage.getItem('speedDialData')) || {
         root: [],
-        folders: {}, // ID -> Array of items
+        folders: {},
         bg: null
     };
     
@@ -309,7 +309,7 @@ const app = (() => {
         const folderName = document.getElementById('folder-name');
         if (currentFolderId) {
             breadcrumbs.style.display = 'block';
-            // Find folder name from root list (simplified for 1 level depth)
+            // Find folder name from root list
             const parentList = data.root; 
             const folderObj = parentList.find(i => i.id === currentFolderId);
             folderName.innerText = folderObj ? ` > 📁 ${folderObj.name}` : ' > Folder';
@@ -317,7 +317,7 @@ const app = (() => {
             breadcrumbs.style.display = 'none';
         }
 
-// Generate Cards
+        // Generate Cards
         items.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'card';
@@ -325,16 +325,15 @@ const app = (() => {
             // Icon Logic
             let iconSrc = '';
             if (item.type === 'folder') {
-                // FIXED: Used URL encoding (%22) so quotes don't break the HTML
-                // Also switched to a cleaner Blue color (%23007AFF) to match the buttons
-                iconSrc = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23007AFF%22><path d=%22M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z%22/></svg>';
+                // FIXED: URL Encoded SVG to prevent "text spill" bug and made it Blue
+                iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23007AFF'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E";
             } else {
-                // Use Google's favicon service for websites
+                // Use Google's favicon service
                 try {
                     const domain = new URL(item.url).hostname;
                     iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
                 } catch (e) {
-                    iconSrc = ''; // Fallback if URL is invalid
+                    iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E";
                 }
             }
 
@@ -343,19 +342,6 @@ const app = (() => {
                 <img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'">
                 <div class="card-title">${item.name}</div>
             `;
-
-            // Click Handler
-            card.onclick = () => {
-                if (isEditMode) return;
-                if (item.type === 'folder') {
-                    openFolder(item.id);
-                } else {
-                    window.location.href = item.url;
-                }
-            };
-
-            grid.appendChild(card);
-        });
 
             // Click Handler
             card.onclick = () => {
@@ -434,7 +420,6 @@ const app = (() => {
         const file = input.files[0];
         if (!file) return;
 
-        // Limit size to prevent localStorage errors (max ~2MB usually safe)
         if (file.size > 12000000) {
             alert('Image is too large! Please choose an image under 12MB.');
             return;
