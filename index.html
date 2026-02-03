@@ -317,7 +317,7 @@ const app = (() => {
             breadcrumbs.style.display = 'none';
         }
 
-        // Generate Cards
+// Generate Cards
         items.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'card';
@@ -325,18 +325,37 @@ const app = (() => {
             // Icon Logic
             let iconSrc = '';
             if (item.type === 'folder') {
-                iconSrc = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFD700"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>';
+                // FIXED: Used URL encoding (%22) so quotes don't break the HTML
+                // Also switched to a cleaner Blue color (%23007AFF) to match the buttons
+                iconSrc = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23007AFF%22><path d=%22M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z%22/></svg>';
             } else {
-                // Use Google's favicon service
-                const domain = new URL(item.url).hostname;
-                iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                // Use Google's favicon service for websites
+                try {
+                    const domain = new URL(item.url).hostname;
+                    iconSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                } catch (e) {
+                    iconSrc = ''; // Fallback if URL is invalid
+                }
             }
 
             card.innerHTML = `
                 <button class="delete-btn" onclick="event.stopPropagation(); app.deleteItem(${index})">×</button>
-                <img src="${iconSrc}" class="card-icon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ccc%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22/></svg>'">
+                <img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'">
                 <div class="card-title">${item.name}</div>
             `;
+
+            // Click Handler
+            card.onclick = () => {
+                if (isEditMode) return;
+                if (item.type === 'folder') {
+                    openFolder(item.id);
+                } else {
+                    window.location.href = item.url;
+                }
+            };
+
+            grid.appendChild(card);
+        });
 
             // Click Handler
             card.onclick = () => {
@@ -417,7 +436,7 @@ const app = (() => {
 
         // Limit size to prevent localStorage errors (max ~2MB usually safe)
         if (file.size > 12000000) {
-            alert('Image is too large! Please choose an image under 2MB.');
+            alert('Image is too large! Please choose an image under 12MB.');
             return;
         }
 
