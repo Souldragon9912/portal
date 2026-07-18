@@ -28,10 +28,10 @@
             transition: background-image 0.3s ease;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center everything vertically */
+            align-items: center; 
         }
 
-        /* --- CLOCK WIDGET (New) --- */
+        /* --- CLOCK WIDGET --- */
         .clock-container {
             text-align: center;
             margin-top: 40px;
@@ -91,7 +91,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Search Engine Switcher Icon */
         .search-icon {
             width: 24px;
             height: 24px;
@@ -139,7 +138,7 @@
             cursor: pointer;
             transition: transform 0.2s, background 0.2s;
         }
-        
+         
         .weather-widget:hover {
             background: rgba(0, 0, 0, 0.5);
             transform: scale(1.02);
@@ -202,6 +201,22 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.8);
             pointer-events: none;
         }
+
+        /* Keyboard Hotkey Indicator Badge */
+        .key-badge {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            font-size: 0.65rem;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.4);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 1px 4px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+        .edit-mode .key-badge { display: none; }
 
         .delete-btn {
             position: absolute;
@@ -356,7 +371,6 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
         .breadcrumb-item:hover { text-decoration: underline; }
-
     </style>
 </head>
 <body>
@@ -367,7 +381,7 @@
     </div>
 
     <div class="search-container">
-        <form id="searchForm" action="https://www.google.com/search" method="GET" target="_blank" onsubmit="setTimeout(() => this.reset(), 500)">
+        <form id="searchForm" action="https://www.google.com/search" method="GET" target="_blank">
             <div class="search-wrapper">
                 <div class="search-icon" id="searchIcon" onclick="app.toggleSearchEngine()" title="Switch Search Engine">G</div>
                 <input type="text" name="q" id="searchInput" class="search-bar" placeholder="Search Google..." autocomplete="off">
@@ -482,7 +496,6 @@ const app = (() => {
     let selectedIconData = null;
     let sortableInstance = null;
     
-    // Search Engine State
     const engines = [
         { name: 'Google', url: 'https://www.google.com/search', icon: 'G', placeholder: 'Search Google...' },
         { name: 'DuckDuckGo', url: 'https://duckduckgo.com/', icon: 'D', placeholder: 'Search DuckDuckGo...' },
@@ -495,7 +508,8 @@ const app = (() => {
         applyBg();
         render();
         fetchWeather();
-        startClock(); // Start Clock
+        startClock(); 
+        setupPowerFeatures(); // Hooks up listeners for shortcuts and live filtering
         document.getElementById('cityInput').value = data.city || '';
         document.getElementById('notesInput').value = data.notes || '';
         
@@ -513,7 +527,6 @@ const app = (() => {
 
     const save = () => { localStorage.setItem('speedDialData', JSON.stringify(data)); render(); };
 
-    // --- CLOCK Logic ---
     const startClock = () => {
         const update = () => {
             const now = new Date();
@@ -532,24 +545,91 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-    // --- SEARCH Logic ---
+    // --- NEW POWER USER INTEGRATIONS ---
+    const setupPowerFeatures = () => {
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+
+        // 1. Live Fuzzy Search Input Filter Logic
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const cards = document.querySelectorAll('#grid .card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').innerText.toLowerCase();
+                if (title.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // 2. Intercept Enter Key for Isolated Filtering Matches
+        searchForm.addEventListener('submit', (e) => {
+            const visibleCards = Array.from(document.querySelectorAll('#grid .card')).filter(c => c.style.display !== 'none');
+            const query = searchInput.value.trim();
+
+            // If query filtered the board down to exactly one match, execute that link immediately
+            if (visibleCards.length === 1 && query.length > 0) {
+                e.preventDefault();
+                visibleCards[0].click();
+                
+                // Reset standard view metrics
+                searchInput.value = '';
+                setTimeout(() => {
+                    document.querySelectorAll('#grid .card').forEach(c => c.style.display = 'flex');
+                }, 100);
+            } else {
+                // Otherwise clear input after a standard engine redirect triggers
+                setTimeout(() => searchForm.reset(), 500);
+            }
+        });
+
+        // 3. Global Keyboard Command Triggers
+        window.addEventListener('keydown', (e) => {
+            // Drop tracking execution loops if actively typing inside forms/textareas
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                if (e.key === 'Escape') {
+                    document.activeElement.blur();
+                    searchInput.value = '';
+                    document.querySelectorAll('#grid .card').forEach(c => c.style.display = 'flex');
+                }
+                return;
+            }
+
+            // Press '/' to instantly target the main search field bar
+            if (e.key === '/') {
+                e.preventDefault();
+                searchInput.focus();
+                return;
+            }
+
+            // Direct Key Bind Mappings [1-9] to execute matching index markers
+            if (e.key >= '1' && e.key <= '9' && !isEditMode) {
+                const targetIndex = parseInt(e.key) - 1;
+                const visibleCards = document.querySelectorAll('#grid .card');
+                if (visibleCards[targetIndex]) {
+                    e.preventDefault();
+                    visibleCards[targetIndex].click();
+                }
+            }
+        });
+    };
+
     const toggleSearchEngine = () => {
         currentEngineIndex = (currentEngineIndex + 1) % engines.length;
         const engine = engines[currentEngineIndex];
         
-        // Update Form
         const form = document.getElementById('searchForm');
         form.action = engine.url;
         
-        // Update Icon
         const icon = document.getElementById('searchIcon');
         icon.innerText = engine.icon;
         
-        // Update Input
         const input = document.getElementById('searchInput');
         input.placeholder = engine.placeholder;
         
-        // Special handling for YouTube/Reddit param names if needed (Google/DDG/Reddit use 'q', YT uses 'search_query')
         if (engine.name === 'YouTube') {
             input.name = 'search_query';
         } else {
@@ -561,7 +641,6 @@ const app = (() => {
         const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
     });
 
-    // --- Standard Functions (Same as before) ---
     const openNotes = () => document.getElementById('notesModal').classList.add('active');
     const saveNotes = () => { data.notes = document.getElementById('notesInput').value; localStorage.setItem('speedDialData', JSON.stringify(data)); };
     
@@ -646,7 +725,11 @@ const app = (() => {
                     catch (e) { iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E"; }
                 }
             }
-            card.innerHTML = `<button class="delete-btn" onclick="event.stopPropagation(); app.deleteItem(${index})">×</button><img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'"><div class="card-title">${item.name}</div>`;
+            
+            // Appends a small unobtrusive keyboard hotkey reminder badge if the index is 0-8 (Keys 1-9)
+            let badgeHtml = (index < 9) ? `<div class="key-badge">${index + 1}</div>` : '';
+
+            card.innerHTML = `<button class="delete-btn" onclick="event.stopPropagation(); app.deleteItem(${index})">×</button><img src="${iconSrc}" class="card-icon" onerror="this.style.display='none'"><div class="card-title">${item.name}</div>${badgeHtml}`;
             card.onclick = (e) => {
                 if (isEditMode) e.preventDefault();
                 else if (item.type === 'folder') openFolder(item.id);
