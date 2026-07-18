@@ -239,7 +239,7 @@
         @keyframes shake { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
         .sortable-ghost { opacity: 0.4; background: rgba(255, 255, 255, 0.1); }
 
-        /* --- UPGRADED NEWS DECK GRID CONTAINER --- */
+        /* --- MULTI-FEED GRAPHICAL DECK --- */
         .rss-container {
             width: 100%;
             max-width: 1000px;
@@ -491,7 +491,6 @@
 
     <div class="grid" id="grid"></div>
 
-    <!-- Graphical Intelligence Card Grid Section -->
     <div class="rss-container">
         <div class="rss-header" id="rssHeaderTitle">📡 Master Intel Feed Stream</div>
         <div class="rss-feed-list" id="rssFeedList">
@@ -566,7 +565,6 @@
                 <input type="text" id="cityInput" placeholder="Leave empty to use GPS">
                 <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveCity()">Update Weather</button>
             </div>
-            <!-- Dynamic RSS Field Form Group (Upgraded for Multiple Comma-Separated Input URLs) -->
             <div class="form-group">
                 <label>Custom News Feeds (Separate URLs with commas)</label>
                 <input type="url" id="rssInput" placeholder="e.g., https://theverge.com, https://bleepingcomputer.com/feed/">
@@ -653,17 +651,15 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-    // --- UPGRADED ASYNC MULTI-FEED ENGINE WITH COVER IMAGE EXTRACTOR ---
+    // --- RECONFIGURED MULTI-FEED ENGINE (TYPO FIXED) ---
     const fetchRSS = async () => {
         const el = document.getElementById('rssFeedList');
         const titleEl = document.getElementById('rssHeaderTitle');
         if (!el) return;
 
-        // Process custom input string array or assign standard fallback source
         const urls = data.rss ? data.rss.split(',').map(u => u.trim()).filter(Boolean) : ['https://www.bleepingcomputer.com/feed/'];
         let masterArticleDeck = [];
 
-        // Isolated asynchronous mapping worker loop to prevent single channel crash errors
         const feedPromises = urls.map(async (url) => {
             try {
                 let proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
@@ -679,7 +675,8 @@ const app = (() => {
                     const htmlDoc = parser.parseFromString(rawDataText, "text/html");
                     const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') || 
                                        htmlDoc.querySelector('link[type="application/atom+xml"]') ||
-                                       htmlDoc.Rel='alternate';
+                                       htmlDoc.querySelector('link[rel="alternate"][href*="feed"]') ||
+                                       htmlDoc.querySelector('link[rel="alternate"][href*="rss"]');
                     
                     if (rssLinkEl && rssLinkEl.getAttribute('href')) {
                         let discoveredUrl = rssLinkEl.getAttribute('href');
@@ -696,7 +693,6 @@ const app = (() => {
                     xmlDoc = parser.parseFromString(rawDataText, "text/xml");
                 }
                 
-                // Extract Source Domain identity
                 const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
                 const sourceName = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || new URL(url).hostname;
 
@@ -714,14 +710,10 @@ const app = (() => {
                     const rawDate = dateEl ? dateEl.textContent : "";
                     const timestamp = rawDate ? new Date(rawDate).getTime() : 0;
 
-                    // --- COVER IMAGE EXTRACTOR PIPELINE ---
                     let imgUrl = '';
-                    
-                    // Route A: XML standard enclosure maps
                     const enclosure = item.getElementsByTagName("enclosure")[0];
                     if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
                     
-                    // Route B: Namespace structural content node queries
                     if (!imgUrl) {
                         Array.from(item.childNodes).forEach(child => {
                             if (child.nodeName.includes('content') || child.nodeName.includes('thumbnail')) {
@@ -731,7 +723,6 @@ const app = (() => {
                         });
                     }
                     
-                    // Route C: String HTML description scraping fallback logic
                     if (!imgUrl) {
                         const descNode = item.getElementsByTagName("description")[0] || item.getElementsByTagName("content")[0] || item.getElementsByTagName("summary")[0];
                         const descText = descNode ? descNode.textContent : "";
@@ -746,26 +737,21 @@ const app = (() => {
             } catch (err) { return []; }
         });
 
-        // Resolve concurrently and merge results
         const settlements = await Promise.all(feedPromises);
         settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
-
-        // Sort chronologically (most recent items first)
         masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
 
         el.innerHTML = '';
         if (titleEl) titleEl.innerText = `📡 Aggregated Threat Intelligence Feed`;
 
         if (masterArticleDeck.length === 0) {
-            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to process targets. Double check your comma separation formatting.</div>';
+            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to process targets. Ensure URLs point to active feeds.</div>';
             return;
         }
 
-        // Display top 6 aggregated items inside the grid
         const maxDisplayCount = Math.min(masterArticleDeck.length, 6);
         for (let i = 0; i < maxDisplayCount; i++) {
             const art = masterArticleDeck[i];
-            
             let formattedDate = "Recent";
             if (art.timestamp) {
                 formattedDate = new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -776,7 +762,6 @@ const app = (() => {
             card.href = art.link;
             card.target = '_blank';
 
-            // Use cover image if found; otherwise, fallback to the elegant CSS container gradient template
             const imgHtml = art.imgUrl ? `<img src="${art.imgUrl}" class="rss-image" alt="Cover">` : `<div class="rss-image"></div>`;
 
             card.innerHTML = `
@@ -800,6 +785,7 @@ const app = (() => {
         closeModals();
     };
 
+    // --- RECONFIGURED SHORTCUT AND FILTER ALIGNMENT ---
     const setupPowerFeatures = () => {
         const searchInput = document.getElementById('searchInput');
         const searchForm = document.getElementById('searchForm');
@@ -851,8 +837,6 @@ const app = (() => {
                 setTimeout(() => {
                     document.querySelectorAll('#grid .card').forEach(c => c.style.display = 'flex');
                 }, 100);
-            } else {
-                setTimeout(() => searchForm.reset(), 500);
             }
         });
 
@@ -874,7 +858,7 @@ const app = (() => {
 
             if (e.key >= '1' && e.key <= '9' && !isEditMode) {
                 const targetIndex = parseInt(e.key) - 1;
-                const visibleCards = document.querySelectorAll('#grid .card');
+                const visibleCards = Array.from(document.querySelectorAll('#grid .card')).filter(c => c.style.display !== 'none');
                 if (visibleCards[targetIndex]) {
                     e.preventDefault();
                     visibleCards[targetIndex].click();
