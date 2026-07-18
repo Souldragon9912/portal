@@ -621,7 +621,7 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-// --- INTEL FEED ENGINE WITH AUTOMATIC URL AUTO-DISCOVERY ---
+// --- UNIVERSAL DUAL RSS + ATOM INTEL FEED ENGINE ---
     const fetchRSS = async () => {
         const el = document.getElementById('rssFeedList');
         const titleEl = document.getElementById('rssHeaderTitle');
@@ -629,7 +629,6 @@ const app = (() => {
         try {
             let feedUrl = data.rss || 'https://www.bleepingcomputer.com/feed/';
             
-            // Step 1: Initial raw web request through the open proxy layer
             let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
             let response = await fetch(proxyUrl);
             let proxyData = await response.json();
@@ -637,10 +636,11 @@ const app = (() => {
             
             let parser = new DOMParser();
             let xmlDoc = parser.parseFromString(rawDataText, "text/xml");
-            let items = xmlDoc.querySelectorAll("item");
+            
+            // Look for EITHER standard RSS <item> tags or Atom <entry> tags simultaneously
+            let items = xmlDoc.querySelectorAll("item, entry");
 
-            // --- AUTO-DISCOVERY INITIATION ---
-            // If no XML items are returned, it's a standard web URL. Scan the header metadata for alternate streams.
+            // --- AUTO-DISCOVERY FALLBACK ARRAY ---
             if (items.length === 0) {
                 const htmlDoc = parser.parseFromString(rawDataText, "text/html");
                 const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') || 
@@ -650,40 +650,50 @@ const app = (() => {
                 if (rssLinkEl && rssLinkEl.getAttribute('href')) {
                     let discoveredUrl = rssLinkEl.getAttribute('href');
                     
-                    // Rebuild absolute target path links if the site uses relative parameters
                     if (!discoveredUrl.startsWith('http')) {
                         const baseOrigin = new URL(feedUrl).origin;
                         discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
                     }
                     
-                    // Silently redirect processing to target the true underlying stream path
                     proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(discoveredUrl)}`;
                     response = await fetch(proxyUrl);
                     proxyData = await response.json();
                     rawDataText = proxyData.contents;
                     xmlDoc = parser.parseFromString(rawDataText, "text/xml");
-                    items = xmlDoc.querySelectorAll("item");
+                    items = xmlDoc.querySelectorAll("item, entry");
                 }
             }
-            // ---------------------------------
+            // -------------------------------------
 
-            const channelTitle = xmlDoc.querySelector("channel > title")?.textContent || "Integrated News Feed";
+            // Extract feed titles dynamically (RSS uses channel > title, Atom uses feed > title)
+            const channelTitle = xmlDoc.querySelector("channel > title, feed > title")?.textContent || "Integrated News Feed";
             if (titleEl) titleEl.innerText = `📡 ${channelTitle}`;
 
             el.innerHTML = '';
-            if (items.length === 0) throw new Error("Empty feed framework");
+            if (items.length === 0) throw new Error("Zero entries resolved.");
 
             const maxItems = Math.min(items.length, 5);
             for (let i = 0; i < maxItems; i++) {
                 const item = items[i];
                 const title = item.querySelector("title")?.textContent || "Untitled Article";
-                const link = item.querySelector("link")?.textContent || "#";
-                const pubDateText = item.querySelector("pubDate")?.textContent || "";
+                
+                // Target links (RSS uses text value inside node, Atom uses the 'href' attribute)
+                let link = "#";
+                const linkEl = item.querySelector("link");
+                if (linkEl) {
+                    link = linkEl.getAttribute("href") || linkEl.textContent || "#";
+                }
+                
+                // Target timestamps (RSS uses pubDate, Atom uses updated/published)
+                const dateEl = item.querySelector("pubDate, updated, published");
+                const pubDateText = dateEl ? dateEl.textContent : "";
                 
                 let formattedDate = "Recent";
                 if (pubDateText) {
                     const pubDate = new Date(pubDateText);
-                    formattedDate = pubDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    if (!isNaN(pubDate)) {
+                        formattedDate = pubDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    }
                 }
                 
                 const a = document.createElement('a');
