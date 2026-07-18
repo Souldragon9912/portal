@@ -239,7 +239,7 @@
         @keyframes shake { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
         .sortable-ghost { opacity: 0.4; background: rgba(255, 255, 255, 0.1); }
 
-        /* --- RSS FEED CONTAINER (New) --- */
+        /* --- RSS FEED CONTAINER --- */
         .rss-container {
             width: 100%;
             max-width: 1000px;
@@ -460,7 +460,7 @@
 
     <!-- RSS Intelligence Feeds Section -->
     <div class="rss-container">
-        <div class="rss-header">📡 Security Threat Intelligence</div>
+        <div class="rss-header" id="rssHeaderTitle">📡 Loading Feed Stream...</div>
         <div class="rss-feed-list" id="rssFeedList">
             <div style="color: #aaa; font-size: 0.9rem; padding: 5px;">Connecting to feed array...</div>
         </div>
@@ -533,6 +533,12 @@
                 <input type="text" id="cityInput" placeholder="Leave empty to use GPS">
                 <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveCity()">Update Weather</button>
             </div>
+            <!-- Dynamic RSS Field Form Group -->
+            <div class="form-group">
+                <label>Custom News Feed (RSS XML URL)</label>
+                <input type="url" id="rssInput" placeholder="e.g., https://www.bleepingcomputer.com/feed/">
+                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveRSS()">Update News Feed</button>
+            </div>
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
             <div class="form-group">
                 <label>Backup & Restore</label>
@@ -555,8 +561,9 @@
 
 <script>
 const app = (() => {
+    // Injected 'rss' key parameter tracking straight into the core local manifest array
     let data = JSON.parse(localStorage.getItem('speedDialData')) || {
-        root: [], folders: {}, bg: null, city: '', notes: ''
+        root: [], folders: {}, bg: null, city: '', notes: '', rss: ''
     };
     let currentFolderId = null; 
     let isEditMode = false;
@@ -576,10 +583,11 @@ const app = (() => {
         render();
         fetchWeather();
         startClock(); 
-        fetchRSS(); // Pulls fresh intelligence headlines
+        fetchRSS(); 
         setupPowerFeatures(); 
         document.getElementById('cityInput').value = data.city || '';
         document.getElementById('notesInput').value = data.notes || '';
+        document.getElementById('rssInput').value = data.rss || ''; // Sync input field state
         
         const grid = document.getElementById('grid');
         sortableInstance = Sortable.create(grid, {
@@ -613,19 +621,26 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-    // --- SECURITY RSS INTELLIGENCE PANEL ENGINE ---
+    // --- RECONFIGURED CUSTOMIZABLE RSS ENGINE PANEL ---
     const fetchRSS = async () => {
         const el = document.getElementById('rssFeedList');
+        const titleEl = document.getElementById('rssHeaderTitle');
         if (!el) return;
         try {
-            // Hardwired to a clean, rapid security bulletin source via rss2json translation API
-            const feedUrl = 'https://www.bleepingcomputer.com/feed/';
+            // Checks for user input configuration, falling back natively to BleepingComputer default
+            const feedUrl = data.rss || 'https://www.bleepingcomputer.com/feed/';
             const res = await (await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`)).json();
             
             if (res.status !== 'ok') throw new Error();
             
+            // Dynamic Header Text Injection tracking incoming channel meta
+            if (titleEl && res.feed && res.feed.title) {
+                titleEl.innerText = `📡 ${res.feed.title}`;
+            } else if (titleEl) {
+                titleEl.innerText = `📡 Integrated News Feed`;
+            }
+
             el.innerHTML = '';
-            // Displays top 5 critical security feeds
             res.items.slice(0, 5).forEach(item => {
                 const pubDate = new Date(item.pubDate);
                 const formattedDate = pubDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -634,12 +649,21 @@ const app = (() => {
                 a.className = 'rss-item';
                 a.href = item.link;
                 a.target = '_blank';
-                a.innerHTML = `<span class="rss-title">🛡️ ${item.title}</span><span class="rss-date">${formattedDate}</span>`;
+                a.innerHTML = `<span class="rss-title">📰 ${item.title}</span><span class="rss-date">${formattedDate}</span>`;
                 el.appendChild(a);
             });
         } catch (e) {
-            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to load target intelligence feeds.</div>';
+            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to parse or fetch targets. Ensure URL targets a valid XML stream.</div>';
+            if (titleEl) titleEl.innerText = `📡 Feed Error`;
         }
+    };
+
+    // State Mutation Registry tracking User Configuration input changes
+    const saveRSS = () => {
+        data.rss = document.getElementById('rssInput').value.trim();
+        save();
+        fetchRSS();
+        closeModals();
     };
 
     const setupPowerFeatures = () => {
@@ -648,8 +672,6 @@ const app = (() => {
 
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
-            
-            // Bypass filtering processing if input string marks a custom engine bang shortcut
             if (query.startsWith('!')) return;
 
             const cards = document.querySelectorAll('#grid .card');
@@ -666,7 +688,6 @@ const app = (() => {
         searchForm.addEventListener('submit', (e) => {
             const query = searchInput.value.trim();
 
-            // --- DEVIATION ROUTE: INTELLIGENT SEARCH ENGINE BANG SHORTCUTS ---
             if (query.startsWith('!')) {
                 e.preventDefault();
                 const parts = query.split(' ');
@@ -683,13 +704,11 @@ const app = (() => {
                 if (bangEngines[bang]) {
                     window.open(bangEngines[bang], '_blank');
                     searchInput.value = '';
-                    // Reset grid state visibility filters
                     document.querySelectorAll('#grid .card').forEach(c => c.style.display = 'flex');
                     return;
                 }
             }
 
-            // Standard isolation click logic fallback
             const visibleCards = Array.from(document.querySelectorAll('#grid .card')).filter(c => c.style.display !== 'none');
             if (visibleCards.length === 1 && query.length > 0) {
                 e.preventDefault();
@@ -903,7 +922,7 @@ const app = (() => {
     const closeModals = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
     const toggleTypeInputs = () => { document.getElementById('urlInputGroup').style.display = document.getElementById('itemType').value === 'folder' ? 'none' : 'block'; };
 
-    return { init, saveItem, deleteItem, openFolder, goHome, toggleEditMode, openAddModal, openSettings, closeModals, toggleTypeInputs, handleBgUpload, resetAll, saveCity, fetchWeather, exportData, importData, searchIcons, openNotes, saveNotes, toggleSearchEngine };
+    return { init, saveItem, deleteItem, openFolder, goHome, toggleEditMode, openAddModal, openSettings, closeModals, toggleTypeInputs, handleBgUpload, resetAll, saveCity, fetchWeather, exportData, importData, searchIcons, openNotes, saveNotes, toggleSearchEngine, saveRSS, fetchRSS };
 })();
 
 app.init();
