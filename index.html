@@ -239,7 +239,7 @@
         @keyframes shake { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
         .sortable-ghost { opacity: 0.4; background: rgba(255, 255, 255, 0.1); }
 
-        /* --- RSS FEED CONTAINER --- */
+        /* --- UPGRADED NEWS DECK GRID CONTAINER --- */
         .rss-container {
             width: 100%;
             max-width: 1000px;
@@ -250,13 +250,12 @@
             border-radius: 16px;
             padding: 20px;
             box-shadow: var(--shadow);
-            padding-bottom: 20px;
             margin-bottom: 100px;
         }
         .rss-header {
             font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -265,38 +264,72 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
         .rss-feed-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 20px;
         }
         .rss-item {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
             text-decoration: none;
             color: #e5e7eb;
-            padding: 8px 12px;
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: background 0.2s, transform 0.1s;
+            overflow: hidden;
+            transition: transform 0.2s, background 0.2s;
         }
         .rss-item:hover {
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            transform: translateX(2px);
+            transform: translateY(-3px);
+        }
+        .rss-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .rss-meta-block {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+            justify-content: space-between;
         }
         .rss-title {
-            font-size: 0.9rem;
-            font-weight: 400;
-            white-space: nowrap;
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 80%;
+            white-space: normal;
+        }
+        .rss-source-date {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+        .rss-source-tag {
+            background: rgba(0, 122, 255, 0.2);
+            color: #3aa0ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .rss-date {
-            font-size: 0.8rem;
-            color: #9ca3af;
             font-family: monospace;
         }
 
@@ -458,11 +491,11 @@
 
     <div class="grid" id="grid"></div>
 
-    <!-- RSS Intelligence Feeds Section -->
+    <!-- Graphical Intelligence Card Grid Section -->
     <div class="rss-container">
-        <div class="rss-header" id="rssHeaderTitle">📡 Loading Feed Stream...</div>
+        <div class="rss-header" id="rssHeaderTitle">📡 Master Intel Feed Stream</div>
         <div class="rss-feed-list" id="rssFeedList">
-            <div style="color: #aaa; font-size: 0.9rem; padding: 5px;">Connecting to feed array...</div>
+            <div style="color: #aaa; font-size: 0.9rem; padding: 5px;">Synchronizing aggregated news nodes...</div>
         </div>
     </div>
 
@@ -533,11 +566,11 @@
                 <input type="text" id="cityInput" placeholder="Leave empty to use GPS">
                 <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveCity()">Update Weather</button>
             </div>
-            <!-- Dynamic RSS Field Form Group -->
+            <!-- Dynamic RSS Field Form Group (Upgraded for Multiple Comma-Separated Input URLs) -->
             <div class="form-group">
-                <label>Custom News Feed (RSS XML URL)</label>
-                <input type="url" id="rssInput" placeholder="e.g., https://www.bleepingcomputer.com/feed/">
-                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveRSS()">Update News Feed</button>
+                <label>Custom News Feeds (Separate URLs with commas)</label>
+                <input type="url" id="rssInput" placeholder="e.g., https://theverge.com, https://bleepingcomputer.com/feed/">
+                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveRSS()">Update News Feeds</button>
             </div>
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
             <div class="form-group">
@@ -561,7 +594,6 @@
 
 <script>
 const app = (() => {
-    // Injected 'rss' key parameter tracking straight into the core local manifest array
     let data = JSON.parse(localStorage.getItem('speedDialData')) || {
         root: [], folders: {}, bg: null, city: '', notes: '', rss: ''
     };
@@ -587,7 +619,7 @@ const app = (() => {
         setupPowerFeatures(); 
         document.getElementById('cityInput').value = data.city || '';
         document.getElementById('notesInput').value = data.notes || '';
-        document.getElementById('rssInput').value = data.rss || ''; // Sync input field state
+        document.getElementById('rssInput').value = data.rss || ''; 
         
         const grid = document.getElementById('grid');
         sortableInstance = Sortable.create(grid, {
@@ -621,105 +653,146 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-// --- UNIVERSAL CORS-RESILIENT ATOM + RSS FEED ENGINE ---
+    // --- UPGRADED ASYNC MULTI-FEED ENGINE WITH COVER IMAGE EXTRACTOR ---
     const fetchRSS = async () => {
         const el = document.getElementById('rssFeedList');
         const titleEl = document.getElementById('rssHeaderTitle');
         if (!el) return;
-        try {
-            let feedUrl = data.rss || 'https://www.bleepingcomputer.com/feed/';
-            
-            // Switch to a raw, high-performance CORS proxy to bypass Cloudflare/Adblock filters
-            let proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(feedUrl)}`;
-            let response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error("Proxy connection dropped");
-            let rawDataText = await response.text();
-            
-            let parser = new DOMParser();
-            
-            // Pre-screen the stream data type to determine if it is an HTML webpage or raw XML layout
-            let isHtml = rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html');
-            
-            let xmlDoc;
-            
-            if (isHtml) {
-                // Parse the text configuration as HTML to scan metadata blocks for structural streams
-                const htmlDoc = parser.parseFromString(rawDataText, "text/html");
-                const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') || 
-                                   htmlDoc.querySelector('link[type="application/atom+xml"]') ||
-                                   htmlDoc.querySelector('link[rel="alternate"][href*="rss"]');
+
+        // Process custom input string array or assign standard fallback source
+        const urls = data.rss ? data.rss.split(',').map(u => u.trim()).filter(Boolean) : ['https://www.bleepingcomputer.com/feed/'];
+        let masterArticleDeck = [];
+
+        // Isolated asynchronous mapping worker loop to prevent single channel crash errors
+        const feedPromises = urls.map(async (url) => {
+            try {
+                let proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+                let response = await fetch(proxyUrl);
+                if (!response.ok) return [];
+                let rawDataText = await response.text();
                 
-                if (rssLinkEl && rssLinkEl.getAttribute('href')) {
-                    let discoveredUrl = rssLinkEl.getAttribute('href');
+                let parser = new DOMParser();
+                let isHtml = rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html');
+                let xmlDoc;
+                
+                if (isHtml) {
+                    const htmlDoc = parser.parseFromString(rawDataText, "text/html");
+                    const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') || 
+                                       htmlDoc.querySelector('link[type="application/atom+xml"]') ||
+                                       htmlDoc.Rel='alternate';
                     
-                    // Normalize relative links to absolute URL strings dynamically
-                    if (!discoveredUrl.startsWith('http')) {
-                        const baseOrigin = new URL(feedUrl).origin;
-                        discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
-                    }
-                    
-                    // Fire secondary proxy validation request targeting the true underlying stream target
-                    proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(discoveredUrl)}`;
-                    response = await fetch(proxyUrl);
-                    rawDataText = await response.text();
-                    xmlDoc = parser.parseFromString(rawDataText, "text/xml");
+                    if (rssLinkEl && rssLinkEl.getAttribute('href')) {
+                        let discoveredUrl = rssLinkEl.getAttribute('href');
+                        if (!discoveredUrl.startsWith('http')) {
+                            const baseOrigin = new URL(url).origin;
+                            discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
+                        }
+                        proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(discoveredUrl)}`;
+                        response = await fetch(proxyUrl);
+                        rawDataText = await response.text();
+                        xmlDoc = parser.parseFromString(rawDataText, "text/xml");
+                    } else { return []; }
                 } else {
-                    throw new Error("No XML map discovered on target host");
-                }
-            } else {
-                xmlDoc = parser.parseFromString(rawDataText, "text/xml");
-            }
-            
-            // Extract entries using getElementsByTagName for namespace immunity across engines
-            let items = Array.from(xmlDoc.getElementsByTagName("item")).concat(Array.from(xmlDoc.getElementsByTagName("entry")));
-            
-            const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
-            const channelTitle = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || "Integrated News Feed";
-            if (titleEl) titleEl.innerText = `📡 ${channelTitle}`;
-
-            el.innerHTML = '';
-            if (items.length === 0) throw new Error("Zero valid records resolved");
-
-            const maxItems = Math.min(items.length, 5);
-            for (let i = 0; i < maxItems; i++) {
-                const item = items[i];
-                const title = item.getElementsByTagName("title")[0]?.textContent || "Untitled Article";
-                
-                // Pull Links safely (RSS embeds plaintext value, Atom maps properties via 'href' attributes)
-                let link = "#";
-                const linkEl = item.getElementsByTagName("link")[0];
-                if (linkEl) {
-                    link = linkEl.getAttribute("href") || linkEl.textContent || "#";
+                    xmlDoc = parser.parseFromString(rawDataText, "text/xml");
                 }
                 
-                // Pull Timestamps (RSS utilizes pubDate markers, Atom targets updated or published keys)
-                const dateEl = item.getElementsByTagName("pubDate")[0] || 
-                               item.getElementsByTagName("updated")[0] || 
-                               item.getElementsByTagName("published")[0];
-                const pubDateText = dateEl ? dateEl.textContent : "";
-                
-                let formattedDate = "Recent";
-                if (pubDateText) {
-                    const pubDate = new Date(pubDateText);
-                    if (!isNaN(pubDate)) {
-                        formattedDate = pubDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                // Extract Source Domain identity
+                const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
+                const sourceName = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || new URL(url).hostname;
+
+                let items = Array.from(xmlDoc.getElementsByTagName("item")).concat(Array.from(xmlDoc.getElementsByTagName("entry")));
+                let channelArticles = [];
+
+                items.forEach(item => {
+                    const title = item.getElementsByTagName("title")[0]?.textContent || "Untitled Article";
+                    
+                    let link = "#";
+                    const linkEl = item.getElementsByTagName("link")[0];
+                    if (linkEl) link = linkEl.getAttribute("href") || linkEl.textContent || "#";
+                    
+                    const dateEl = item.getElementsByTagName("pubDate")[0] || item.getElementsByTagName("updated")[0] || item.getElementsByTagName("published")[0];
+                    const rawDate = dateEl ? dateEl.textContent : "";
+                    const timestamp = rawDate ? new Date(rawDate).getTime() : 0;
+
+                    // --- COVER IMAGE EXTRACTOR PIPELINE ---
+                    let imgUrl = '';
+                    
+                    // Route A: XML standard enclosure maps
+                    const enclosure = item.getElementsByTagName("enclosure")[0];
+                    if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
+                    
+                    // Route B: Namespace structural content node queries
+                    if (!imgUrl) {
+                        Array.from(item.childNodes).forEach(child => {
+                            if (child.nodeName.includes('content') || child.nodeName.includes('thumbnail')) {
+                                const urlAttr = child.getAttribute('url');
+                                if (urlAttr) imgUrl = urlAttr;
+                            }
+                        });
                     }
-                }
-                
-                const a = document.createElement('a');
-                a.className = 'rss-item';
-                a.href = link;
-                a.target = '_blank';
-                a.innerHTML = `<span class="rss-title">📰 ${title}</span><span class="rss-date">${formattedDate}</span>`;
-                el.appendChild(a);
+                    
+                    // Route C: String HTML description scraping fallback logic
+                    if (!imgUrl) {
+                        const descNode = item.getElementsByTagName("description")[0] || item.getElementsByTagName("content")[0] || item.getElementsByTagName("summary")[0];
+                        const descText = descNode ? descNode.textContent : "";
+                        const imgMatch = descText.match(/<img[^>]+src="([^">]+)"/i);
+                        if (imgMatch && imgMatch[1]) imgUrl = imgMatch[1];
+                    }
+
+                    channelArticles.push({ title, link, rawDate, timestamp, sourceName, imgUrl });
+                });
+
+                return channelArticles;
+            } catch (err) { return []; }
+        });
+
+        // Resolve concurrently and merge results
+        const settlements = await Promise.all(feedPromises);
+        settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
+
+        // Sort chronologically (most recent items first)
+        masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
+
+        el.innerHTML = '';
+        if (titleEl) titleEl.innerText = `📡 Aggregated Threat Intelligence Feed`;
+
+        if (masterArticleDeck.length === 0) {
+            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to process targets. Double check your comma separation formatting.</div>';
+            return;
+        }
+
+        // Display top 6 aggregated items inside the grid
+        const maxDisplayCount = Math.min(masterArticleDeck.length, 6);
+        for (let i = 0; i < maxDisplayCount; i++) {
+            const art = masterArticleDeck[i];
+            
+            let formattedDate = "Recent";
+            if (art.timestamp) {
+                formattedDate = new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
             }
-        } catch (e) {
-            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to parse or fetch targets. Ensure URL targets a valid XML stream.</div>';
-            if (titleEl) titleEl.innerText = `📡 Feed Error`;
+
+            const card = document.createElement('a');
+            card.className = 'rss-item';
+            card.href = art.link;
+            card.target = '_blank';
+
+            // Use cover image if found; otherwise, fallback to the elegant CSS container gradient template
+            const imgHtml = art.imgUrl ? `<img src="${art.imgUrl}" class="rss-image" alt="Cover">` : `<div class="rss-image"></div>`;
+
+            card.innerHTML = `
+                ${imgHtml}
+                <div class="rss-meta-block">
+                    <div class="rss-title">${art.title}</div>
+                    <div class="rss-source-date">
+                        <span class="rss-source-tag">${art.sourceName}</span>
+                        <span class="rss-date">${formattedDate}</span>
+                    </div>
+                </div>
+            `;
+            el.appendChild(card);
         }
     };
 
-    // State Mutation Registry tracking User Configuration input changes
     const saveRSS = () => {
         data.rss = document.getElementById('rssInput').value.trim();
         save();
