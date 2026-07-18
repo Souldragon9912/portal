@@ -621,7 +621,7 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-// --- UNIVERSAL DUAL RSS + ATOM INTEL FEED ENGINE ---
+// --- UNIVERSAL CORS-RESILIENT ATOM + RSS FEED ENGINE ---
     const fetchRSS = async () => {
         const el = document.getElementById('rssFeedList');
         const titleEl = document.getElementById('rssHeaderTitle');
@@ -629,19 +629,21 @@ const app = (() => {
         try {
             let feedUrl = data.rss || 'https://www.bleepingcomputer.com/feed/';
             
-            let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+            // Switch to a raw, high-performance CORS proxy to bypass Cloudflare/Adblock filters
+            let proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(feedUrl)}`;
             let response = await fetch(proxyUrl);
-            let proxyData = await response.json();
-            let rawDataText = proxyData.contents;
+            if (!response.ok) throw new Error("Proxy connection dropped");
+            let rawDataText = await response.text();
             
             let parser = new DOMParser();
-            let xmlDoc = parser.parseFromString(rawDataText, "text/xml");
             
-            // Look for EITHER standard RSS <item> tags or Atom <entry> tags simultaneously
-            let items = xmlDoc.querySelectorAll("item, entry");
-
-            // --- AUTO-DISCOVERY FALLBACK ARRAY ---
-            if (items.length === 0) {
+            // Pre-screen the stream data type to determine if it is an HTML webpage or raw XML layout
+            let isHtml = rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html');
+            
+            let xmlDoc;
+            
+            if (isHtml) {
+                // Parse the text configuration as HTML to scan metadata blocks for structural streams
                 const htmlDoc = parser.parseFromString(rawDataText, "text/html");
                 const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') || 
                                    htmlDoc.querySelector('link[type="application/atom+xml"]') ||
@@ -650,42 +652,50 @@ const app = (() => {
                 if (rssLinkEl && rssLinkEl.getAttribute('href')) {
                     let discoveredUrl = rssLinkEl.getAttribute('href');
                     
+                    // Normalize relative links to absolute URL strings dynamically
                     if (!discoveredUrl.startsWith('http')) {
                         const baseOrigin = new URL(feedUrl).origin;
                         discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
                     }
                     
-                    proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(discoveredUrl)}`;
+                    // Fire secondary proxy validation request targeting the true underlying stream target
+                    proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(discoveredUrl)}`;
                     response = await fetch(proxyUrl);
-                    proxyData = await response.json();
-                    rawDataText = proxyData.contents;
+                    rawDataText = await response.text();
                     xmlDoc = parser.parseFromString(rawDataText, "text/xml");
-                    items = xmlDoc.querySelectorAll("item, entry");
+                } else {
+                    throw new Error("No XML map discovered on target host");
                 }
+            } else {
+                xmlDoc = parser.parseFromString(rawDataText, "text/xml");
             }
-            // -------------------------------------
-
-            // Extract feed titles dynamically (RSS uses channel > title, Atom uses feed > title)
-            const channelTitle = xmlDoc.querySelector("channel > title, feed > title")?.textContent || "Integrated News Feed";
+            
+            // Extract entries using getElementsByTagName for namespace immunity across engines
+            let items = Array.from(xmlDoc.getElementsByTagName("item")).concat(Array.from(xmlDoc.getElementsByTagName("entry")));
+            
+            const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
+            const channelTitle = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || "Integrated News Feed";
             if (titleEl) titleEl.innerText = `📡 ${channelTitle}`;
 
             el.innerHTML = '';
-            if (items.length === 0) throw new Error("Zero entries resolved.");
+            if (items.length === 0) throw new Error("Zero valid records resolved");
 
             const maxItems = Math.min(items.length, 5);
             for (let i = 0; i < maxItems; i++) {
                 const item = items[i];
-                const title = item.querySelector("title")?.textContent || "Untitled Article";
+                const title = item.getElementsByTagName("title")[0]?.textContent || "Untitled Article";
                 
-                // Target links (RSS uses text value inside node, Atom uses the 'href' attribute)
+                // Pull Links safely (RSS embeds plaintext value, Atom maps properties via 'href' attributes)
                 let link = "#";
-                const linkEl = item.querySelector("link");
+                const linkEl = item.getElementsByTagName("link")[0];
                 if (linkEl) {
                     link = linkEl.getAttribute("href") || linkEl.textContent || "#";
                 }
                 
-                // Target timestamps (RSS uses pubDate, Atom uses updated/published)
-                const dateEl = item.querySelector("pubDate, updated, published");
+                // Pull Timestamps (RSS utilizes pubDate markers, Atom targets updated or published keys)
+                const dateEl = item.getElementsByTagName("pubDate")[0] || 
+                               item.getElementsByTagName("updated")[0] || 
+                               item.getElementsByTagName("published")[0];
                 const pubDateText = dateEl ? dateEl.textContent : "";
                 
                 let formattedDate = "Recent";
