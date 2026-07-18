@@ -621,36 +621,58 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-    // --- NATIVE DOMPARSER RSS ENGINE PANEL ---
+// --- INTEL FEED ENGINE WITH AUTOMATIC URL AUTO-DISCOVERY ---
     const fetchRSS = async () => {
         const el = document.getElementById('rssFeedList');
         const titleEl = document.getElementById('rssHeaderTitle');
         if (!el) return;
         try {
-            const feedUrl = data.rss || 'https://www.bleepingcomputer.com/feed/';
+            let feedUrl = data.rss || 'https://www.bleepingcomputer.com/feed/';
             
-            // Uses a generic open-source proxy to pull raw data without triggering adblock filters
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
-            const response = await fetch(proxyUrl);
-            const proxyData = await response.json();
+            // Step 1: Initial raw web request through the open proxy layer
+            let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+            let response = await fetch(proxyUrl);
+            let proxyData = await response.json();
+            let rawDataText = proxyData.contents;
             
-            // Extract the raw XML string payload
-            const rawXml = proxyData.contents;
-            
-            // Natively parse the XML structure inside the browser engine
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(rawXml, "text/xml");
-            
-            // Dynamically query and update the header title using the channel metadata
+            let parser = new DOMParser();
+            let xmlDoc = parser.parseFromString(rawDataText, "text/xml");
+            let items = xmlDoc.querySelectorAll("item");
+
+            // --- AUTO-DISCOVERY INITIATION ---
+            // If no XML items are returned, it's a standard web URL. Scan the header metadata for alternate streams.
+            if (items.length === 0) {
+                const htmlDoc = parser.parseFromString(rawDataText, "text/html");
+                const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') || 
+                                   htmlDoc.querySelector('link[type="application/atom+xml"]') ||
+                                   htmlDoc.querySelector('link[rel="alternate"][href*="rss"]');
+                
+                if (rssLinkEl && rssLinkEl.getAttribute('href')) {
+                    let discoveredUrl = rssLinkEl.getAttribute('href');
+                    
+                    // Rebuild absolute target path links if the site uses relative parameters
+                    if (!discoveredUrl.startsWith('http')) {
+                        const baseOrigin = new URL(feedUrl).origin;
+                        discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
+                    }
+                    
+                    // Silently redirect processing to target the true underlying stream path
+                    proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(discoveredUrl)}`;
+                    response = await fetch(proxyUrl);
+                    proxyData = await response.json();
+                    rawDataText = proxyData.contents;
+                    xmlDoc = parser.parseFromString(rawDataText, "text/xml");
+                    items = xmlDoc.querySelectorAll("item");
+                }
+            }
+            // ---------------------------------
+
             const channelTitle = xmlDoc.querySelector("channel > title")?.textContent || "Integrated News Feed";
             if (titleEl) titleEl.innerText = `📡 ${channelTitle}`;
 
-            const items = xmlDoc.querySelectorAll("item");
             el.innerHTML = '';
-            
-            if (items.length === 0) throw new Error("Empty feed or invalid format");
+            if (items.length === 0) throw new Error("Empty feed framework");
 
-            // Build out cards for the top 5 articles
             const maxItems = Math.min(items.length, 5);
             for (let i = 0; i < maxItems; i++) {
                 const item = items[i];
