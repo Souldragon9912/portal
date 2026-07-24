@@ -288,7 +288,7 @@
             width: 100%;
             height: 160px;
             object-fit: cover;
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         .rss-meta-block {
@@ -332,6 +332,59 @@
         .rss-date {
             font-family: monospace;
         }
+
+        /* --- Visual RSS Feed Manager (Modal) --- */
+        .rss-manager-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .rss-manager-item {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .rss-manager-item:hover { transform: scale(1.05); }
+        .rss-manager-item img {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+        }
+        .rss-delete-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .rss-delete-btn:hover { background: #dc2626; transform: scale(1.1); }
 
         /* --- FABs --- */
         .fab-container {
@@ -565,10 +618,15 @@
                 <input type="text" id="cityInput" placeholder="Leave empty to use GPS">
                 <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveCity()">Update Weather</button>
             </div>
+            <!-- Visually Upgraded RSS Feed Management Group -->
             <div class="form-group">
-                <label>Custom News Feeds (Separate URLs with commas)</label>
-                <input type="url" id="rssInput" placeholder="e.g., https://theverge.com, https://bleepingcomputer.com/feed/">
-                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveRSS()">Update News Feeds</button>
+                <label>Manage News Feeds</label>
+                <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+                    <input type="url" id="newRssInput" placeholder="https://theverge.com" style="margin-bottom:0;">
+                    <button class="btn btn-primary" onclick="app.addRSSFeed()">Add</button>
+                </div>
+                <!-- Dynamic Grid for active site icons -->
+                <div id="rssManagerGrid" class="rss-manager-grid"></div>
             </div>
             <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
             <div class="form-group">
@@ -592,9 +650,25 @@
 
 <script>
 const app = (() => {
+    // Core data extraction
     let data = JSON.parse(localStorage.getItem('speedDialData')) || {
-        root: [], folders: {}, bg: null, city: '', notes: '', rss: ''
+        root: [], folders: {}, bg: null, city: '', notes: '', rssFeeds: ['https://www.bleepingcomputer.com/feed/']
     };
+
+    // Background Migration: Converts old comma-separated strings to the new visual array grid format
+    if (data.rss !== undefined) {
+        if (data.rss && data.rss.trim() !== '') {
+            data.rssFeeds = data.rss.split(',').map(u => u.trim()).filter(Boolean);
+        } else if (!data.rssFeeds) {
+            data.rssFeeds = ['https://www.bleepingcomputer.com/feed/'];
+        }
+        delete data.rss;
+        localStorage.setItem('speedDialData', JSON.stringify(data));
+    }
+    if (!data.rssFeeds || data.rssFeeds.length === 0) {
+        data.rssFeeds = ['https://www.bleepingcomputer.com/feed/'];
+    }
+
     let currentFolderId = null; 
     let isEditMode = false;
     let selectedIconData = null;
@@ -611,13 +685,13 @@ const app = (() => {
     const init = () => {
         applyBg();
         render();
+        renderRSSManager(); // Renders the new settings menu grid
         fetchWeather();
         startClock(); 
         fetchRSS(); 
         setupPowerFeatures(); 
         document.getElementById('cityInput').value = data.city || '';
         document.getElementById('notesInput').value = data.notes || '';
-        document.getElementById('rssInput').value = data.rss || ''; 
         
         const grid = document.getElementById('grid');
         sortableInstance = Sortable.create(grid, {
@@ -651,14 +725,76 @@ const app = (() => {
         setInterval(update, 1000);
     };
 
-    // --- RECONFIGURED MULTI-FEED ENGINE (TYPO FIXED) ---
+    // --- VISUAL RSS FEED MANAGER (MODAL LOGIC) ---
+    const renderRSSManager = () => {
+        const grid = document.getElementById('rssManagerGrid');
+        grid.innerHTML = '';
+        
+        if(data.rssFeeds.length === 0) {
+            grid.innerHTML = '<div style="color:#aaa; font-size:0.85rem; padding: 10px; width: 100%; grid-column: 1 / -1;">No feeds active. Add one above.</div>';
+            return;
+        }
+
+        data.rssFeeds.forEach((url, index) => {
+            const item = document.createElement('div');
+            item.className = 'rss-manager-item';
+            item.title = url;
+            
+            let iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E";
+            try { 
+                const d = new URL(url).hostname; 
+                iconSrc = `https://www.google.com/s2/favicons?domain=${d}&sz=64`; 
+            } catch (e) {}
+
+            item.innerHTML = `
+                <button class="rss-delete-btn" onclick="app.removeRSSFeed(${index})">×</button>
+                <img src="${iconSrc}" onerror="this.style.display='none'" alt="site-icon">
+            `;
+            grid.appendChild(item);
+        });
+    };
+
+    const addRSSFeed = () => {
+        const input = document.getElementById('newRssInput');
+        let url = input.value.trim();
+        if (!url) return;
+        
+        // Auto-correct missing schema
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+
+        if (!data.rssFeeds.includes(url)) {
+            data.rssFeeds.push(url);
+            save();
+            renderRSSManager();
+            fetchRSS(); // Pull fresh articles instantly
+        }
+        input.value = '';
+    };
+
+    const removeRSSFeed = (index) => {
+        data.rssFeeds.splice(index, 1);
+        save();
+        renderRSSManager();
+        fetchRSS();
+    };
+    // ---------------------------------------------
+
+    // --- MASTER NEWS FEED ENGINE ---
     const fetchRSS = async () => {
         const el = document.getElementById('rssFeedList');
         const titleEl = document.getElementById('rssHeaderTitle');
         if (!el) return;
 
-        const urls = data.rss ? data.rss.split(',').map(u => u.trim()).filter(Boolean) : ['https://www.bleepingcomputer.com/feed/'];
+        const urls = data.rssFeeds;
         let masterArticleDeck = [];
+
+        if (urls.length === 0) {
+            el.innerHTML = '<div style="color: #aaa; font-size: 0.9rem; padding: 5px;">No active feeds. Open settings to map targets.</div>';
+            if (titleEl) titleEl.innerText = `📡 Threat Intelligence Stream`;
+            return;
+        }
 
         const feedPromises = urls.map(async (url) => {
             try {
@@ -742,10 +878,10 @@ const app = (() => {
         masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
 
         el.innerHTML = '';
-        if (titleEl) titleEl.innerText = `📡 Aggregated Threat Intelligence Feed`;
+        if (titleEl) titleEl.innerText = `📡 Aggregated Intelligence Stream`;
 
         if (masterArticleDeck.length === 0) {
-            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to process targets. Ensure URLs point to active feeds.</div>';
+            el.innerHTML = '<div style="color: #ef4444; font-size: 0.9rem; padding: 5px;">⚠️ Failed to parse nodes. Targets may be blocking headless requests.</div>';
             return;
         }
 
@@ -778,14 +914,6 @@ const app = (() => {
         }
     };
 
-    const saveRSS = () => {
-        data.rss = document.getElementById('rssInput').value.trim();
-        save();
-        fetchRSS();
-        closeModals();
-    };
-
-    // --- RECONFIGURED SHORTCUT AND FILTER ALIGNMENT ---
     const setupPowerFeatures = () => {
         const searchInput = document.getElementById('searchInput');
         const searchForm = document.getElementById('searchForm');
@@ -837,6 +965,8 @@ const app = (() => {
                 setTimeout(() => {
                     document.querySelectorAll('#grid .card').forEach(c => c.style.display = 'flex');
                 }, 100);
+            } else {
+                setTimeout(() => searchForm.reset(), 500);
             }
         });
 
@@ -1040,7 +1170,7 @@ const app = (() => {
     const closeModals = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
     const toggleTypeInputs = () => { document.getElementById('urlInputGroup').style.display = document.getElementById('itemType').value === 'folder' ? 'none' : 'block'; };
 
-    return { init, saveItem, deleteItem, openFolder, goHome, toggleEditMode, openAddModal, openSettings, closeModals, toggleTypeInputs, handleBgUpload, resetAll, saveCity, fetchWeather, exportData, importData, searchIcons, openNotes, saveNotes, toggleSearchEngine, saveRSS, fetchRSS };
+    return { init, saveItem, deleteItem, openFolder, goHome, toggleEditMode, openAddModal, openSettings, closeModals, toggleTypeInputs, handleBgUpload, resetAll, saveCity, fetchWeather, exportData, importData, searchIcons, openNotes, saveNotes, toggleSearchEngine, addRSSFeed, removeRSSFeed };
 })();
 
 app.init();
