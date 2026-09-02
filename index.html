@@ -174,6 +174,10 @@
       gap: 16px;
     }
 
+    .dial-card-wrapper {
+      position: relative;
+    }
+
     .dial-card {
       background: var(--bg-glass-card);
       border: 1px solid var(--border-glass);
@@ -188,6 +192,7 @@
       font-size: 13px;
       font-weight: 500;
       transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
     }
 
     .dial-card:hover {
@@ -202,11 +207,44 @@
       border-radius: 6px;
     }
 
+    .card-delete-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      color: var(--text-muted);
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .dial-card-wrapper:hover .card-delete-btn,
+    .service-card-wrapper:hover .card-delete-btn {
+      display: flex;
+    }
+
+    .card-delete-btn:hover {
+      color: var(--danger);
+      background: rgba(248, 81, 73, 0.2);
+    }
+
     /* Self-Hosted Stack Grid */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 14px;
+    }
+
+    .service-card-wrapper {
+      position: relative;
     }
 
     .service-card {
@@ -220,6 +258,7 @@
       text-decoration: none;
       color: var(--text-main);
       transition: transform 0.2s, border-color 0.2s;
+      width: 100%;
     }
 
     .service-card:hover {
@@ -295,7 +334,6 @@
       color: var(--text-main);
     }
 
-    /* Calendar Frame in Drawer */
     .drawer-calendar-frame {
       flex: 1;
       width: 100%;
@@ -386,11 +424,13 @@
       border: 1px solid var(--border-glass);
       border-radius: 16px;
       width: 90%;
-      max-width: 480px;
+      max-width: 500px;
       padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .form-group {
@@ -411,6 +451,66 @@
       padding: 10px 14px;
       border-radius: 8px;
       font-size: 14px;
+    }
+
+    /* Toggle Switches for Modules */
+    .modules-toggle-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #0d1117;
+      border: 1px solid var(--border-glass);
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: rgba(255, 255, 255, 0.15);
+      transition: .2s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
     }
 
     .modal-footer {
@@ -441,11 +541,11 @@
 </head>
 <body>
 
-  <!-- Top Utility Bar with Expandable Drawer Toggles -->
+  <!-- Top Utility Bar -->
   <header>
     <div class="widget-toggles">
-      <button class="nav-btn" onclick="toggleDrawer('calendar-drawer')">📅 Google Calendar</button>
-      <button class="nav-btn" onclick="toggleDrawer('bookmarks-drawer')">📑 Saved Bookmarks</button>
+      <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">📅 Google Calendar</button>
+      <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Saved Bookmarks</button>
     </div>
     <div>
       <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
@@ -465,8 +565,8 @@
       <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
     </form>
 
-    <!-- Speed Dials (Primary Focus) -->
-    <div class="main-panel">
+    <!-- Speed Dials (Toggleable Section) -->
+    <div class="main-panel" id="section-dials">
       <div class="panel-header">
         <span class="panel-title">⚡ Speed Dials</span>
         <button class="badge-btn" onclick="openAddDialModal()">+ Add Link</button>
@@ -474,8 +574,8 @@
       <div class="speed-dial-grid" id="speed-dials-container"></div>
     </div>
 
-    <!-- Self-Hosted & Web Apps Hub -->
-    <div class="main-panel">
+    <!-- Self-Hosted & Web Apps Hub (Toggleable Section) -->
+    <div class="main-panel" id="section-services">
       <div class="panel-header">
         <span class="panel-title">🖥 Self-Hosted Services</span>
         <button class="badge-btn" onclick="openAddServiceModal()">+ Add Service</button>
@@ -485,7 +585,7 @@
 
   </main>
 
-  <!-- Expandable Slide-Out Drawer: Google Calendar -->
+  <!-- Slide-Out Drawer: Google Calendar -->
   <aside class="drawer drawer-right" id="calendar-drawer">
     <div class="drawer-header">
       <span class="panel-title">📅 Google Calendar</span>
@@ -496,7 +596,7 @@
     </div>
   </aside>
 
-  <!-- Expandable Slide-Out Drawer: Saved Bookmarks / Read-Later -->
+  <!-- Slide-Out Drawer: Saved Bookmarks -->
   <aside class="drawer drawer-right" id="bookmarks-drawer">
     <div class="drawer-header">
       <span class="panel-title">📑 Saved Tabs & Bookmarks</span>
@@ -510,21 +610,58 @@
     <ul class="bookmarks-list" id="bookmarks-container"></ul>
   </aside>
 
-  <!-- Settings Modal -->
+  <!-- Settings Modal with Section/Module Toggles -->
   <div class="modal" id="settings-modal">
     <div class="modal-content">
-      <h3>Settings</h3>
+      <h3>Dashboard Settings</h3>
+      
       <div class="form-group">
         <label>Custom Wallpaper URL</label>
         <input type="url" id="settings-wallpaper" placeholder="https://..." />
       </div>
+
       <div class="form-group">
         <label>Google Calendar Embed URL</label>
         <input type="text" id="settings-calendar" placeholder="https://calendar.google.com/calendar/embed?src=..." />
       </div>
+
+      <div class="form-group">
+        <label>Visible Modules & Sections</label>
+        <div class="modules-toggle-list">
+          <div class="toggle-row">
+            <span>⚡ Speed Dials Grid</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-mod-dials">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <span>🖥 Self-Hosted Services</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-mod-services">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <span>📅 Google Calendar</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-mod-calendar">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <span>📑 Bookmarks Drawer</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-mod-bookmarks">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button class="btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
-        <button class="btn-primary" onclick="saveSettings()">Save</button>
+        <button class="btn-primary" onclick="saveSettings()">Save Configuration</button>
       </div>
     </div>
   </div>
@@ -572,7 +709,7 @@
   </div>
 
   <script>
-    // --- State & Defaults ---
+    // --- State Defaults ---
     const defaultDials = [
       { name: 'GitHub', url: 'https://github.com' },
       { name: 'YouTube', url: 'https://youtube.com' },
@@ -587,12 +724,20 @@
       { name: 'Tailscale', desc: 'Mesh Admin', url: 'https://login.tailscale.com/admin' }
     ];
 
+    const defaultModules = {
+      dials: true,
+      services: true,
+      calendar: true,
+      bookmarks: true
+    };
+
     let state = {
       wallpaper: localStorage.getItem('dash_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070',
       calendarUrl: localStorage.getItem('dash_calendar') || '',
       dials: JSON.parse(localStorage.getItem('dash_dials')) || defaultDials,
       bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
-      services: JSON.parse(localStorage.getItem('dash_services')) || defaultServices
+      services: JSON.parse(localStorage.getItem('dash_services')) || defaultServices,
+      modules: JSON.parse(localStorage.getItem('dash_modules')) || defaultModules
     };
 
     // --- Search Handling ---
@@ -614,25 +759,81 @@
     // --- Drawer Toggles ---
     function toggleDrawer(drawerId) {
       const drawer = document.getElementById(drawerId);
-      // Close other drawers if open
       document.querySelectorAll('.drawer').forEach(d => {
         if (d.id !== drawerId) d.classList.remove('open');
       });
       drawer.classList.toggle('open');
     }
 
-    // --- Renders ---
+    // --- Dynamic Section Visibility ---
+    function applyModuleVisibility() {
+      // Speed Dials Section
+      document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
+      
+      // Services Section
+      document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
+
+      // Calendar Navigation & Drawer
+      document.getElementById('nav-btn-calendar').style.display = state.modules.calendar ? 'inline-block' : 'none';
+      if (!state.modules.calendar) document.getElementById('calendar-drawer').classList.remove('open');
+
+      // Bookmarks Navigation & Drawer
+      document.getElementById('nav-btn-bookmarks').style.display = state.modules.bookmarks ? 'inline-block' : 'none';
+      if (!state.modules.bookmarks) document.getElementById('bookmarks-drawer').classList.remove('open');
+    }
+
+    // --- Render Functions with Individual Deletion ---
     function renderDials() {
       const container = document.getElementById('speed-dials-container');
-      container.innerHTML = state.dials.map(dial => {
-        const domain = new URL(dial.url).hostname;
+      if (state.dials.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No speed dials added.</div>';
+        return;
+      }
+      container.innerHTML = state.dials.map((dial, idx) => {
+        let domain = 'example.com';
+        try { domain = new URL(dial.url).hostname; } catch(e){}
         return `
-          <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener">
-            <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="${dial.name}" />
-            <span>${dial.name}</span>
-          </a>
+          <div class="dial-card-wrapper">
+            <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener">
+              <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="${dial.name}" />
+              <span>${dial.name}</span>
+            </a>
+            <button class="card-delete-btn" title="Remove" onclick="removeDial(${idx})">&times;</button>
+          </div>
         `;
       }).join('');
+    }
+
+    function removeDial(idx) {
+      state.dials.splice(idx, 1);
+      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+      renderDials();
+    }
+
+    function renderServices() {
+      const container = document.getElementById('services-container');
+      if (state.services.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No hosted services configured.</div>';
+        return;
+      }
+      container.innerHTML = state.services.map((srv, idx) => `
+        <div class="service-card-wrapper">
+          <a href="${srv.url}" class="service-card" target="_blank" rel="noopener">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="name">${srv.name}</span>
+              <span class="status-dot"></span>
+            </div>
+            <span class="desc">${srv.desc}</span>
+          </a>
+          <button class="card-delete-btn" title="Remove" onclick="removeService(${idx})">&times;</button>
+        </div>
+      `).join('');
+    }
+
+    function removeService(idx) {
+      state.services.splice(idx, 1);
+      localStorage.setItem('dash_services', JSON.stringify(state.services));
+      renderServices();
     }
 
     function renderBookmarks() {
@@ -649,35 +850,12 @@
       `).join('');
     }
 
-    function renderServices() {
-      const container = document.getElementById('services-container');
-      container.innerHTML = state.services.map(srv => `
-        <a href="${srv.url}" class="service-card" target="_blank" rel="noopener">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="name">${srv.name}</span>
-            <span class="status-dot"></span>
-          </div>
-          <span class="desc">${srv.desc}</span>
-        </a>
-      `).join('');
+    function removeBookmark(idx) {
+      state.bookmarks.splice(idx, 1);
+      localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
+      renderBookmarks();
     }
 
-    function applySettings() {
-      document.body.style.backgroundImage = `url('${state.wallpaper}')`;
-      const calFrame = document.getElementById('calendar-frame');
-      if (state.calendarUrl) {
-        calFrame.src = state.calendarUrl;
-      } else {
-        calFrame.srcdoc = `
-          <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:85vh; color:#8b949e; font-family:sans-serif; text-align:center; padding: 20px;">
-            <p><strong>Google Calendar Not Configured</strong></p>
-            <p style="font-size:13px; margin-top:8px;">Open Settings, paste your calendar embed URL, and click Save.</p>
-          </body>
-        `;
-      }
-    }
-
-    // --- Bookmarks Logic ---
     function addBookmark() {
       const titleInput = document.getElementById('bm-title');
       const urlInput = document.getElementById('bm-url');
@@ -694,16 +872,32 @@
       renderBookmarks();
     }
 
-    function removeBookmark(idx) {
-      state.bookmarks.splice(idx, 1);
-      localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
-      renderBookmarks();
+    function applySettings() {
+      document.body.style.backgroundImage = `url('${state.wallpaper}')`;
+      const calFrame = document.getElementById('calendar-frame');
+      if (state.calendarUrl) {
+        calFrame.src = state.calendarUrl;
+      } else {
+        calFrame.srcdoc = `
+          <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:85vh; color:#8b949e; font-family:sans-serif; text-align:center; padding: 20px;">
+            <p><strong>Google Calendar Not Configured</strong></p>
+            <p style="font-size:13px; margin-top:8px;">Open Settings, paste your calendar embed URL, and click Save.</p>
+          </body>
+        `;
+      }
+      applyModuleVisibility();
     }
 
-    // --- Modals ---
+    // --- Modals & Configuration ---
     function openSettingsModal() {
       document.getElementById('settings-wallpaper').value = state.wallpaper;
       document.getElementById('settings-calendar').value = state.calendarUrl;
+      
+      document.getElementById('toggle-mod-dials').checked = state.modules.dials;
+      document.getElementById('toggle-mod-services').checked = state.modules.services;
+      document.getElementById('toggle-mod-calendar').checked = state.modules.calendar;
+      document.getElementById('toggle-mod-bookmarks').checked = state.modules.bookmarks;
+
       document.getElementById('settings-modal').style.display = 'flex';
     }
 
@@ -728,6 +922,16 @@
       }
       state.calendarUrl = cal;
       localStorage.setItem('dash_calendar', cal);
+
+      // Save module toggles
+      state.modules = {
+        dials: document.getElementById('toggle-mod-dials').checked,
+        services: document.getElementById('toggle-mod-services').checked,
+        calendar: document.getElementById('toggle-mod-calendar').checked,
+        bookmarks: document.getElementById('toggle-mod-bookmarks').checked
+      };
+      localStorage.setItem('dash_modules', JSON.stringify(state.modules));
+
       applySettings();
       closeModal('settings-modal');
     }
