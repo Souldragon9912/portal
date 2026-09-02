@@ -6,6 +6,7 @@
   <title>Command Center</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg-glass: rgba(22, 27, 34, 0.75);
@@ -285,7 +286,7 @@
       color: var(--text-muted);
     }
 
-    /* Slide-out Drawers (Calendar & Bookmarks) */
+    /* Slide-out Drawers */
     .drawer {
       position: fixed;
       top: 0;
@@ -334,22 +335,58 @@
       color: var(--text-main);
     }
 
-    .drawer-calendar-frame {
-      flex: 1;
-      width: 100%;
-      border-radius: 12px;
+    /* Google Calendar Auth & Events UI */
+    .cal-auth-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 14px;
+      padding: 40px 16px;
+      background: var(--bg-glass-card);
       border: 1px solid var(--border-glass);
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
     }
 
-    .drawer-calendar-frame iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .events-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
     }
 
-    /* Bookmarks Manager in Drawer */
+    .cal-event-card {
+      background: var(--bg-glass-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.2s;
+    }
+
+    .cal-event-card:hover {
+      border-color: var(--accent);
+    }
+
+    .cal-event-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .cal-event-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* Bookmarks Drawer */
     .bookmark-input-group {
       display: flex;
       flex-direction: column;
@@ -453,7 +490,6 @@
       font-size: 14px;
     }
 
-    /* Toggle Switches for Modules */
     .modules-toggle-list {
       display: flex;
       flex-direction: column;
@@ -541,7 +577,6 @@
 </head>
 <body>
 
-  <!-- Top Utility Bar -->
   <header>
     <div class="widget-toggles">
       <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">📅 Google Calendar</button>
@@ -552,10 +587,8 @@
     </div>
   </header>
 
-  <!-- Central Main Focus -->
   <main class="hero-container">
     
-    <!-- Quick Search Bar -->
     <form class="search-box" id="search-form">
       <select id="engine-select">
         <option value="https://www.google.com/search?q=">Google</option>
@@ -565,7 +598,6 @@
       <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
     </form>
 
-    <!-- Speed Dials (Toggleable Section) -->
     <div class="main-panel" id="section-dials">
       <div class="panel-header">
         <span class="panel-title">⚡ Speed Dials</span>
@@ -574,7 +606,6 @@
       <div class="speed-dial-grid" id="speed-dials-container"></div>
     </div>
 
-    <!-- Self-Hosted & Web Apps Hub (Toggleable Section) -->
     <div class="main-panel" id="section-services">
       <div class="panel-header">
         <span class="panel-title">🖥 Self-Hosted Services</span>
@@ -585,18 +616,29 @@
 
   </main>
 
-  <!-- Slide-Out Drawer: Google Calendar -->
   <aside class="drawer drawer-right" id="calendar-drawer">
     <div class="drawer-header">
       <span class="panel-title">📅 Google Calendar</span>
       <button class="drawer-close" onclick="toggleDrawer('calendar-drawer')">&times;</button>
     </div>
-    <div class="drawer-calendar-frame">
-      <iframe id="calendar-frame" src="" loading="lazy"></iframe>
+
+    <div class="cal-auth-box" id="cal-auth-section">
+      <p style="color: var(--text-muted); font-size: 13px;">Sign in with your Google account to sync your schedule directly into this dashboard.</p>
+      <button class="nav-btn" style="background: var(--accent); color: #fff; padding: 10px 18px;" onclick="handleGoogleAuth()">Sign in with Google</button>
+    </div>
+
+    <div class="events-container" id="cal-events-section" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 12px; color: var(--text-muted);">Upcoming Events</span>
+        <div style="display: flex; gap: 8px;">
+          <button class="badge-btn" onclick="fetchCalendarEvents()">Refresh</button>
+          <button class="badge-btn" style="color: var(--danger); border-color: rgba(248,81,73,0.3);" onclick="handleGoogleSignout()">Sign Out</button>
+        </div>
+      </div>
+      <div id="calendar-event-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
   </aside>
 
-  <!-- Slide-Out Drawer: Saved Bookmarks -->
   <aside class="drawer drawer-right" id="bookmarks-drawer">
     <div class="drawer-header">
       <span class="panel-title">📑 Saved Tabs & Bookmarks</span>
@@ -610,7 +652,6 @@
     <ul class="bookmarks-list" id="bookmarks-container"></ul>
   </aside>
 
-  <!-- Settings Modal with Section/Module Toggles -->
   <div class="modal" id="settings-modal">
     <div class="modal-content">
       <h3>Dashboard Settings</h3>
@@ -621,8 +662,8 @@
       </div>
 
       <div class="form-group">
-        <label>Google Calendar Embed URL</label>
-        <input type="text" id="settings-calendar" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+        <label>Google OAuth Client ID (<a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: var(--accent);">Get One</a>)</label>
+        <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
       </div>
 
       <div class="form-group">
@@ -666,7 +707,6 @@
     </div>
   </div>
 
-  <!-- Add Speed Dial Modal -->
   <div class="modal" id="dial-modal">
     <div class="modal-content">
       <h3>Add Speed Dial</h3>
@@ -685,7 +725,6 @@
     </div>
   </div>
 
-  <!-- Add Service Modal -->
   <div class="modal" id="service-modal">
     <div class="modal-content">
       <h3>Add Service</h3>
@@ -733,12 +772,15 @@
 
     let state = {
       wallpaper: localStorage.getItem('dash_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070',
-      calendarUrl: localStorage.getItem('dash_calendar') || '',
+      googleClientId: localStorage.getItem('dash_google_client_id') || '',
+      googleToken: localStorage.getItem('dash_google_token') || null,
       dials: JSON.parse(localStorage.getItem('dash_dials')) || defaultDials,
       bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
       services: JSON.parse(localStorage.getItem('dash_services')) || defaultServices,
       modules: JSON.parse(localStorage.getItem('dash_modules')) || defaultModules
     };
+
+    let tokenClient = null;
 
     // --- Search Handling ---
     document.getElementById('search-form').addEventListener('submit', (e) => {
@@ -765,24 +807,17 @@
       drawer.classList.toggle('open');
     }
 
-    // --- Dynamic Section Visibility ---
+    // --- Section Visibility ---
     function applyModuleVisibility() {
-      // Speed Dials Section
       document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
-      
-      // Services Section
       document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
-
-      // Calendar Navigation & Drawer
       document.getElementById('nav-btn-calendar').style.display = state.modules.calendar ? 'inline-block' : 'none';
       if (!state.modules.calendar) document.getElementById('calendar-drawer').classList.remove('open');
-
-      // Bookmarks Navigation & Drawer
       document.getElementById('nav-btn-bookmarks').style.display = state.modules.bookmarks ? 'inline-block' : 'none';
       if (!state.modules.bookmarks) document.getElementById('bookmarks-drawer').classList.remove('open');
     }
 
-    // --- Render Functions with Individual Deletion ---
+    // --- Speed Dials ---
     function renderDials() {
       const container = document.getElementById('speed-dials-container');
       if (state.dials.length === 0) {
@@ -810,6 +845,19 @@
       renderDials();
     }
 
+    function saveNewDial() {
+      const name = document.getElementById('dial-title').value.trim();
+      let url = document.getElementById('dial-url').value.trim();
+      if (!name || !url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+      state.dials.push({ name, url });
+      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+      renderDials();
+      closeModal('dial-modal');
+    }
+
+    // --- Self-Hosted Services ---
     function renderServices() {
       const container = document.getElementById('services-container');
       if (state.services.length === 0) {
@@ -836,6 +884,19 @@
       renderServices();
     }
 
+    function saveNewService() {
+      const name = document.getElementById('srv-name').value.trim();
+      const desc = document.getElementById('srv-desc').value.trim();
+      const url = document.getElementById('srv-url').value.trim();
+      if (!name || !url) return;
+
+      state.services.push({ name, desc, url });
+      localStorage.setItem('dash_services', JSON.stringify(state.services));
+      renderServices();
+      closeModal('service-modal');
+    }
+
+    // --- Bookmarks ---
     function renderBookmarks() {
       const container = document.getElementById('bookmarks-container');
       if (state.bookmarks.length === 0) {
@@ -848,12 +909,6 @@
           <button onclick="removeBookmark(${idx})">&times;</button>
         </li>
       `).join('');
-    }
-
-    function removeBookmark(idx) {
-      state.bookmarks.splice(idx, 1);
-      localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
-      renderBookmarks();
     }
 
     function addBookmark() {
@@ -872,27 +927,112 @@
       renderBookmarks();
     }
 
-    function applySettings() {
-      document.body.style.backgroundImage = `url('${state.wallpaper}')`;
-      const calFrame = document.getElementById('calendar-frame');
-      if (state.calendarUrl) {
-        calFrame.src = state.calendarUrl;
-      } else {
-        calFrame.srcdoc = `
-          <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:85vh; color:#8b949e; font-family:sans-serif; text-align:center; padding: 20px;">
-            <p><strong>Google Calendar Not Configured</strong></p>
-            <p style="font-size:13px; margin-top:8px;">Open Settings, paste your calendar embed URL, and click Save.</p>
-          </body>
-        `;
-      }
-      applyModuleVisibility();
+    function removeBookmark(idx) {
+      state.bookmarks.splice(idx, 1);
+      localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
+      renderBookmarks();
     }
 
-    // --- Modals & Configuration ---
+    // --- Google Calendar OAuth2 & API ---
+    function initGoogleAuth() {
+      if (typeof google === 'undefined' || !state.googleClientId) return;
+
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: state.googleClientId,
+        scope: 'https://www.googleapis.com/auth/calendar.events.readonly',
+        callback: (res) => {
+          if (res && res.access_token) {
+            state.googleToken = res.access_token;
+            localStorage.setItem('dash_google_token', state.googleToken);
+            fetchCalendarEvents();
+          }
+        },
+      });
+
+      if (state.googleToken) {
+        fetchCalendarEvents();
+      }
+    }
+
+    function handleGoogleAuth() {
+      if (!state.googleClientId) {
+        alert('Please add your Google OAuth Client ID in Settings first.');
+        openSettingsModal();
+        return;
+      }
+      if (!tokenClient) initGoogleAuth();
+      if (tokenClient) {
+        tokenClient.requestAccessToken({ prompt: '' });
+      }
+    }
+
+    function handleGoogleSignout() {
+      if (state.googleToken) {
+        google.accounts.oauth2.revoke(state.googleToken, () => {
+          state.googleToken = null;
+          localStorage.removeItem('dash_google_token');
+          document.getElementById('cal-auth-section').style.display = 'flex';
+          document.getElementById('cal-events-section').style.display = 'none';
+        });
+      }
+    }
+
+    async function fetchCalendarEvents() {
+      if (!state.googleToken) return;
+
+      try {
+        const timeMin = new Date().toISOString();
+        const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&maxResults=20&singleEvents=true&orderBy=startTime`;
+
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${state.googleToken}` }
+        });
+
+        if (res.status === 401) {
+          // Token expired
+          handleGoogleSignout();
+          return;
+        }
+
+        const data = await res.json();
+        renderCalendarEvents(data.items || []);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+      }
+    }
+
+    function renderCalendarEvents(events) {
+      const container = document.getElementById('calendar-event-list');
+      document.getElementById('cal-auth-section').style.display = 'none';
+      document.getElementById('cal-events-section').style.display = 'flex';
+
+      if (events.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No upcoming events.</div>';
+        return;
+      }
+
+      container.innerHTML = events.map(evt => {
+        const start = evt.start.dateTime ? new Date(evt.start.dateTime) : new Date(evt.start.date);
+        const dateStr = start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        const timeStr = evt.start.dateTime ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'All Day';
+
+        return `
+          <div class="cal-event-card">
+            <span class="cal-event-title">${evt.summary || 'Untitled Event'}</span>
+            <div class="cal-event-meta">
+              <span>${dateStr}</span>
+              <span>${timeStr}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Modals & General Settings ---
     function openSettingsModal() {
       document.getElementById('settings-wallpaper').value = state.wallpaper;
-      document.getElementById('settings-calendar').value = state.calendarUrl;
-      
+      document.getElementById('settings-client-id').value = state.googleClientId;
+
       document.getElementById('toggle-mod-dials').checked = state.modules.dials;
       document.getElementById('toggle-mod-services').checked = state.modules.services;
       document.getElementById('toggle-mod-calendar').checked = state.modules.calendar;
@@ -915,15 +1055,17 @@
 
     function saveSettings() {
       const wp = document.getElementById('settings-wallpaper').value.trim();
-      const cal = document.getElementById('settings-calendar').value.trim();
+      const cid = document.getElementById('settings-client-id').value.trim();
+
       if (wp) {
         state.wallpaper = wp;
         localStorage.setItem('dash_wallpaper', wp);
+        document.body.style.backgroundImage = `url('${state.wallpaper}')`;
       }
-      state.calendarUrl = cal;
-      localStorage.setItem('dash_calendar', cal);
 
-      // Save module toggles
+      state.googleClientId = cid;
+      localStorage.setItem('dash_google_client_id', cid);
+
       state.modules = {
         dials: document.getElementById('toggle-mod-dials').checked,
         services: document.getElementById('toggle-mod-services').checked,
@@ -932,39 +1074,20 @@
       };
       localStorage.setItem('dash_modules', JSON.stringify(state.modules));
 
-      applySettings();
+      applyModuleVisibility();
+      initGoogleAuth();
       closeModal('settings-modal');
     }
 
-    function saveNewDial() {
-      const name = document.getElementById('dial-title').value.trim();
-      let url = document.getElementById('dial-url').value.trim();
-      if (!name || !url) return;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
-
-      state.dials.push({ name, url });
-      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+    // --- Boot ---
+    window.addEventListener('load', () => {
+      document.body.style.backgroundImage = `url('${state.wallpaper}')`;
       renderDials();
-      closeModal('dial-modal');
-    }
-
-    function saveNewService() {
-      const name = document.getElementById('srv-name').value.trim();
-      const desc = document.getElementById('srv-desc').value.trim();
-      const url = document.getElementById('srv-url').value.trim();
-      if (!name || !url) return;
-
-      state.services.push({ name, desc, url });
-      localStorage.setItem('dash_services', JSON.stringify(state.services));
+      renderBookmarks();
       renderServices();
-      closeModal('service-modal');
-    }
-
-    // Init
-    renderDials();
-    renderBookmarks();
-    renderServices();
-    applySettings();
+      applyModuleVisibility();
+      setTimeout(initGoogleAuth, 500);
+    });
   </script>
 </body>
 </html>
