@@ -19,6 +19,12 @@
       --accent-hover: #1f6feb;
       --accent-glow: rgba(88, 166, 255, 0.35);
       --danger: #f85149;
+      
+      /* Default Animated Border Colors (Google) */
+      --se-c1: #4285F4; 
+      --se-c2: #EA4335; 
+      --se-c3: #FBBC05; 
+      --se-c4: #34A853;
     }
 
     * {
@@ -79,7 +85,7 @@
       border-color: var(--accent);
     }
 
-    /* Central Search & Hero Section */
+    /* Central Search & Animated Border */
     .hero-container {
       width: 100%;
       max-width: 1100px;
@@ -89,20 +95,48 @@
       gap: 28px;
     }
 
-    .search-box {
+    .search-box-wrapper {
+      position: relative;
+      padding: 2px; /* Border thickness */
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
       width: 100%;
       max-width: 680px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .search-box-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300%;
+      height: 300%;
+      background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1));
+      transform: translate(-50%, -50%) rotate(0deg);
+      animation: spin-border 4s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes spin-border {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .search-box {
+      position: relative;
+      z-index: 1;
+      width: 100%;
       display: flex;
       gap: 10px;
-      background: var(--bg-glass);
-      backdrop-filter: blur(16px);
+      background: rgba(18, 22, 28, 0.95); /* Opaque enough to hide the inner gradient */
       padding: 8px;
       border-radius: 14px;
-      border: 1px solid var(--border-glass);
     }
 
     .search-box select {
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.05);
       color: var(--text-main);
       border: 1px solid var(--border-glass);
       padding: 10px 14px;
@@ -113,19 +147,18 @@
 
     .search-box input {
       flex: 1;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-glass);
       padding: 12px 18px;
       border-radius: 10px;
       color: var(--text-main);
       font-size: 15px;
       outline: none;
-      transition: border 0.2s, box-shadow 0.2s;
+      transition: background 0.2s;
     }
 
     .search-box input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
+      background: rgba(255, 255, 255, 0.1);
     }
 
     /* Content Panels */
@@ -465,7 +498,7 @@
       border: 1px solid var(--border-glass);
       border-radius: 16px;
       width: 90%;
-      max-width: 520px;
+      max-width: 540px;
       padding: 24px;
       display: flex;
       flex-direction: column;
@@ -492,6 +525,33 @@
       padding: 10px 14px;
       border-radius: 8px;
       font-size: 14px;
+    }
+
+    /* Search Engine Settings Form */
+    .se-settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .se-settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.2);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-glass);
+      font-size: 12px;
+    }
+    
+    .se-settings-item .se-color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
     }
 
     .modules-toggle-list {
@@ -595,15 +655,13 @@
   <!-- Central Main Focus -->
   <main class="hero-container">
     
-    <!-- Quick Search Bar -->
-    <form class="search-box" id="search-form">
-      <select id="engine-select">
-        <option value="https://www.google.com/search?q=">Google</option>
-        <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-        <option value="https://www.bing.com/search?q=">Bing</option>
-      </select>
-      <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
-    </form>
+    <!-- Quick Search Bar (Wrapped for Animated Glowing Border) -->
+    <div class="search-box-wrapper" id="search-wrapper">
+      <form class="search-box" id="search-form">
+        <select id="engine-select" onchange="changeActiveEngine(this.value)"></select>
+        <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
+      </form>
+    </div>
 
     <!-- Speed Dials (Toggleable Section) -->
     <div class="main-panel" id="section-dials">
@@ -631,14 +689,10 @@
       <span class="panel-title">📅 Google Calendar</span>
       <button class="drawer-close" onclick="toggleDrawer('calendar-drawer')">&times;</button>
     </div>
-
-    <!-- Unauthenticated State -->
     <div class="cal-auth-box" id="cal-auth-section">
       <p style="color: var(--text-muted); font-size: 13px;">Sign in with your Google account to sync your schedule directly into this dashboard.</p>
       <button class="nav-btn" style="background: var(--accent); color: #fff; padding: 10px 18px;" onclick="handleGoogleAuth()">Sign in with Google</button>
     </div>
-
-    <!-- Authenticated Events Feed -->
     <div class="events-container" id="cal-events-section" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
         <span style="font-size: 12px; color: var(--text-muted);">Upcoming Events</span>
@@ -665,7 +719,7 @@
     <ul class="bookmarks-list" id="bookmarks-container"></ul>
   </aside>
 
-  <!-- Settings Modal with Inline Directions -->
+  <!-- Settings Modal with Search Engine Config -->
   <div class="modal" id="settings-modal">
     <div class="modal-content">
       <h3>Dashboard Settings</h3>
@@ -675,24 +729,19 @@
         <input type="url" id="settings-wallpaper" placeholder="https://..." />
       </div>
 
-      <div class="form-group">
-        <label>Google OAuth Client ID</label>
-        <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
+      <!-- Search Engine Configuration -->
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Search Engines</label>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Add custom search endpoints (e.g. SearXNG, Brave Search). Pick an accent color to update the border's aura effect.</p>
         
-        <!-- Collapsible Directions -->
-        <details style="margin-top: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer;">
-          <summary style="color: var(--accent); user-select: none;">Need a Client ID? Click for setup instructions</summary>
-          <div style="background: #0d1117; padding: 12px; border-radius: 8px; margin-top: 8px; line-height: 1.5; border: 1px solid var(--border-glass);">
-            <ol style="padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
-              <li>Go to <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--accent);">console.cloud.google.com</a> and create a <strong>New Project</strong>.</li>
-              <li>Go to <strong>APIs & Services &gt; Library</strong>, search for <strong>Google Calendar API</strong>, and click <strong>Enable</strong>.</li>
-              <li>Go to <strong>OAuth consent screen</strong>, pick <strong>External</strong>, name the app "Dashboard", and save.</li>
-              <li>Go to <strong>Credentials &gt; Create Credentials &gt; OAuth client ID</strong>.</li>
-              <li>Set Application Type to <strong>Web application</strong>. Under <em>Authorized JavaScript origins</em>, enter your dashboard address (e.g., <code>http://localhost</code> or your server IP).</li>
-              <li>Click <strong>Create</strong>, copy the <strong>Client ID</strong>, paste it into the field above, and click <strong>Save Configuration</strong>.</li>
-            </ol>
-          </div>
-        </details>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="new-se-name" placeholder="Name" style="flex: 1;" />
+          <input type="url" id="new-se-url" placeholder="URL + ?q=" style="flex: 2;" title="Must end in the query parameter, e.g. https://search.brave.com/search?q=" />
+          <input type="color" id="new-se-color" value="#ff2000" style="width: 38px; height: 38px; padding: 2px; border: 1px solid var(--border-glass); border-radius: 6px; cursor: pointer;" title="Accent Color" />
+          <button class="badge-btn" onclick="addSearchEngine()">Add</button>
+        </div>
+        
+        <div class="se-settings-list" id="custom-engines-list"></div>
       </div>
 
       <div class="form-group">
@@ -709,20 +758,6 @@
             <span>🖥 Self-Hosted Services</span>
             <label class="toggle-switch">
               <input type="checkbox" id="toggle-mod-services">
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="toggle-row">
-            <span>📅 Google Calendar</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-mod-calendar">
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="toggle-row">
-            <span>📑 Bookmarks Drawer</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-mod-bookmarks">
               <span class="slider"></span>
             </label>
           </div>
@@ -794,12 +829,12 @@
       { name: 'Tailscale', desc: 'Mesh Admin', url: 'https://login.tailscale.com/admin' }
     ];
 
-    const defaultModules = {
-      dials: true,
-      services: true,
-      calendar: true,
-      bookmarks: true
-    };
+    // Core default search engines and their multi-color gradient arrays
+    const defaultSearchEngines = [
+      { id: 'se_google', name: 'Google', url: 'https://www.google.com/search?q=', colors: ['#4285F4', '#EA4335', '#FBBC05', '#34A853'], isCustom: false },
+      { id: 'se_ddg', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', colors: ['#DE5833', '#FFA07A', '#DE5833', '#FFA07A'], isCustom: false },
+      { id: 'se_bing', name: 'Bing', url: 'https://www.bing.com/search?q=', colors: ['#00809D', '#0063B1', '#00A2ED', '#00809D'], isCustom: false }
+    ];
 
     let state = {
       wallpaper: localStorage.getItem('dash_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070',
@@ -808,12 +843,96 @@
       dials: JSON.parse(localStorage.getItem('dash_dials')) || defaultDials,
       bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
       services: JSON.parse(localStorage.getItem('dash_services')) || defaultServices,
-      modules: JSON.parse(localStorage.getItem('dash_modules')) || defaultModules
+      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, calendar: true, bookmarks: true },
+      searchEngines: JSON.parse(localStorage.getItem('dash_search_engines')) || defaultSearchEngines,
+      activeEngineId: localStorage.getItem('dash_active_engine') || 'se_google'
     };
 
     let tokenClient = null;
 
-    // --- Search Handling ---
+    // --- Search Engine & Animated Border Logic ---
+    function renderEngineDropdown() {
+      const select = document.getElementById('engine-select');
+      select.innerHTML = state.searchEngines.map(engine => 
+        `<option value="${engine.id}" ${state.activeEngineId === engine.id ? 'selected' : ''}>${engine.name}</option>`
+      ).join('');
+      
+      // Ensure border colors load correctly on boot
+      changeActiveEngine(state.activeEngineId);
+    }
+
+    function changeActiveEngine(engineId) {
+      const engine = state.searchEngines.find(e => e.id === engineId) || state.searchEngines[0];
+      state.activeEngineId = engine.id;
+      localStorage.setItem('dash_active_engine', engine.id);
+
+      // Dynamically update CSS root variables to shift the border's glow colors
+      const root = document.documentElement;
+      root.style.setProperty('--se-c1', engine.colors[0]);
+      root.style.setProperty('--se-c2', engine.colors[1]);
+      root.style.setProperty('--se-c3', engine.colors[2]);
+      root.style.setProperty('--se-c4', engine.colors[3]);
+    }
+
+    // --- Settings UI for Custom Search Engines ---
+    function renderCustomEnginesList() {
+      const listContainer = document.getElementById('custom-engines-list');
+      const customEngines = state.searchEngines.filter(e => e.isCustom);
+      
+      if (customEngines.length === 0) {
+        listContainer.innerHTML = '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>';
+        return;
+      }
+      
+      listContainer.innerHTML = customEngines.map(e => `
+        <div class="se-settings-item">
+          <div style="display:flex; align-items:center;">
+            <span class="se-color-dot" style="background: ${e.colors[0]}"></span>
+            <strong>${e.name}</strong>
+          </div>
+          <button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button>
+        </div>
+      `).join('');
+    }
+
+    function addSearchEngine() {
+      const name = document.getElementById('new-se-name').value.trim();
+      const url = document.getElementById('new-se-url').value.trim();
+      const color = document.getElementById('new-se-color').value;
+
+      if (!name || !url) return;
+
+      // If user supplies 1 accent color, we build a 4-stop radar gradient sweeping into darkness
+      const customColors = [color, '#12161c', color, '#12161c'];
+      const newEngine = {
+        id: 'se_custom_' + Date.now(),
+        name: name,
+        url: url,
+        colors: customColors,
+        isCustom: true
+      };
+
+      state.searchEngines.push(newEngine);
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
+      
+      document.getElementById('new-se-name').value = '';
+      document.getElementById('new-se-url').value = '';
+      
+      renderCustomEnginesList();
+      renderEngineDropdown();
+    }
+
+    function removeSearchEngine(id) {
+      state.searchEngines = state.searchEngines.filter(e => e.id !== id);
+      if (state.activeEngineId === id) {
+        state.activeEngineId = 'se_google';
+      }
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
+      renderCustomEnginesList();
+      renderEngineDropdown();
+    }
+
+    // --- Search Submission ---
     document.getElementById('search-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const query = document.getElementById('search-input').value.trim();
@@ -824,8 +943,9 @@
       } else if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(query)) {
         window.open('http://' + query, '_blank');
       } else {
-        const engine = document.getElementById('engine-select').value;
-        window.location.href = engine + encodeURIComponent(query);
+        const activeEngine = state.searchEngines.find(eng => eng.id === state.activeEngineId);
+        const searchUrl = activeEngine ? activeEngine.url : 'https://www.google.com/search?q=';
+        window.location.href = searchUrl + encodeURIComponent(query);
       }
     });
 
@@ -838,7 +958,6 @@
       drawer.classList.toggle('open');
     }
 
-    // --- Section Visibility ---
     function applyModuleVisibility() {
       document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
       document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
@@ -848,7 +967,7 @@
       if (!state.modules.bookmarks) document.getElementById('bookmarks-drawer').classList.remove('open');
     }
 
-    // --- Speed Dials ---
+    // --- Speed Dials & Services ---
     function renderDials() {
       const container = document.getElementById('speed-dials-container');
       if (state.dials.length === 0) {
@@ -888,7 +1007,6 @@
       closeModal('dial-modal');
     }
 
-    // --- Self-Hosted Services ---
     function renderServices() {
       const container = document.getElementById('services-container');
       if (state.services.length === 0) {
@@ -1068,6 +1186,7 @@
       document.getElementById('toggle-mod-calendar').checked = state.modules.calendar;
       document.getElementById('toggle-mod-bookmarks').checked = state.modules.bookmarks;
 
+      renderCustomEnginesList();
       document.getElementById('settings-modal').style.display = 'flex';
     }
 
@@ -1112,6 +1231,7 @@
     // --- Boot ---
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
+      renderEngineDropdown();
       renderDials();
       renderBookmarks();
       renderServices();
