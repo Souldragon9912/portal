@@ -6,7 +6,6 @@
   <title>Command Center</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
@@ -676,7 +675,6 @@
 </head>
 <body>
 
-  <!-- Top Utility Bar -->
   <header>
     <div class="widget-toggles">
       <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">📅 Google Calendar</button>
@@ -687,10 +685,8 @@
     </div>
   </header>
 
-  <!-- Central Main Focus -->
   <main class="hero-container">
     
-    <!-- Quick Search Bar -->
     <form class="search-box" id="search-form">
       <select id="engine-select">
         <option value="https://www.google.com/search?q=">Google</option>
@@ -700,7 +696,6 @@
       <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
     </form>
 
-    <!-- Speed Dials (Toggleable Section) -->
     <div class="main-panel" id="section-dials">
       <div class="panel-header">
         <span class="panel-title">⚡ Speed Dials</span>
@@ -709,7 +704,6 @@
       <div class="speed-dial-grid" id="speed-dials-container"></div>
     </div>
 
-    <!-- Self-Hosted Hub (Toggleable Section) -->
     <div class="main-panel" id="section-services">
       <div class="panel-header">
         <span class="panel-title">🖥 Self-Hosted Services</span>
@@ -720,7 +714,6 @@
 
   </main>
 
-  <!-- Compact Draggable Floating Window / In-Page Embed Viewer -->
   <div id="embed-viewer">
     <div class="embed-bar" id="embed-bar">
       <div class="title-group">
@@ -735,20 +728,17 @@
     <iframe id="embed-frame" src="about:blank"></iframe>
   </div>
 
-  <!-- Slide-Out Drawer: Native Google Calendar API -->
   <aside class="drawer drawer-right" id="calendar-drawer">
     <div class="drawer-header">
       <span class="panel-title">📅 Google Calendar</span>
       <button class="drawer-close" onclick="toggleDrawer('calendar-drawer')">&times;</button>
     </div>
 
-    <!-- Unauthenticated State -->
     <div class="cal-auth-box" id="cal-auth-section">
       <p style="color: var(--text-muted); font-size: 13px;">Sign in with your Google account to sync your schedule directly into this dashboard.</p>
       <button class="nav-btn" style="background: var(--accent); color: #fff; padding: 10px 18px;" onclick="handleGoogleAuth()">Sign in with Google</button>
     </div>
 
-    <!-- Authenticated Events Feed -->
     <div class="events-container" id="cal-events-section" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
         <span style="font-size: 12px; color: var(--text-muted);">Upcoming Events</span>
@@ -761,7 +751,6 @@
     </div>
   </aside>
 
-  <!-- Slide-Out Drawer: Saved Bookmarks -->
   <aside class="drawer drawer-right" id="bookmarks-drawer">
     <div class="drawer-header">
       <span class="panel-title">📑 Saved Tabs & Bookmarks</span>
@@ -775,7 +764,6 @@
     <ul class="bookmarks-list" id="bookmarks-container"></ul>
   </aside>
 
-  <!-- Settings Modal with Inline Directions -->
   <div class="modal" id="settings-modal">
     <div class="modal-content">
       <h3>Dashboard Settings</h3>
@@ -789,7 +777,6 @@
         <label>Google OAuth Client ID</label>
         <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
         
-        <!-- Collapsible Directions -->
         <details style="margin-top: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer;">
           <summary style="color: var(--accent); user-select: none;">Need a Client ID? Click for setup instructions</summary>
           <div style="background: #0d1117; padding: 12px; border-radius: 8px; margin-top: 8px; line-height: 1.5; border: 1px solid var(--border-glass);">
@@ -846,7 +833,6 @@
     </div>
   </div>
 
-  <!-- Add Speed Dial Modal -->
   <div class="modal" id="dial-modal">
     <div class="modal-content">
       <h3>Add Speed Dial</h3>
@@ -865,7 +851,6 @@
     </div>
   </div>
 
-  <!-- Add Service Modal -->
   <div class="modal" id="service-modal">
     <div class="modal-content">
       <h3>Add Service</h3>
@@ -911,12 +896,6 @@
       bookmarks: true
     };
 
-    // Domains that enforce strict X-Frame-Options / frame-ancestors blocking
-    const STRICT_FRAME_BLOCKED = [
-      'facebook.com', 'google.com', 'youtube.com', 'reddit.com',
-      'github.com', 'twitter.com', 'x.com', 'instagram.com'
-    ];
-
     let state = {
       wallpaper: localStorage.getItem('dash_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070',
       googleClientId: localStorage.getItem('dash_google_client_id') || '',
@@ -947,21 +926,7 @@
 
     // --- Floating Window & Popup Router ---
     function openInPage(url, title) {
-      let isBlocked = false;
-      try {
-        const host = new URL(url).hostname.toLowerCase();
-        isBlocked = STRICT_FRAME_BLOCKED.some(domain => host.includes(domain));
-      } catch (e) {}
-
-      if (isBlocked) {
-        const w = 900;
-        const h = 700;
-        const left = (window.screen.width - w) / 2;
-        const top = (window.screen.height - h) / 2;
-        window.open(url, '_blank', `width=${w},height=${h},top=${top},left=${left},menubar=no,toolbar=no,location=no,status=no`);
-        return;
-      }
-
+      // Force ALL URLs into the floating window directly
       const viewer = document.getElementById('embed-viewer');
       const frame = document.getElementById('embed-frame');
       const titleEl = document.getElementById('embed-title');
