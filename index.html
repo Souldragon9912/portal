@@ -7,6 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <!-- ========================================== -->
+  <!--                 CSS STYLES                 -->
+  <!-- ========================================== -->
   <style>
     :root {
       --bg-glass: rgba(22, 27, 34, 0.75);
@@ -19,19 +23,13 @@
       --accent-glow: rgba(88, 166, 255, 0.35);
       --danger: #f85149;
       
-      /* Default Animated Border Colors (Google) */
       --se-c1: #4285F4; 
       --se-c2: #EA4335; 
       --se-c3: #FBBC05; 
       --se-c4: #34A853;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
     body {
       min-height: 100vh;
@@ -42,80 +40,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: background-image 0.3s ease;
+      transition: background-image 0.5s ease-in-out;
       overflow-x: hidden;
     }
 
-    /* Top Bar */
-    header {
-      width: 100%;
-      max-width: 1100px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 36px;
-      background: var(--bg-glass);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--border-glass);
-      padding: 14px 24px;
-      border-radius: 16px;
-    }
-
-    .widget-toggles {
-      display: flex;
-      gap: 10px;
-    }
-
-    .nav-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-glass);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 0.2s, border-color 0.2s;
-    }
-
-    .nav-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-
-    /* Central Search & Animated Border */
-    .hero-container {
-      width: 100%;
-      max-width: 1100px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 28px;
-    }
-
-    .search-box-wrapper {
-      position: relative;
-      padding: 2px; /* Border thickness */
-      border-radius: 16px;
-      overflow: hidden;
-      display: flex;
-      width: 100%;
-      max-width: 680px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    }
-
-    .search-box-wrapper::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 300%;
-      height: 300%;
-      background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1));
-      transform: translate(-50%, -50%) rotate(0deg);
-      animation: spin-border 4s linear infinite;
-      z-index: 0;
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes spin-border {
@@ -123,546 +54,156 @@
       100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
-    .search-box {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      display: flex;
-      gap: 10px;
-      background: rgba(18, 22, 28, 0.95);
-      padding: 8px;
-      border-radius: 14px;
-    }
+    /* --- Header --- */
+    header { width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; background: var(--bg-glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border-glass); padding: 14px 24px; border-radius: 16px; position: relative; }
+    .widget-toggles { display: flex; gap: 10px; }
+    .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
-    .search-box select {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-      border: 1px solid var(--border-glass);
-      padding: 10px 14px;
-      border-radius: 10px;
-      outline: none;
-      cursor: pointer;
-    }
+    /* --- Inline Calendar --- */
+    .inline-calendar-wrapper { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease; background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; width: 100%; max-width: 1100px; margin-bottom: 0; border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; }
+    .inline-calendar-wrapper.open { max-height: 500px; opacity: 1; padding: 24px; margin-bottom: 28px; border-color: var(--border-glass); }
+    .generic-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; width: 100%; max-width: 400px; }
+    .cal-day-header { font-size: 12px; color: var(--text-muted); font-weight: 600; padding-bottom: 8px; }
+    .cal-day { padding: 10px; font-size: 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
+    .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
+    .cal-day.empty { background: transparent; }
+    .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
 
-    .search-box input {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-glass);
-      padding: 12px 18px;
-      border-radius: 10px;
-      color: var(--text-main);
-      font-size: 15px;
-      outline: none;
-      transition: background 0.2s;
-    }
+    /* --- Central Search --- */
+    .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; }
+    .search-box-wrapper { position: relative; padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; }
+    .search-box-wrapper::before { content: ""; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%; background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1)); transform: translate(-50%, -50%) rotate(0deg); animation: spin-border 4s linear infinite; z-index: 0; }
+    .search-box { position: relative; z-index: 1; width: 100%; display: flex; gap: 10px; background: rgba(18, 22, 28, 0.95); padding: 8px; border-radius: 14px; }
+    .search-box select, .search-box input { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-glass); padding: 10px 14px; border-radius: 10px; outline: none; transition: background 0.2s; }
+    .search-box input { flex: 1; font-size: 15px; }
+    .search-box input:focus { background: rgba(255, 255, 255, 0.1); }
 
-    .search-box input:focus {
-      background: rgba(255, 255, 255, 0.1);
-    }
+    /* --- Content Panels --- */
+    .main-panel { width: 100%; background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 18px; animation: fadeInSlide 0.7s ease-out forwards; opacity: 0; }
+    #section-services { animation-delay: 0.1s; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
+    .panel-title { font-size: 16px; font-weight: 600; }
+    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
+    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
-    /* Content Panels */
-    .main-panel {
-      width: 100%;
-      background: var(--bg-glass);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--border-glass);
-      border-radius: 18px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-glass);
-      padding-bottom: 12px;
-    }
-
-    .panel-title {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .badge-btn {
-      background: transparent;
-      border: 1px solid var(--border-glass);
-      color: var(--accent);
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .badge-btn:hover {
-      background: rgba(88, 166, 255, 0.15);
-    }
-
-    /* Speed Dials Grid */
-    .speed-dial-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 16px;
-    }
-
-    .dial-card-wrapper {
-      position: relative;
-    }
-
-    .dial-card {
-      background: var(--bg-glass-card);
-      border: 1px solid var(--border-glass);
-      border-radius: 12px;
-      padding: 18px 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 500;
-      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-      width: 100%;
-    }
-
-    .dial-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-    }
-
-    .dial-card img {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
-
-    .card-delete-btn {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0, 0, 0, 0.6);
-      color: var(--text-muted);
-      border: none;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 13px;
-      line-height: 1;
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .dial-card-wrapper:hover .card-delete-btn,
-    .service-card-wrapper:hover .card-delete-btn {
-      display: flex;
-    }
-
-    .card-delete-btn:hover {
-      color: var(--danger);
-      background: rgba(248, 81, 73, 0.2);
-    }
-
-    /* Self-Hosted Stack Grid */
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 14px;
-    }
-
-    .service-card-wrapper {
-      position: relative;
-    }
-
-    .service-card {
-      background: var(--bg-glass-card);
-      border: 1px solid var(--border-glass);
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      text-decoration: none;
-      color: var(--text-main);
-      transition: transform 0.2s, border-color 0.2s;
-      width: 100%;
-    }
-
-    .service-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent);
-    }
-
-    .service-card .status-dot {
-      width: 8px;
-      height: 8px;
-      background: #3fb950;
-      border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 6px #3fb950;
-    }
-
-    .service-card .name {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .service-card .desc {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* Slide-out Drawers */
-    .drawer {
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      width: 440px;
-      max-width: 90vw;
-      background: rgba(13, 17, 23, 0.94);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-left: 1px solid var(--border-glass);
-      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6);
-      z-index: 100;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .drawer-right {
-      right: 0;
-      transform: translateX(100%);
-    }
-
-    .drawer-right.open {
-      transform: translateX(0);
-    }
-
-    .drawer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-glass);
-      padding-bottom: 12px;
-    }
-
-    .drawer-close {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 22px;
-      cursor: pointer;
-    }
-
-    .drawer-close:hover {
-      color: var(--text-main);
-    }
-
-    /* Google Calendar Auth & Events UI */
-    .cal-auth-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 14px;
-      padding: 40px 16px;
-      background: var(--bg-glass-card);
-      border: 1px solid var(--border-glass);
-      border-radius: 12px;
-    }
-
-    .events-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .cal-event-card {
-      background: var(--bg-glass-card);
-      border: 1px solid var(--border-glass);
-      border-radius: 10px;
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: border-color 0.2s;
-    }
-
-    .cal-event-card:hover {
-      border-color: var(--accent);
-    }
-
-    .cal-event-title {
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--text-main);
-    }
-
-    .cal-event-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--accent);
-    }
-
-    /* Bookmarks Drawer with Folders */
-    .bookmark-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .bookmark-input-group input {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border-glass);
-      color: var(--text-main);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-    }
-
-    .bookmarks-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .bookmark-folder-header {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 14px;
-      margin-bottom: 2px;
-      border-bottom: 1px solid var(--border-glass);
-      padding-bottom: 4px;
-      font-weight: 600;
-    }
-
-    .bookmark-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-glass-card);
-      border: 1px solid var(--border-glass);
-      padding: 12px 14px;
-      border-radius: 10px;
-    }
-
-    .bookmark-item a {
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 13px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 300px;
-    }
-
-    .bookmark-item a:hover {
-      color: var(--accent);
-    }
-
-    .bookmark-item button {
-      background: transparent;
-      border: none;
-      color: var(--danger);
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    /* Modal Styling */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-    }
-
-    .modal-content {
-      background: #161b22;
-      border: 1px solid var(--border-glass);
-      border-radius: 16px;
-      width: 90%;
-      max-width: 540px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .form-group input {
-      background: #0d1117;
-      border: 1px solid var(--border-glass);
-      color: var(--text-main);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    /* Search Engine Settings Form */
-    .se-settings-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .se-settings-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(0,0,0,0.2);
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border-glass);
-      font-size: 12px;
-    }
+    /* --- Grids, Folders, & Advanced Drag/Drop --- */
+    .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
     
-    .se-settings-item .se-color-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 8px;
-    }
+    .dial-folder-wrapper { grid-column: 1 / -1; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-glass); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; }
+    .dial-folder-header { font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s, background 0.2s; padding: 8px 12px; border-radius: 8px; margin: -8px -8px 8px -8px; }
+    .dial-folder-header:hover { color: var(--accent); background: rgba(255,255,255,0.05); }
+    .dial-folder-header.drag-over-folder { background: rgba(88, 166, 255, 0.2); color: var(--accent); border: 1px dashed var(--accent); }
+    
+    .dial-folder-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
+    .dial-folder-inner { overflow: hidden; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+    .dial-folder-wrapper.open .dial-folder-content { grid-template-rows: 1fr; }
+    .dial-folder-wrapper.open .dial-folder-inner { padding-top: 8px; }
 
-    .modules-toggle-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #0d1117;
-      border: 1px solid var(--border-glass);
-      padding: 14px;
-      border-radius: 10px;
-    }
+    /* Dynamic Swapping Styling (Removed Entrance Animation to prevent flash on drop) */
+    .draggable-wrapper { position: relative; cursor: grab; }
+    .draggable-wrapper:active { cursor: grabbing; }
+    
+    .dial-card, .service-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; display: flex; text-decoration: none; color: var(--text-main); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; width: 100%; pointer-events: none; }
+    .draggable-wrapper a { pointer-events: auto; }
+    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
+    .service-card { padding: 14px; flex-direction: column; gap: 6px; }
+    .dial-card:hover, .service-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35); }
+    .dial-card img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
+    .service-card .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #fbbc05; box-shadow: 0 0 6px #fbbc05; transition: background 0.3s, box-shadow 0.3s; }
+    .service-card .name { font-size: 14px; font-weight: 600; }
+    .service-card .desc { font-size: 11px; color: var(--text-muted); }
+    
+    .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
+    .draggable-wrapper:hover .card-delete-btn { display: flex; }
+    .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
 
-    .toggle-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-    }
+    /* --- Drawers --- */
+    .drawer { position: fixed; top: 0; bottom: 0; width: 440px; max-width: 90vw; background: rgba(13, 17, 23, 0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border-glass); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    .drawer-right { right: 0; transform: translateX(100%); }
+    .drawer-right.open { transform: translateX(0); }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
+    .drawer-close { background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
+    .drawer-close:hover { color: var(--text-main); }
+    
+    /* Google Calendar Auth & Events UI */
+    .cal-auth-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 16px; background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; }
+    .events-container { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-right: 4px; }
+    .cal-event-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s; }
+    .cal-event-card:hover { border-color: var(--accent); }
+    .cal-event-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
+    .cal-event-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--accent); }
 
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 38px;
-      height: 20px;
-    }
+    /* Bookmarks Drawer UI */
+    .bookmark-input-group { display: flex; flex-direction: column; gap: 8px; }
+    .bookmark-input-group input { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+    .bookmarks-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; padding-right: 4px; }
+    .bookmark-folder-header { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 14px; margin-bottom: 2px; border-bottom: 1px solid var(--border-glass); padding-bottom: 4px; font-weight: 600; }
+    .bookmark-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-glass-card); border: 1px solid var(--border-glass); padding: 12px 14px; border-radius: 10px; }
+    .bookmark-item a { color: var(--text-main); text-decoration: none; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
+    .bookmark-item a:hover { color: var(--accent); }
+    .bookmark-item button { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 16px; }
 
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+    /* --- Modals --- */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 200; opacity: 0; transition: opacity 0.3s; }
+    .modal.show { opacity: 1; }
+    .modal-content { background: #161b22; border: 1px solid var(--border-glass); border-radius: 16px; width: 90%; max-width: 540px; padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .modal.show .modal-content { transform: scale(1); }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; color: var(--text-muted); }
+    .form-group input { background: #0d1117; border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: var(--accent); outline: none; }
+    
+    /* Settings Modal UI */
+    .se-settings-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+    .se-settings-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass); font-size: 12px; }
+    .se-settings-item .se-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .modules-toggle-list { display: flex; flex-direction: column; gap: 12px; background: #0d1117; border: 1px solid var(--border-glass); padding: 14px; border-radius: 10px; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+    .toggle-switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: rgba(255, 255, 255, 0.15); transition: .2s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider:before { transform: translateX(18px); }
 
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background-color: rgba(255, 255, 255, 0.15);
-      transition: .2s;
-      border-radius: 20px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 14px;
-      width: 14px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .2s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: var(--accent);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(18px);
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .modal-footer button {
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--border-glass);
-      color: var(--text-main);
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      border: 1px solid var(--accent);
-      color: #fff;
-    }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+    .modal-footer button { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border-glass); color: var(--text-main); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.05); }
+    .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
   </style>
 </head>
 <body>
 
+  <!-- ========================================== -->
+  <!--                 TOP HEADER                 -->
+  <!-- ========================================== -->
   <header>
     <div class="widget-toggles">
-      <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">📅 Google Calendar</button>
+      <button class="nav-btn" id="nav-btn-builtin-cal" onclick="toggleInlineCalendar()">📅 Calendar View</button>
+      <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal Sync</button>
       <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Saved Bookmarks</button>
     </div>
-    <div>
+    <div style="display: flex; align-items: center;">
+      <div id="live-clock" style="font-weight: 600; font-size: 15px; margin-right: 20px;"></div>
       <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
     </div>
   </header>
 
+  <!-- ========================================== -->
+  <!--           INLINE BUILT-IN CALENDAR         -->
+  <!-- ========================================== -->
+  <div class="inline-calendar-wrapper" id="inline-calendar-wrapper">
+    <h3 id="cal-month-title" style="margin-bottom: 12px; font-size: 18px;"></h3>
+    <div class="generic-calendar" id="generic-calendar-grid"></div>
+  </div>
+
+  <!-- ========================================== -->
+  <!--              MAIN DASHBOARD AREA           -->
+  <!-- ========================================== -->
   <main class="hero-container">
     
     <div class="search-box-wrapper" id="search-wrapper">
@@ -690,6 +231,9 @@
 
   </main>
 
+  <!-- ========================================== -->
+  <!--             GOOGLE CALENDAR DRAWER         -->
+  <!-- ========================================== -->
   <aside class="drawer drawer-right" id="calendar-drawer">
     <div class="drawer-header">
       <span class="panel-title">📅 Google Calendar</span>
@@ -711,13 +255,16 @@
     </div>
   </aside>
 
+  <!-- ========================================== -->
+  <!--               BOOKMARKS DRAWER             -->
+  <!-- ========================================== -->
   <aside class="drawer drawer-right" id="bookmarks-drawer">
     <div class="drawer-header">
       <span class="panel-title">📑 Saved Tabs & Bookmarks</span>
       <button class="drawer-close" onclick="toggleDrawer('bookmarks-drawer')">&times;</button>
     </div>
     <div class="bookmark-input-group">
-      <input type="text" id="bm-title" placeholder="Page title or description..." />
+      <input type="text" id="bm-title" placeholder="Leave blank to auto-fetch from URL..." />
       <input type="url" id="bm-url" placeholder="https://..." />
       <input type="text" id="bm-folder" placeholder="Folder (e.g. Social, Weather)..." list="bm-folder-list" />
       <datalist id="bm-folder-list"></datalist>
@@ -726,26 +273,30 @@
     <ul class="bookmarks-list" id="bookmarks-container"></ul>
   </aside>
 
+  <!-- ========================================== -->
+  <!--               SETTINGS MODAL               -->
+  <!-- ========================================== -->
   <div class="modal" id="settings-modal">
     <div class="modal-content">
       <h3>Dashboard Settings</h3>
       
       <div class="form-group">
-        <label>Custom Wallpaper URL</label>
-        <input type="url" id="settings-wallpaper" placeholder="https://..." />
+        <label>Custom Wallpaper (URL or Upload Image)</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="url" id="settings-wallpaper" placeholder="https://..." style="flex: 1;" />
+          <input type="file" id="settings-wallpaper-file" accept="image/*" style="display: none;" onchange="compressAndLoadWallpaper(event)" />
+          <button class="badge-btn" onclick="document.getElementById('settings-wallpaper-file').click()">Upload File</button>
+        </div>
       </div>
 
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Search Engines</label>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Add custom search endpoints (e.g. SearXNG, Brave Search). Pick an accent color to update the border's aura effect.</p>
-        
         <div style="display: flex; gap: 6px;">
           <input type="text" id="new-se-name" placeholder="Name" style="flex: 1;" />
-          <input type="url" id="new-se-url" placeholder="URL + ?q=" style="flex: 2;" title="Must end in the query parameter, e.g. https://search.brave.com/search?q=" />
-          <input type="color" id="new-se-color" value="#ff2000" style="width: 38px; height: 38px; padding: 2px; border: 1px solid var(--border-glass); border-radius: 6px; cursor: pointer;" title="Accent Color" />
+          <input type="url" id="new-se-url" placeholder="URL + ?q=" style="flex: 2;" />
+          <input type="color" id="new-se-color" value="#ff2000" style="width: 38px; height: 38px; padding: 2px; border: 1px solid var(--border-glass); border-radius: 6px; cursor: pointer;" />
           <button class="badge-btn" onclick="addSearchEngine()">Add</button>
         </div>
-        
         <div class="se-settings-list" id="custom-engines-list"></div>
       </div>
 
@@ -759,38 +310,29 @@
         <div class="modules-toggle-list">
           <div class="toggle-row">
             <span>⚡ Speed Dials Grid</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-mod-dials">
-              <span class="slider"></span>
-            </label>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-dials"><span class="slider"></span></label>
           </div>
           <div class="toggle-row">
             <span>🖥 Self-Hosted Services</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-mod-services">
-              <span class="slider"></span>
-            </label>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-services"><span class="slider"></span></label>
           </div>
           <div class="toggle-row">
-            <span>📅 Google Calendar</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-mod-calendar">
-              <span class="slider"></span>
-            </label>
+            <span>📅 Built-in Calendar (Calendar View)</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-builtin-cal"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>🗓 Google Calendar (G-Cal Sync)</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-gcal"><span class="slider"></span></label>
           </div>
           <div class="toggle-row">
             <span>📑 Bookmarks Drawer</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-mod-bookmarks">
-              <span class="slider"></span>
-            </label>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-bookmarks"><span class="slider"></span></label>
           </div>
         </div>
       </div>
 
       <div class="form-group" style="margin-top: 6px; border-top: 1px solid var(--border-glass); padding-top: 14px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Backup & Sync Configuration</label>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Export your complete dashboard configuration to a JSON file, or import an existing configuration to sync across devices.</p>
         <div style="display: flex; gap: 8px;">
           <button class="badge-btn" onclick="exportConfig()" style="padding: 8px 12px;">Export Config</button>
           <button class="badge-btn" onclick="document.getElementById('import-file').click()" style="padding: 8px 12px;">Import Config</button>
@@ -805,338 +347,371 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!--            ADD SPEED DIAL MODAL            -->
+  <!-- ========================================== -->
   <div class="modal" id="dial-modal">
     <div class="modal-content">
       <h3>Add Speed Dial</h3>
-      <div class="form-group">
-        <label>Label</label>
-        <input type="text" id="dial-title" placeholder="YouTube, GitHub, etc." />
-      </div>
-      <div class="form-group">
-        <label>URL</label>
-        <input type="url" id="dial-url" placeholder="https://..." />
-      </div>
-      <div class="form-group">
-        <label>Custom Image URL (Optional)</label>
-        <input type="url" id="dial-img" placeholder="https://... (Leave blank for default icon)" />
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('dial-modal')">Cancel</button>
-        <button class="btn-primary" onclick="saveNewDial()">Add Link</button>
-      </div>
+      <div class="form-group"><label>Label (Leave blank to auto-fetch from URL)</label><input type="text" id="dial-title" placeholder="YouTube, GitHub, etc." /></div>
+      <div class="form-group"><label>URL</label><input type="url" id="dial-url" placeholder="https://..." /></div>
+      <div class="form-group"><label>Folder (Optional)</label><input type="text" id="dial-folder" placeholder="e.g. Social, Work..." list="dial-folder-list" /></div>
+      <datalist id="dial-folder-list"></datalist>
+      <div class="form-group"><label>Custom Image URL (Optional)</label><input type="url" id="dial-img" placeholder="https://..." /></div>
+      <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('dial-modal')">Cancel</button><button class="btn-primary" onclick="saveNewDial()">Add Link</button></div>
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!--              ADD SERVICE MODAL             -->
+  <!-- ========================================== -->
   <div class="modal" id="service-modal">
     <div class="modal-content">
       <h3>Add Service</h3>
-      <div class="form-group">
-        <label>Service Name</label>
-        <input type="text" id="srv-name" placeholder="Immich, Plex, Portainer..." />
-      </div>
-      <div class="form-group">
-        <label>Description</label>
-        <input type="text" id="srv-desc" placeholder="Photo Storage, Media..." />
-      </div>
-      <div class="form-group">
-        <label>LAN or Tailscale URL</label>
-        <input type="url" id="srv-url" placeholder="http://192.168.1.50:2283" />
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('service-modal')">Cancel</button>
-        <button class="btn-primary" onclick="saveNewService()">Add Service</button>
-      </div>
+      <div class="form-group"><label>Service Name</label><input type="text" id="srv-name" placeholder="What service are you adding?" /></div>
+      <div class="form-group"><label>Description</label><input type="text" id="srv-desc" placeholder="Photo Storage, Media..." /></div>
+      <div class="form-group"><label>LAN or Tailscale URL</label><input type="url" id="srv-url" placeholder="http://192.168.1.50:2283" /></div>
+      <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('service-modal')">Cancel</button><button class="btn-primary" onclick="saveNewService()">Add Service</button></div>
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!--             JAVASCRIPT ENGINE              -->
+  <!-- ========================================== -->
   <script>
-    // --- State Defaults ---
-    const defaultDials = [
-      { name: 'GitHub', url: 'https://github.com', img: '' },
-      { name: 'YouTube', url: 'https://youtube.com', img: '' },
-      { name: 'Reddit', url: 'https://reddit.com', img: '' },
-      { name: 'Facebook', url: 'https://facebook.com', img: '' }
-    ];
+    // ===== LIVE CLOCK =====
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 1000); updateClock();
 
-    const defaultServices = [
-      { name: 'Immich', desc: 'Photos & Backups', url: 'http://localhost:2283' },
-      { name: 'Plex', desc: 'Media Server', url: 'http://localhost:32400' },
-      { name: 'Portainer', desc: 'Containers', url: 'http://localhost:9000' },
-      { name: 'Tailscale', desc: 'Mesh Admin', url: 'https://login.tailscale.com/admin' }
-    ];
+    // ===== SMART URL PARSER =====
+    function generateSmartLabel(urlStr) {
+      try {
+        const url = new URL(urlStr);
+        let host = url.hostname.replace(/^www\./, '');
+        
+        const overrideDictionary = {
+          'facebook.com': 'Facebook',
+          'youtube.com': 'YouTube',
+          'calendar.google.com': 'Google Calendar',
+          'ai.joinhandshake.com': 'Handshake',
+          'github.com': 'GitHub',
+          'reddit.com': 'Reddit',
+          'apartments.com': 'apartments.com' // Explicit exclusion rule
+        };
 
-    // Core default search engines and their multi-color gradient arrays
+        if (overrideDictionary[host]) return overrideDictionary[host];
+
+        const parts = host.split('.');
+        if (parts.length >= 2) {
+          const main = parts[parts.length - 2];
+          return main.charAt(0).toUpperCase() + main.slice(1);
+        }
+        return host;
+      } catch (e) { return 'Saved Link'; }
+    }
+
+    // ===== STATE & DEFAULTS =====
     const defaultSearchEngines = [
       { id: 'se_google', name: 'Google', url: 'https://www.google.com/search?q=', colors: ['#4285F4', '#EA4335', '#FBBC05', '#34A853'], isCustom: false },
-      { id: 'se_ddg', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', colors: ['#DE5833', '#FFA07A', '#DE5833', '#FFA07A'], isCustom: false },
-      { id: 'se_bing', name: 'Bing', url: 'https://www.bing.com/search?q=', colors: ['#00809D', '#0063B1', '#00A2ED', '#00809D'], isCustom: false }
+      { id: 'se_ddg', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', colors: ['#DE5833', '#FFA07A', '#DE5833', '#FFA07A'], isCustom: false }
     ];
 
     let state = {
       wallpaper: localStorage.getItem('dash_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070',
       googleClientId: localStorage.getItem('dash_google_client_id') || '',
       googleToken: localStorage.getItem('dash_google_token') || null,
-      dials: JSON.parse(localStorage.getItem('dash_dials')) || defaultDials,
+      dials: JSON.parse(localStorage.getItem('dash_dials')) || [], 
       bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
-      services: JSON.parse(localStorage.getItem('dash_services')) || defaultServices,
-      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, calendar: true, bookmarks: true },
+      services: JSON.parse(localStorage.getItem('dash_services')) || [], 
+      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, builtin_cal: true, gcal: true, bookmarks: true },
       searchEngines: JSON.parse(localStorage.getItem('dash_search_engines')) || defaultSearchEngines,
       activeEngineId: localStorage.getItem('dash_active_engine') || 'se_google'
     };
-
     let tokenClient = null;
 
-    // --- Config Export & Import ---
-    function exportConfig() {
-      // Exclude volatile tokens from backup
-      const backupState = { ...state };
-      delete backupState.googleToken; 
-      
-      const configStr = JSON.stringify(backupState, null, 2);
-      const blob = new Blob([configStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'command-center-backup.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function importConfig(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
+    // ===== LOCAL WALLPAPER COMPRESSOR =====
+    function compressAndLoadWallpaper(e) {
+      const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const importedState = JSON.parse(e.target.result);
-          
-          if (importedState.wallpaper) localStorage.setItem('dash_wallpaper', importedState.wallpaper);
-          if (importedState.googleClientId) localStorage.setItem('dash_google_client_id', importedState.googleClientId);
-          if (importedState.dials) localStorage.setItem('dash_dials', JSON.stringify(importedState.dials));
-          if (importedState.bookmarks) localStorage.setItem('dash_bookmarks', JSON.stringify(importedState.bookmarks));
-          if (importedState.services) localStorage.setItem('dash_services', JSON.stringify(importedState.services));
-          if (importedState.modules) localStorage.setItem('dash_modules', JSON.stringify(importedState.modules));
-          if (importedState.searchEngines) localStorage.setItem('dash_search_engines', JSON.stringify(importedState.searchEngines));
-          if (importedState.activeEngineId) localStorage.setItem('dash_active_engine', importedState.activeEngineId);
-          
-          alert("Configuration imported successfully! The dashboard will now reload.");
-          window.location.reload();
-        } catch (err) {
-          alert("Invalid configuration file. Please select a valid JSON backup.");
-          console.error(err);
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1920; let width = img.width; let height = img.height;
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          document.getElementById('settings-wallpaper').value = canvas.toDataURL('image/jpeg', 0.8);
         }
+        img.src = event.target.result;
       };
-      reader.readAsText(file);
+      reader.readAsDataURL(file);
     }
 
-    // --- Search Engine & Animated Border Logic ---
+    // ===== SEARCH ENGINE LOGIC =====
     function renderEngineDropdown() {
       const select = document.getElementById('engine-select');
-      select.innerHTML = state.searchEngines.map(engine => 
-        `<option value="${engine.id}" ${state.activeEngineId === engine.id ? 'selected' : ''}>${engine.name}</option>`
-      ).join('');
-      
-      // Ensure border colors load correctly on boot
+      select.innerHTML = state.searchEngines.map(engine => `<option value="${engine.id}" ${state.activeEngineId === engine.id ? 'selected' : ''}>${engine.name}</option>`).join('');
       changeActiveEngine(state.activeEngineId);
     }
-
     function changeActiveEngine(engineId) {
       const engine = state.searchEngines.find(e => e.id === engineId) || state.searchEngines[0];
-      state.activeEngineId = engine.id;
-      localStorage.setItem('dash_active_engine', engine.id);
-
-      // Dynamically update CSS root variables to shift the border's glow colors
+      state.activeEngineId = engine.id; localStorage.setItem('dash_active_engine', engine.id);
       const root = document.documentElement;
-      root.style.setProperty('--se-c1', engine.colors[0]);
-      root.style.setProperty('--se-c2', engine.colors[1]);
-      root.style.setProperty('--se-c3', engine.colors[2]);
-      root.style.setProperty('--se-c4', engine.colors[3]);
+      root.style.setProperty('--se-c1', engine.colors[0]); root.style.setProperty('--se-c2', engine.colors[1]); root.style.setProperty('--se-c3', engine.colors[2]); root.style.setProperty('--se-c4', engine.colors[3]);
     }
-
-    // --- Settings UI for Custom Search Engines ---
-    function renderCustomEnginesList() {
-      const listContainer = document.getElementById('custom-engines-list');
-      const customEngines = state.searchEngines.filter(e => e.isCustom);
-      
-      if (customEngines.length === 0) {
-        listContainer.innerHTML = '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>';
-        return;
-      }
-      
-      listContainer.innerHTML = customEngines.map(e => `
-        <div class="se-settings-item">
-          <div style="display:flex; align-items:center;">
-            <span class="se-color-dot" style="background: ${e.colors[0]}"></span>
-            <strong>${e.name}</strong>
-          </div>
-          <button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button>
-        </div>
-      `).join('');
-    }
-
-    function addSearchEngine() {
-      const name = document.getElementById('new-se-name').value.trim();
-      const url = document.getElementById('new-se-url').value.trim();
-      const color = document.getElementById('new-se-color').value;
-
-      if (!name || !url) return;
-
-      // If user supplies 1 accent color, we build a 4-stop radar gradient sweeping into darkness
-      const customColors = [color, '#12161c', color, '#12161c'];
-      const newEngine = {
-        id: 'se_custom_' + Date.now(),
-        name: name,
-        url: url,
-        colors: customColors,
-        isCustom: true
-      };
-
-      state.searchEngines.push(newEngine);
-      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
-      
-      document.getElementById('new-se-name').value = '';
-      document.getElementById('new-se-url').value = '';
-      
-      renderCustomEnginesList();
-      renderEngineDropdown();
-    }
-
-    function removeSearchEngine(id) {
-      state.searchEngines = state.searchEngines.filter(e => e.id !== id);
-      if (state.activeEngineId === id) {
-        state.activeEngineId = 'se_google';
-      }
-      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
-      renderCustomEnginesList();
-      renderEngineDropdown();
-    }
-
-    // --- Search Submission ---
     document.getElementById('search-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const query = document.getElementById('search-input').value.trim();
-      if (!query) return;
-
-      if (query.startsWith('http://') || query.startsWith('https://')) {
-        window.open(query, '_blank');
-      } else if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(query)) {
-        window.open('http://' + query, '_blank');
-      } else {
-        const activeEngine = state.searchEngines.find(eng => eng.id === state.activeEngineId);
-        const searchUrl = activeEngine ? activeEngine.url : 'https://www.google.com/search?q=';
-        window.open(searchUrl + encodeURIComponent(query), '_blank');
-      }
+      e.preventDefault(); const query = document.getElementById('search-input').value.trim(); if (!query) return;
+      if (query.startsWith('http://') || query.startsWith('https://')) { window.open(query, '_blank'); }
+      else if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(query)) { window.open('http://' + query, '_blank'); }
+      else { const ae = state.searchEngines.find(eng => eng.id === state.activeEngineId); window.open((ae ? ae.url : 'https://www.google.com/search?q=') + encodeURIComponent(query), '_blank'); }
     });
 
-    // --- Drawer Toggles ---
-    function toggleDrawer(drawerId) {
-      const drawer = document.getElementById(drawerId);
-      document.querySelectorAll('.drawer').forEach(d => {
-        if (d.id !== drawerId) d.classList.remove('open');
+    // ===== FLIP ANIMATION DRAG AND DROP =====
+    let draggedNode = null;
+    let dragType = null;
+
+    function handleDragStart(e, type) { 
+      draggedNode = e.currentTarget; 
+      dragType = type; 
+      e.dataTransfer.effectAllowed = 'move'; 
+      setTimeout(() => { draggedNode.style.opacity = '0'; }, 0); 
+    }
+
+    function handleDragEnter(e, type) {
+      e.preventDefault();
+      const targetNode = e.currentTarget;
+      
+      if (draggedNode && draggedNode !== targetNode && dragType === type && draggedNode.parentNode === targetNode.parentNode) {
+        const parent = targetNode.parentNode;
+        const children = Array.from(parent.children);
+        const draggedIdx = children.indexOf(draggedNode);
+        const targetIdx = children.indexOf(targetNode);
+
+        const rects = new Map();
+        parent.querySelectorAll('.draggable-wrapper').forEach(el => rects.set(el, el.getBoundingClientRect()));
+
+        if (draggedIdx < targetIdx) {
+          parent.insertBefore(draggedNode, targetNode.nextSibling);
+        } else {
+          parent.insertBefore(draggedNode, targetNode);
+        }
+
+        parent.querySelectorAll('.draggable-wrapper').forEach(el => {
+          const oldRect = rects.get(el);
+          const newRect = el.getBoundingClientRect();
+          if (oldRect) {
+            const dx = oldRect.left - newRect.left;
+            const dy = oldRect.top - newRect.top;
+            if (dx || dy) {
+              el.style.transform = `translate(${dx}px, ${dy}px)`;
+              el.style.transition = 'none';
+              requestAnimationFrame(() => {
+                el.style.transform = '';
+                el.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+              });
+            }
+          }
+        });
+      }
+    }
+
+    function syncDialStateFromDOM() {
+      const newDials = [];
+      document.querySelectorAll('#speed-dials-container > .draggable-wrapper').forEach(node => {
+         const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+         data.folder = ''; newDials.push(data);
       });
-      drawer.classList.toggle('open');
+      document.querySelectorAll('.dial-folder-wrapper').forEach(folderNode => {
+         const folderName = folderNode.dataset.folderName;
+         folderNode.querySelectorAll('.dial-folder-inner > .draggable-wrapper').forEach(node => {
+            const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+            data.folder = folderName; newDials.push(data);
+         });
+      });
+      state.dials = newDials;
+      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+      renderDials(); 
     }
 
-    function applyModuleVisibility() {
-      document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
-      document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
-      document.getElementById('nav-btn-calendar').style.display = state.modules.calendar ? 'inline-block' : 'none';
-      if (!state.modules.calendar) document.getElementById('calendar-drawer').classList.remove('open');
-      document.getElementById('nav-btn-bookmarks').style.display = state.modules.bookmarks ? 'inline-block' : 'none';
-      if (!state.modules.bookmarks) document.getElementById('bookmarks-drawer').classList.remove('open');
+    function syncServiceStateFromDOM() {
+      const newServices = [];
+      document.querySelectorAll('#services-container > .draggable-wrapper').forEach(node => {
+         newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
+      });
+      state.services = newServices;
+      localStorage.setItem('dash_services', JSON.stringify(state.services));
+      renderServices();
     }
 
-    // --- Speed Dials & Services ---
+    function handleDragEnd(e, type) { 
+      if (draggedNode) draggedNode.style.opacity = '1'; 
+      if (type === 'dial') syncDialStateFromDOM(); 
+      else syncServiceStateFromDOM();
+      draggedNode = null; dragType = null;
+    }
+
+    // Folder Header Drop Logic
+    function handleFolderDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over-folder'); return false; }
+    function handleFolderDragLeave(e) { e.currentTarget.classList.remove('drag-over-folder'); }
+    function handleDropToFolder(e, folderName) {
+      e.stopPropagation(); e.currentTarget.classList.remove('drag-over-folder');
+      if (draggedNode && dragType === 'dial') {
+        const folderInner = document.getElementById(`folder-inner-${folderName}`);
+        if (folderInner) folderInner.appendChild(draggedNode);
+      }
+    }
+
+    function toggleFolderUI(folderId) {
+      const fw = document.getElementById(`folder-wrapper-${folderId}`);
+      fw.classList.toggle('open');
+    }
+
+    // ===== RENDER DIALS =====
     function renderDials() {
       const container = document.getElementById('speed-dials-container');
+      const datalist = document.getElementById('dial-folder-list');
+      
       if (state.dials.length === 0) {
         container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No speed dials added.</div>';
+        if (datalist) datalist.innerHTML = '';
         return;
       }
-      container.innerHTML = state.dials.map((dial, idx) => {
-        let domain = 'example.com';
-        try { domain = new URL(dial.url).hostname; } catch(e){}
+      
+      const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
+      if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
+
+      const grouped = { _root: [] };
+      state.dials.forEach((dial, idx) => {
+        dial._origIdx = idx; 
+        if (dial.folder) {
+          if (!grouped[dial.folder]) grouped[dial.folder] = [];
+          grouped[dial.folder].push(dial);
+        } else {
+          grouped._root.push(dial);
+        }
+      });
+
+      container.innerHTML = '';
+
+      Object.keys(grouped).sort().forEach(folderName => {
+        if (folderName === '_root') return;
         
-        // Use custom image if it exists, otherwise fallback to standard favicon
-        let imgSrc = dial.img && dial.img.trim() !== '' 
-            ? dial.img 
-            : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+        const folderWrapper = document.createElement('div');
+        folderWrapper.className = 'dial-folder-wrapper open';
+        folderWrapper.id = `folder-wrapper-${folderName}`;
+        folderWrapper.dataset.folderName = folderName;
+        
+        const header = document.createElement('div');
+        header.className = 'dial-folder-header';
+        header.innerHTML = `📂 ${folderName}`;
+        header.addEventListener('click', () => toggleFolderUI(folderName));
+        header.addEventListener('dragover', handleFolderDragOver);
+        header.addEventListener('dragleave', handleFolderDragLeave);
+        header.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
+        
+        const content = document.createElement('div');
+        content.className = 'dial-folder-content';
+        
+        const inner = document.createElement('div');
+        inner.className = 'dial-folder-inner';
+        inner.id = `folder-inner-${folderName}`;
+        
+        grouped[folderName].forEach(dial => { inner.appendChild(createDialElement(dial)); });
+        content.appendChild(inner); folderWrapper.appendChild(header); folderWrapper.appendChild(content); container.appendChild(folderWrapper);
+      });
 
-        return `
-          <div class="dial-card-wrapper">
-            <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener">
-              <img src="${imgSrc}" alt="${dial.name}" />
-              <span>${dial.name}</span>
-            </a>
-            <button class="card-delete-btn" title="Remove" onclick="removeDial(${idx})">&times;</button>
-          </div>
-        `;
-      }).join('');
+      grouped._root.forEach(dial => { container.appendChild(createDialElement(dial)); });
     }
 
-    function removeDial(idx) {
-      state.dials.splice(idx, 1);
-      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
-      renderDials();
+    function createDialElement(dial) {
+      let domain = 'example.com';
+      try { domain = new URL(dial.url).hostname; } catch(e){}
+      let imgSrc = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'draggable-wrapper'; wrapper.draggable = true;
+      wrapper.dataset.dialData = encodeURIComponent(JSON.stringify(dial));
+      
+      wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'dial'));
+      wrapper.addEventListener('dragover', (e) => e.preventDefault());
+      wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial'));
+      wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
+
+      wrapper.innerHTML = `<a href="${dial.url}" class="dial-card" target="_blank" rel="noopener"><img src="${imgSrc}" alt="${dial.name}" /><span>${dial.name}</span></a><button class="card-delete-btn" title="Remove" onclick="removeDial(${dial._origIdx})">&times;</button>`;
+      return wrapper;
     }
 
+    function removeDial(idx) { state.dials.splice(idx, 1); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); }
+    
     function saveNewDial() {
-      const name = document.getElementById('dial-title').value.trim();
+      let name = document.getElementById('dial-title').value.trim();
       let url = document.getElementById('dial-url').value.trim();
+      let folder = document.getElementById('dial-folder').value.trim();
       let img = document.getElementById('dial-img').value.trim();
       
-      if (!name || !url) return;
+      if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+      if (!name) name = generateSmartLabel(url);
 
-      state.dials.push({ name, url, img });
+      state.dials.push({ name, url, img, folder });
       localStorage.setItem('dash_dials', JSON.stringify(state.dials));
-      
-      renderDials();
-      closeModal('dial-modal');
+      renderDials(); closeModal('dial-modal');
     }
 
+    // ===== RENDER SERVICES & PING =====
     function renderServices() {
       const container = document.getElementById('services-container');
       if (state.services.length === 0) {
         container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No hosted services configured.</div>';
         return;
       }
-      container.innerHTML = state.services.map((srv, idx) => `
-        <div class="service-card-wrapper">
-          <a href="${srv.url}" class="service-card" target="_blank" rel="noopener">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span class="name">${srv.name}</span>
-              <span class="status-dot"></span>
-            </div>
-            <span class="desc">${srv.desc}</span>
-          </a>
-          <button class="card-delete-btn" title="Remove" onclick="removeService(${idx})">&times;</button>
-        </div>
-      `).join('');
+      container.innerHTML = '';
+      state.services.forEach((srv, idx) => {
+        srv._origIdx = idx;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'draggable-wrapper'; wrapper.draggable = true;
+        wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
+
+        wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'service'));
+        wrapper.addEventListener('dragover', (e) => e.preventDefault());
+        wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service'));
+        wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
+
+        wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a><button class="card-delete-btn" title="Remove" onclick="removeService(${idx})">&times;</button>`;
+        container.appendChild(wrapper);
+      });
+      pingServices();
     }
 
-    function removeService(idx) {
-      state.services.splice(idx, 1);
-      localStorage.setItem('dash_services', JSON.stringify(state.services));
-      renderServices();
+    function pingServices() {
+      state.services.forEach((srv, idx) => {
+        const dot = document.getElementById(`srv-dot-${idx}`);
+        if (!dot) return;
+        fetch(srv.url, { mode: 'no-cors', cache: 'no-store' })
+          .then(() => { dot.style.background = '#3fb950'; dot.style.boxShadow = '0 0 6px #3fb950'; })
+          .catch(() => { dot.style.background = 'var(--danger)'; dot.style.boxShadow = '0 0 6px var(--danger)'; });
+      });
     }
 
+    function removeService(idx) { state.services.splice(idx, 1); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); }
     function saveNewService() {
-      const name = document.getElementById('srv-name').value.trim();
+      let name = document.getElementById('srv-name').value.trim();
       const desc = document.getElementById('srv-desc').value.trim();
-      const url = document.getElementById('srv-url').value.trim();
-      if (!name || !url) return;
-
+      let url = document.getElementById('srv-url').value.trim();
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+      if (!name) name = generateSmartLabel(url);
+      
       state.services.push({ name, desc, url });
       localStorage.setItem('dash_services', JSON.stringify(state.services));
-      renderServices();
-      closeModal('service-modal');
+      renderServices(); closeModal('service-modal');
     }
 
-    // --- Bookmarks (With Folders) ---
+    // ===== RENDER BOOKMARKS =====
     function renderBookmarks() {
       const container = document.getElementById('bookmarks-container');
       const datalist = document.getElementById('bm-folder-list');
@@ -1146,12 +721,10 @@
         datalist.innerHTML = '';
         return;
       }
-
-      // Extract unique folders to populate the autocomplete datalist
+      
       const folders = [...new Set(state.bookmarks.map(bm => bm.folder || 'General'))].sort();
       datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
 
-      // Group bookmarks by folder
       const grouped = {};
       state.bookmarks.forEach((bm, idx) => {
         const f = bm.folder || 'General';
@@ -1159,214 +732,179 @@
         grouped[f].push({ ...bm, originalIndex: idx });
       });
 
-      // Generate HTML
       let html = '';
       Object.keys(grouped).sort().forEach(folder => {
         html += `<div class="bookmark-folder-header">${folder}</div>`;
         grouped[folder].forEach(bm => {
-          html += `
-            <li class="bookmark-item">
-              <a href="${bm.url}" target="_blank" rel="noopener">${bm.title}</a>
-              <button onclick="removeBookmark(${bm.originalIndex})">&times;</button>
-            </li>
-          `;
+          html += `<li class="bookmark-item"><a href="${bm.url}" target="_blank" rel="noopener">${bm.title}</a><button onclick="removeBookmark(${bm.originalIndex})">&times;</button></li>`;
         });
       });
-      
       container.innerHTML = html;
     }
 
     function addBookmark() {
-      const titleInput = document.getElementById('bm-title');
-      const urlInput = document.getElementById('bm-url');
-      const folderInput = document.getElementById('bm-folder');
-      
-      const title = titleInput.value.trim();
-      let url = urlInput.value.trim();
-      const folder = folderInput.value.trim() || 'General';
+      let title = document.getElementById('bm-title').value.trim();
+      let url = document.getElementById('bm-url').value.trim();
+      const folder = document.getElementById('bm-folder').value.trim() || 'General';
 
-      if (!title || !url) return;
+      if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+      if (!title) title = generateSmartLabel(url);
 
       state.bookmarks.unshift({ title, url, folder });
       localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
       
-      titleInput.value = '';
-      urlInput.value = '';
-      folderInput.value = '';
-      
+      document.getElementById('bm-title').value = ''; document.getElementById('bm-url').value = ''; document.getElementById('bm-folder').value = '';
       renderBookmarks();
     }
+    function removeBookmark(idx) { state.bookmarks.splice(idx, 1); localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks)); renderBookmarks(); }
 
-    function removeBookmark(idx) {
-      state.bookmarks.splice(idx, 1);
-      localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
-      renderBookmarks();
-    }
-
-    // --- Google Calendar OAuth2 & API ---
+    // ===== GOOGLE CALENDAR OAUTH =====
     function initGoogleAuth() {
       if (typeof google === 'undefined' || !state.googleClientId) return;
-
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: state.googleClientId,
         scope: 'https://www.googleapis.com/auth/calendar.events.readonly',
-        callback: (res) => {
-          if (res && res.access_token) {
-            state.googleToken = res.access_token;
-            localStorage.setItem('dash_google_token', state.googleToken);
-            fetchCalendarEvents();
-          }
-        },
+        callback: (res) => { if (res && res.access_token) { state.googleToken = res.access_token; localStorage.setItem('dash_google_token', state.googleToken); fetchCalendarEvents(); } },
       });
-
-      if (state.googleToken) {
-        fetchCalendarEvents();
-      }
+      if (state.googleToken) { fetchCalendarEvents(); }
     }
-
     function handleGoogleAuth() {
-      if (!state.googleClientId) {
-        alert('Please add your Google OAuth Client ID in Settings first.');
-        openSettingsModal();
-        return;
-      }
+      if (!state.googleClientId) { alert('Please add your Google OAuth Client ID in Settings first.'); openSettingsModal(); return; }
       if (!tokenClient) initGoogleAuth();
-      if (tokenClient) {
-        tokenClient.requestAccessToken({ prompt: '' });
-      }
+      if (tokenClient) { tokenClient.requestAccessToken({ prompt: '' }); }
     }
-
     function handleGoogleSignout() {
       if (state.googleToken) {
         google.accounts.oauth2.revoke(state.googleToken, () => {
-          state.googleToken = null;
-          localStorage.removeItem('dash_google_token');
+          state.googleToken = null; localStorage.removeItem('dash_google_token');
           document.getElementById('cal-auth-section').style.display = 'flex';
           document.getElementById('cal-events-section').style.display = 'none';
         });
       }
     }
-
     async function fetchCalendarEvents() {
       if (!state.googleToken) return;
-
       try {
         const timeMin = new Date().toISOString();
         const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&maxResults=20&singleEvents=true&orderBy=startTime`;
-
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${state.googleToken}` }
-        });
-
-        if (res.status === 401) {
-          handleGoogleSignout();
-          return;
-        }
-
-        const data = await res.json();
-        renderCalendarEvents(data.items || []);
-      } catch (err) {
-        console.error('Error fetching events:', err);
-      }
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${state.googleToken}` } });
+        if (res.status === 401) { handleGoogleSignout(); return; }
+        const data = await res.json(); renderCalendarEvents(data.items || []);
+      } catch (err) { console.error('Error fetching events:', err); }
     }
-
     function renderCalendarEvents(events) {
       const container = document.getElementById('calendar-event-list');
-      document.getElementById('cal-auth-section').style.display = 'none';
-      document.getElementById('cal-events-section').style.display = 'flex';
-
-      if (events.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No upcoming events.</div>';
-        return;
-      }
-
+      document.getElementById('cal-auth-section').style.display = 'none'; document.getElementById('cal-events-section').style.display = 'flex';
+      if (events.length === 0) { container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No upcoming events.</div>'; return; }
       container.innerHTML = events.map(evt => {
         const start = evt.start.dateTime ? new Date(evt.start.dateTime) : new Date(evt.start.date);
         const dateStr = start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
         const timeStr = evt.start.dateTime ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'All Day';
-
-        return `
-          <div class="cal-event-card">
-            <span class="cal-event-title">${evt.summary || 'Untitled Event'}</span>
-            <div class="cal-event-meta">
-              <span>${dateStr}</span>
-              <span>${timeStr}</span>
-            </div>
-          </div>
-        `;
+        return `<div class="cal-event-card"><span class="cal-event-title">${evt.summary || 'Untitled Event'}</span><div class="cal-event-meta"><span>${dateStr}</span><span>${timeStr}</span></div></div>`;
       }).join('');
     }
 
-    // --- Modals (Clear inputs immediately on open) ---
-    function openSettingsModal() {
-      document.getElementById('settings-wallpaper').value = state.wallpaper;
-      document.getElementById('settings-client-id').value = state.googleClientId;
+    // ===== INLINE BUILT-IN CALENDAR =====
+    function toggleInlineCalendar() {
+      const wrapper = document.getElementById('inline-calendar-wrapper');
+      if (wrapper.classList.contains('open')) { wrapper.classList.remove('open'); return; }
+      const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); const today = now.getDate();
+      const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById('cal-month-title').innerText = `${monthNames[month]} ${year}`;
+      let html = '<div class="cal-day-header">Su</div><div class="cal-day-header">Mo</div><div class="cal-day-header">Tu</div><div class="cal-day-header">We</div><div class="cal-day-header">Th</div><div class="cal-day-header">Fr</div><div class="cal-day-header">Sa</div>';
+      for (let i = 0; i < firstDay; i++) { html += '<div class="cal-day empty"></div>'; }
+      for (let i = 1; i <= daysInMonth; i++) { const isToday = (i === today) ? 'today' : ''; html += `<div class="cal-day ${isToday}">${i}</div>`; }
+      document.getElementById('generic-calendar-grid').innerHTML = html; wrapper.classList.add('open');
+    }
 
+    // ===== MODALS & DRAWERS =====
+    function toggleDrawer(drawerId) {
+      const drawer = document.getElementById(drawerId);
+      document.querySelectorAll('.drawer').forEach(d => { if (d.id !== drawerId) d.classList.remove('open'); });
+      drawer.classList.toggle('open');
+    }
+    function openSettingsModal() {
+      document.getElementById('settings-wallpaper').value = state.wallpaper; document.getElementById('settings-client-id').value = state.googleClientId;
       if (document.getElementById('toggle-mod-dials')) document.getElementById('toggle-mod-dials').checked = state.modules.dials;
       if (document.getElementById('toggle-mod-services')) document.getElementById('toggle-mod-services').checked = state.modules.services;
-      if (document.getElementById('toggle-mod-calendar')) document.getElementById('toggle-mod-calendar').checked = state.modules.calendar;
+      if (document.getElementById('toggle-mod-builtin-cal')) document.getElementById('toggle-mod-builtin-cal').checked = state.modules.builtin_cal;
+      if (document.getElementById('toggle-mod-gcal')) document.getElementById('toggle-mod-gcal').checked = state.modules.gcal;
       if (document.getElementById('toggle-mod-bookmarks')) document.getElementById('toggle-mod-bookmarks').checked = state.modules.bookmarks;
+      const customEngines = state.searchEngines.filter(e => e.isCustom); const listContainer = document.getElementById('custom-engines-list');
+      listContainer.innerHTML = customEngines.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>' : customEngines.map(e => `<div class="se-settings-item"><div style="display:flex; align-items:center;"><span class="se-color-dot" style="background: ${e.colors[0]}"></span><strong>${e.name}</strong></div><button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button></div>`).join('');
+      document.getElementById('settings-modal').style.display = 'flex'; setTimeout(() => document.getElementById('settings-modal').classList.add('show'), 10);
+    }
+    function openAddDialModal() { document.getElementById('dial-title').value = ''; document.getElementById('dial-url').value = ''; document.getElementById('dial-folder').value = ''; document.getElementById('dial-img').value = ''; document.getElementById('dial-modal').style.display = 'flex'; setTimeout(() => document.getElementById('dial-modal').classList.add('show'), 10); }
+    function openAddServiceModal() { document.getElementById('srv-name').value = ''; document.getElementById('srv-desc').value = ''; document.getElementById('srv-url').value = ''; document.getElementById('service-modal').style.display = 'flex'; setTimeout(() => document.getElementById('service-modal').classList.add('show'), 10); }
+    function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('show'); setTimeout(() => { modal.style.display = 'none'; }, 300); }
 
-      renderCustomEnginesList();
-      document.getElementById('settings-modal').style.display = 'flex';
+    // ===== BACKUP & SYNC ENGINE =====
+    function exportConfig() {
+      const backupState = { ...state }; delete backupState.googleToken;
+      const blob = new Blob([JSON.stringify(backupState, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'command-center-backup.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+    function importConfig(event) {
+      const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedState = JSON.parse(e.target.result);
+          if (importedState.wallpaper) localStorage.setItem('dash_wallpaper', importedState.wallpaper);
+          if (importedState.googleClientId) localStorage.setItem('dash_google_client_id', importedState.googleClientId);
+          if (importedState.dials) localStorage.setItem('dash_dials', JSON.stringify(importedState.dials));
+          if (importedState.bookmarks) localStorage.setItem('dash_bookmarks', JSON.stringify(importedState.bookmarks));
+          if (importedState.services) localStorage.setItem('dash_services', JSON.stringify(importedState.services));
+          if (importedState.modules) localStorage.setItem('dash_modules', JSON.stringify(importedState.modules));
+          if (importedState.searchEngines) localStorage.setItem('dash_search_engines', JSON.stringify(importedState.searchEngines));
+          if (importedState.activeEngineId) localStorage.setItem('dash_active_engine', importedState.activeEngineId);
+          alert("Configuration imported successfully! The dashboard will now reload."); window.location.reload();
+        } catch (err) { alert("Invalid configuration file. Please select a valid JSON backup."); }
+      }; reader.readAsText(file);
     }
 
-    function openAddDialModal() {
-      // Clear previous inputs BEFORE opening
-      document.getElementById('dial-title').value = '';
-      document.getElementById('dial-url').value = '';
-      document.getElementById('dial-img').value = '';
-      document.getElementById('dial-modal').style.display = 'flex';
-    }
-
-    function openAddServiceModal() {
-      // Clear previous inputs BEFORE opening
-      document.getElementById('srv-name').value = '';
-      document.getElementById('srv-desc').value = '';
-      document.getElementById('srv-url').value = '';
-      document.getElementById('service-modal').style.display = 'flex';
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
-    }
-
+    // ===== SAVE CONFIGURATION =====
     function saveSettings() {
       const wp = document.getElementById('settings-wallpaper').value.trim();
       const cid = document.getElementById('settings-client-id').value.trim();
-
-      if (wp) {
-        state.wallpaper = wp;
-        localStorage.setItem('dash_wallpaper', wp);
-        document.body.style.backgroundImage = `url('${state.wallpaper}')`;
-      }
-
-      state.googleClientId = cid;
-      localStorage.setItem('dash_google_client_id', cid);
-
-      state.modules = {
-        dials: document.getElementById('toggle-mod-dials').checked,
-        services: document.getElementById('toggle-mod-services').checked,
-        calendar: document.getElementById('toggle-mod-calendar').checked,
-        bookmarks: document.getElementById('toggle-mod-bookmarks').checked
-      };
+      if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
+      state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
+      state.modules = { dials: document.getElementById('toggle-mod-dials').checked, services: document.getElementById('toggle-mod-services').checked, builtin_cal: document.getElementById('toggle-mod-builtin-cal').checked, gcal: document.getElementById('toggle-mod-gcal').checked, bookmarks: document.getElementById('toggle-mod-bookmarks').checked };
       localStorage.setItem('dash_modules', JSON.stringify(state.modules));
-
-      applyModuleVisibility();
-      initGoogleAuth();
-      closeModal('settings-modal');
+      applyModuleVisibility(); initGoogleAuth(); closeModal('settings-modal');
     }
 
-    // --- Boot ---
+    function applyModuleVisibility() {
+      document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
+      document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
+      document.getElementById('nav-btn-builtin-cal').style.display = state.modules.builtin_cal ? 'inline-block' : 'none';
+      const gcalBtn = document.getElementById('nav-btn-calendar'); gcalBtn.style.display = state.modules.gcal ? 'inline-block' : 'none';
+      if (!state.modules.gcal) document.getElementById('calendar-drawer').classList.remove('open');
+      const bmBtn = document.getElementById('nav-btn-bookmarks'); bmBtn.style.display = state.modules.bookmarks ? 'inline-block' : 'none';
+      if (!state.modules.bookmarks) document.getElementById('bookmarks-drawer').classList.remove('open');
+    }
+
+    // ===== ADD SEARCH ENGINE =====
+    function addSearchEngine() {
+      const name = document.getElementById('new-se-name').value.trim(); const url = document.getElementById('new-se-url').value.trim(); const color = document.getElementById('new-se-color').value;
+      if (!name || !url) return;
+      const customColors = [color, '#12161c', color, '#12161c'];
+      state.searchEngines.push({ id: 'se_custom_' + Date.now(), name: name, url: url, colors: customColors, isCustom: true });
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
+      document.getElementById('new-se-name').value = ''; document.getElementById('new-se-url').value = ''; openSettingsModal(); renderEngineDropdown();
+    }
+    function removeSearchEngine(id) {
+      state.searchEngines = state.searchEngines.filter(e => e.id !== id);
+      if (state.activeEngineId === id) state.activeEngineId = 'se_google';
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines)); openSettingsModal(); renderEngineDropdown();
+    }
+
+    // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
-      renderEngineDropdown();
-      renderDials();
-      renderBookmarks();
-      renderServices();
-      applyModuleVisibility();
-      setTimeout(initGoogleAuth, 500);
+      renderEngineDropdown(); renderDials(); renderServices(); renderBookmarks(); applyModuleVisibility(); setTimeout(initGoogleAuth, 500);
     });
   </script>
 </body>
