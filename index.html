@@ -61,11 +61,11 @@
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
     /* --- Inline Calendar --- */
-    .inline-calendar-wrapper { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.6s ease; background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; width: 100%; max-width: 1100px; margin-bottom: 0; border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; }
+    .inline-calendar-wrapper { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease; background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; width: 100%; max-width: 1100px; margin-bottom: 0; border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; }
     .inline-calendar-wrapper.open { max-height: 500px; opacity: 1; padding: 24px; margin-bottom: 28px; border-color: var(--border-glass); }
     .generic-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; width: 100%; max-width: 400px; }
     .cal-day-header { font-size: 12px; color: var(--text-muted); font-weight: 600; padding-bottom: 8px; }
-    .cal-day { padding: 10px; font-size: 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.4s, transform 0.4s; }
+    .cal-day { padding: 10px; font-size: 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
     .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
     .cal-day.empty { background: transparent; }
     .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
@@ -101,15 +101,17 @@
     .dial-folder-wrapper.open .dial-folder-content { grid-template-rows: 1fr; }
     .dial-folder-wrapper.open .dial-folder-inner { padding-top: 8px; }
 
-    /* Dynamic Swapping Styling (Removed Entrance Animation to prevent flash on drop) */
+    /* Dynamic Swapping Styling */
     .draggable-wrapper { position: relative; cursor: grab; }
     .draggable-wrapper:active { cursor: grabbing; }
     
-    .dial-card, .service-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; display: flex; text-decoration: none; color: var(--text-main); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; width: 100%; pointer-events: none; }
+    .dial-card, .service-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; display: flex; text-decoration: none; color: var(--text-main); transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s; width: 100%; pointer-events: none; }
     .draggable-wrapper a { pointer-events: auto; }
     .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
     .service-card { padding: 14px; flex-direction: column; gap: 6px; }
-    .dial-card:hover, .service-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35); }
+    
+    .dial-card:hover, .service-card:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+    
     .dial-card img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
     .service-card .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #fbbc05; box-shadow: 0 0 6px #fbbc05; transition: background 0.3s, box-shadow 0.3s; }
     .service-card .name { font-size: 14px; font-weight: 600; }
