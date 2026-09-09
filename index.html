@@ -720,159 +720,84 @@
     }
 
     // ===== MASTER AUTO-DISCOVERY RSS ENGINE =====
-    const fetchRSS = async () => {
-      const el = document.getElementById('rssFeedList');
-      const titleEl = document.getElementById('rssHeaderTitle');
-      if (!el) return;
-      const urls = state.rssFeeds;
-      let masterArticleDeck = [];
+   const fetchRSS = async () => {
+  const el = document.getElementById('rssFeedList');
+  const titleEl = document.getElementById('rssHeaderTitle');
+  if (!el) return;
+  const urls = state.rssFeeds;
+  let masterArticleDeck = [];
 
-      if (urls.length === 0) {
-        el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">No active feeds. Open settings to add your favorite news sites.</div>';
-        if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
-        return;
+  if (urls.length === 0) {
+    el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">No active feeds. Open settings to add your favorite news sites.</div>';
+    if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
+    return;
+  }
+
+  el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">Synchronizing aggregated news nodes...</div>';
+
+  const feedPromises = urls.map(async (url) => {
+    try {
+      // Clean URL to ensure it points to a feed if a root domain was entered
+      let targetUrl = url;
+      if (!targetUrl.includes('feed') && !targetUrl.includes('rss') && !targetUrl.includes('.xml')) {
+        targetUrl = targetUrl.replace(/\/$/, '') + '/feed/';
       }
 
-      el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">Synchronizing aggregated news nodes...</div>';
-
-      const feedPromises = urls.map(async (url) => {
-        try {
-          const proxies = [
-            `https://corsproxy.io/?url=`,
-            `https://api.allorigins.win/raw?url=`
-          ];
-          
-          let response, rawDataText;
-          let success = false;
-          
-          for (let p of proxies) {
-            try {
-              response = await fetch(p + encodeURIComponent(url));
-              if (response.ok) {
-                rawDataText = await response.text();
-                success = true;
-                break;
-              }
-            } catch (e) {}
-          }
-          
-          if (!success) return [];
-
-          let parser = new DOMParser();
-          let isHtml = rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html');
-          let xmlDoc;
-
-          if (isHtml) {
-            const htmlDoc = parser.parseFromString(rawDataText, "text/html");
-            const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') ||
-                              htmlDoc.querySelector('link[type="application/atom+xml"]') ||
-                              htmlDoc.querySelector('link[rel="alternate"][href*="feed"]') ||
-                              htmlDoc.querySelector('link[rel="alternate"][href*="rss"]');
-
-            if (rssLinkEl && rssLinkEl.getAttribute('href')) {
-              let discoveredUrl = rssLinkEl.getAttribute('href');
-              if (!discoveredUrl.startsWith('http')) {
-                const baseOrigin = new URL(url).origin;
-                discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
-              }
-              
-              success = false;
-              for (let p of proxies) {
-                try {
-                  response = await fetch(p + encodeURIComponent(discoveredUrl));
-                  if (response.ok) {
-                    rawDataText = await response.text();
-                    success = true;
-                    break;
-                  }
-                } catch (e) {}
-              }
-              if (!success) return [];
-              xmlDoc = parser.parseFromString(rawDataText, "text/xml");
-            } else { return []; }
-          } else {
-            xmlDoc = parser.parseFromString(rawDataText, "text/xml");
-          }
-
-          const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
-          const sourceName = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || new URL(url).hostname;
-          let items = Array.from(xmlDoc.getElementsByTagName("item")).concat(Array.from(xmlDoc.getElementsByTagName("entry")));
-          let channelArticles = [];
-
-          items.forEach(item => {
-            const title = item.getElementsByTagName("title")[0]?.textContent || "Untitled Article";
-            let link = "#";
-            const linkEl = item.getElementsByTagName("link")[0];
-            if (linkEl) link = linkEl.getAttribute("href") || linkEl.textContent || "#";
-
-            const dateEl = item.getElementsByTagName("pubDate")[0] || item.getElementsByTagName("updated")[0] || item.getElementsByTagName("published")[0];
-            const rawDate = dateEl ? dateEl.textContent : "";
-            const timestamp = rawDate ? new Date(rawDate).getTime() : 0;
-            let imgUrl = '';
-
-            const enclosure = item.getElementsByTagName("enclosure")[0];
-            if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
-
-            if (!imgUrl) {
-              Array.from(item.childNodes).forEach(child => {
-                if (child.nodeName.includes('content') || child.nodeName.includes('thumbnail')) {
-                  const urlAttr = child.getAttribute('url');
-                  if (urlAttr) imgUrl = urlAttr;
-                }
-              });
-            }
-
-            if (!imgUrl) {
-              const descNode = item.getElementsByTagName("description")[0] || item.getElementsByTagName("content")[0] || item.getElementsByTagName("summary")[0];
-              const descText = descNode ? descNode.textContent : "";
-              const imgMatch = descText.match(/<img[^>]+src="([^">]+)"/i);
-              if (imgMatch && imgMatch[1]) imgUrl = imgMatch[1];
-            }
-
-            channelArticles.push({ title, link, rawDate, timestamp, sourceName, imgUrl });
-          });
-          return channelArticles;
-        } catch (err) { return []; }
-      });
-
-      const settlements = await Promise.all(feedPromises);
-      settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
-      masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
-
-      el.innerHTML = '';
-      if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
-      if (masterArticleDeck.length === 0) {
-        el.innerHTML = '<div style="color: var(--danger); font-size: 0.9rem; padding: 10px;">⚠️ Failed to parse feeds. Target blocking requests or invalid URL.</div>';
-        return;
+      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}`);
+      const data = await res.json();
+      
+      if (data.status === 'ok') {
+        return data.items.map(item => ({
+          title: item.title,
+          link: item.link,
+          timestamp: new Date(item.pubDate).getTime(),
+          sourceName: data.feed.title || new URL(url).hostname,
+          imgUrl: item.thumbnail || item.enclosure?.link || ''
+        }));
       }
+      return [];
+    } catch (err) {
+      console.error('Feed error:', err);
+      return [];
+    }
+  });
 
-      const maxDisplayCount = Math.min(masterArticleDeck.length, 9);
-      for (let i = 0; i < maxDisplayCount; i++) {
-        const art = masterArticleDeck[i];
-        let formattedDate = "Recent";
-        if (art.timestamp) {
-          formattedDate = new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        }
-        const card = document.createElement('a');
-        card.className = 'rss-item';
-        card.href = art.link;
-        card.target = '_blank';
-        card.rel = 'noopener';
-        const imgHtml = art.imgUrl ? `<img src="${art.imgUrl}" class="rss-image" alt="Cover">` : `<div class="rss-image"></div>`;
-        card.innerHTML = `
-          ${imgHtml}
-          <div class="rss-meta-block">
-            <div class="rss-title">${art.title}</div>
-            <div class="rss-source-date">
-              <span class="rss-source-tag">${art.sourceName}</span>
-              <span class="rss-date">${formattedDate}</span>
-            </div>
-          </div>
-        `;
-        el.appendChild(card);
-      }
-    };
+  const settlements = await Promise.all(feedPromises);
+  settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
+  masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
 
+  el.innerHTML = '';
+  if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
+  
+  if (masterArticleDeck.length === 0) {
+    el.innerHTML = '<div style="color: var(--danger); font-size: 0.9rem; padding: 10px;">⚠️ Could not fetch feeds. Try entering the direct RSS URL.</div>';
+    return;
+  }
+
+  const maxDisplayCount = Math.min(masterArticleDeck.length, 9);
+  for (let i = 0; i < maxDisplayCount; i++) {
+    const art = masterArticleDeck[i];
+    let formattedDate = art.timestamp ? new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : "Recent";
+    
+    const card = document.createElement('a');
+    card.className = 'rss-item';
+    card.href = art.link;
+    card.target = '_blank';
+    card.rel = 'noopener';
+    const imgHtml = art.imgUrl ? `<img src="${art.imgUrl}" class="rss-image" alt="Cover">` : `<div class="rss-image"></div>`;
+    card.innerHTML = `
+      ${imgHtml}
+      <div class="rss-meta-block">
+        <div class="rss-title">${art.title}</div>
+        <div class="rss-source-date">
+          <span class="rss-source-tag">${art.sourceName}</span>
+          <span class="rss-date">${formattedDate}</span>
+        </div>
+      </div>
+    `;
+    el.appendChild(card);
+  }
+};
     const renderRSSManager = () => {
       const grid = document.getElementById('rssManagerGrid');
       if (!grid) return;
