@@ -846,7 +846,28 @@
 
       const settlements = await Promise.all(feedPromises);
       settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
-      masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
+      // Interleave articles from each feed so one source doesn't dominate
+const groupedBySource = {};
+masterArticleDeck.forEach(art => {
+  if (!groupedBySource[art.sourceName]) groupedBySource[art.sourceName] = [];
+  groupedBySource[art.sourceName].push(art);
+});
+
+let balancedDeck = [];
+const sourceKeys = Object.keys(groupedBySource);
+let maxPerSource = 3; // Max articles to take from each source initially
+
+for (let i = 0; i < maxPerSource; i++) {
+  sourceKeys.forEach(src => {
+    if (groupedBySource[src][i]) {
+      balancedDeck.push(groupedBySource[src][i]);
+    }
+  });
+}
+
+// Sort the balanced mix by timestamp
+balancedDeck.sort((a, b) => b.timestamp - a.timestamp);
+masterArticleDeck = balancedDeck;
 
       el.innerHTML = '';
       if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
