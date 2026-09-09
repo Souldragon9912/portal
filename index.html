@@ -82,6 +82,7 @@
     /* --- Content Panels --- */
     .main-panel { width: 100%; background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 18px; animation: fadeInSlide 0.7s ease-out forwards; opacity: 0; }
     #section-services { animation-delay: 0.1s; }
+    #section-news { animation-delay: 0.15s; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
     .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
@@ -120,6 +121,25 @@
     .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
     .draggable-wrapper:hover .card-delete-btn { display: flex; }
     .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
+
+    /* --- Visual RSS Deck Cards --- */
+    .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
+    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .rss-item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+    .rss-image { width: 100%; height: 150px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+    .rss-meta-block { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; justify-content: space-between; }
+    .rss-title { font-size: 0.92rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .rss-source-date { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 8px; border-radius: 6px; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rss-date { font-family: monospace; font-size: 11px; }
+
+    /* --- Visual RSS Feed Manager (Modal) --- */
+    .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
+    .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .rss-manager-item:hover { transform: scale(1.05); }
+    .rss-manager-item img { width: 26px; height: 26px; border-radius: 6px; }
+    .rss-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; border: none; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: background 0.2s; }
+    .rss-delete-btn:hover { background: #dc2626; }
 
     /* --- Drawers --- */
     .drawer { position: fixed; top: 0; bottom: 0; width: 440px; max-width: 90vw; background: rgba(13, 17, 23, 0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border-glass); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -208,6 +228,7 @@
   <!-- ========================================== -->
   <main class="hero-container">
     
+    <!-- Central Search Bar -->
     <div class="search-box-wrapper" id="search-wrapper">
       <form class="search-box" id="search-form">
         <select id="engine-select" onchange="changeActiveEngine(this.value)"></select>
@@ -215,6 +236,7 @@
       </form>
     </div>
 
+    <!-- Speed Dials Section -->
     <div class="main-panel" id="section-dials">
       <div class="panel-header">
         <span class="panel-title">⚡ Speed Dials</span>
@@ -223,12 +245,24 @@
       <div class="speed-dial-grid" id="speed-dials-container"></div>
     </div>
 
+    <!-- Self-Hosted Services Section -->
     <div class="main-panel" id="section-services">
       <div class="panel-header">
         <span class="panel-title">🖥 Self-Hosted Services</span>
         <button class="badge-btn" onclick="openAddServiceModal()">+ Add Service</button>
       </div>
       <div class="services-grid" id="services-container"></div>
+    </div>
+
+    <!-- Multi-Feed Graphical RSS Deck -->
+    <div class="main-panel" id="section-news" style="display: none;">
+      <div class="panel-header">
+        <span class="panel-title" id="rssHeaderTitle">📡 Aggregated News Stream</span>
+        <button class="badge-btn" onclick="fetchRSS()">Refresh</button>
+      </div>
+      <div class="rss-feed-list" id="rssFeedList">
+        <div style="color: var(--text-muted); font-size: 0.9rem; padding: 8px;">Synchronizing aggregated news nodes...</div>
+      </div>
     </div>
 
   </main>
@@ -282,6 +316,7 @@
     <div class="modal-content">
       <h3>Dashboard Settings</h3>
       
+      <!-- Custom Wallpaper -->
       <div class="form-group">
         <label>Custom Wallpaper (URL or Upload Image)</label>
         <div style="display: flex; gap: 8px;">
@@ -291,6 +326,7 @@
         </div>
       </div>
 
+      <!-- Search Engines -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Search Engines</label>
         <div style="display: flex; gap: 6px;">
@@ -302,11 +338,24 @@
         <div class="se-settings-list" id="custom-engines-list"></div>
       </div>
 
+      <!-- Visual RSS Feed Manager -->
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Manage News Feeds (Auto-Discovery)</label>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Paste any website URL (e.g., https://theverge.com) and the feed will auto-discover.</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+          <input type="url" id="newRssInput" placeholder="https://theverge.com or direct feed URL" style="flex: 1;" />
+          <button class="badge-btn" onclick="addRSSFeed()">Add</button>
+        </div>
+        <div id="rssManagerGrid" class="rss-manager-grid"></div>
+      </div>
+
+      <!-- Google OAuth Client ID -->
       <div class="form-group">
         <label>Google OAuth Client ID</label>
         <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
       </div>
 
+      <!-- Visible Modules Toggles -->
       <div class="form-group">
         <label>Visible Modules & Sections</label>
         <div class="modules-toggle-list">
@@ -317,6 +366,10 @@
           <div class="toggle-row">
             <span>🖥 Self-Hosted Services</span>
             <label class="toggle-switch"><input type="checkbox" id="toggle-mod-services"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>📰 News Feed Deck</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-news"><span class="slider"></span></label>
           </div>
           <div class="toggle-row">
             <span>📅 Built-in Calendar (Calendar View)</span>
@@ -333,6 +386,7 @@
         </div>
       </div>
 
+      <!-- Backup & Sync Settings -->
       <div class="form-group" style="margin-top: 6px; border-top: 1px solid var(--border-glass); padding-top: 14px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Backup & Sync Configuration</label>
         <div style="display: flex; gap: 8px;">
@@ -401,7 +455,7 @@
           'ai.joinhandshake.com': 'Handshake',
           'github.com': 'GitHub',
           'reddit.com': 'Reddit',
-          'apartments.com': 'apartments.com' // Explicit exclusion rule
+          'apartments.com': 'apartments.com'
         };
 
         if (overrideDictionary[host]) return overrideDictionary[host];
@@ -428,7 +482,8 @@
       dials: JSON.parse(localStorage.getItem('dash_dials')) || [], 
       bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
       services: JSON.parse(localStorage.getItem('dash_services')) || [], 
-      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, builtin_cal: true, gcal: true, bookmarks: true },
+      rssFeeds: JSON.parse(localStorage.getItem('dash_rss_feeds')) || ['https://www.bleepingcomputer.com/feed/'],
+      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, news: true, builtin_cal: true, gcal: true, bookmarks: true },
       searchEngines: JSON.parse(localStorage.getItem('dash_search_engines')) || defaultSearchEngines,
       activeEngineId: localStorage.getItem('dash_active_engine') || 'se_google'
     };
@@ -496,11 +551,8 @@
         const rects = new Map();
         parent.querySelectorAll('.draggable-wrapper').forEach(el => rects.set(el, el.getBoundingClientRect()));
 
-        if (draggedIdx < targetIdx) {
-          parent.insertBefore(draggedNode, targetNode.nextSibling);
-        } else {
-          parent.insertBefore(draggedNode, targetNode);
-        }
+        if (draggedIdx < targetIdx) { parent.insertBefore(draggedNode, targetNode.nextSibling); } 
+        else { parent.insertBefore(draggedNode, targetNode); }
 
         parent.querySelectorAll('.draggable-wrapper').forEach(el => {
           const oldRect = rects.get(el);
@@ -534,9 +586,7 @@
             data.folder = folderName; newDials.push(data);
          });
       });
-      state.dials = newDials;
-      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
-      renderDials(); 
+      state.dials = newDials; localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); 
     }
 
     function syncServiceStateFromDOM() {
@@ -544,19 +594,15 @@
       document.querySelectorAll('#services-container > .draggable-wrapper').forEach(node => {
          newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
       });
-      state.services = newServices;
-      localStorage.setItem('dash_services', JSON.stringify(state.services));
-      renderServices();
+      state.services = newServices; localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices();
     }
 
     function handleDragEnd(e, type) { 
       if (draggedNode) draggedNode.style.opacity = '1'; 
-      if (type === 'dial') syncDialStateFromDOM(); 
-      else syncServiceStateFromDOM();
+      if (type === 'dial') syncDialStateFromDOM(); else syncServiceStateFromDOM();
       draggedNode = null; dragType = null;
     }
 
-    // Folder Header Drop Logic
     function handleFolderDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over-folder'); return false; }
     function handleFolderDragLeave(e) { e.currentTarget.classList.remove('drag-over-folder'); }
     function handleDropToFolder(e, folderName) {
@@ -566,22 +612,12 @@
         if (folderInner) folderInner.appendChild(draggedNode);
       }
     }
-
-    function toggleFolderUI(folderId) {
-      const fw = document.getElementById(`folder-wrapper-${folderId}`);
-      fw.classList.toggle('open');
-    }
+    function toggleFolderUI(folderId) { document.getElementById(`folder-wrapper-${folderId}`).classList.toggle('open'); }
 
     // ===== RENDER DIALS =====
     function renderDials() {
-      const container = document.getElementById('speed-dials-container');
-      const datalist = document.getElementById('dial-folder-list');
-      
-      if (state.dials.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No speed dials added.</div>';
-        if (datalist) datalist.innerHTML = '';
-        return;
-      }
+      const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
+      if (state.dials.length === 0) { container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No speed dials added.</div>'; if (datalist) datalist.innerHTML = ''; return; }
       
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
@@ -589,60 +625,34 @@
       const grouped = { _root: [] };
       state.dials.forEach((dial, idx) => {
         dial._origIdx = idx; 
-        if (dial.folder) {
-          if (!grouped[dial.folder]) grouped[dial.folder] = [];
-          grouped[dial.folder].push(dial);
-        } else {
-          grouped._root.push(dial);
-        }
+        if (dial.folder) { if (!grouped[dial.folder]) grouped[dial.folder] = []; grouped[dial.folder].push(dial); } 
+        else { grouped._root.push(dial); }
       });
 
       container.innerHTML = '';
 
       Object.keys(grouped).sort().forEach(folderName => {
         if (folderName === '_root') return;
+        const folderWrapper = document.createElement('div'); folderWrapper.className = 'dial-folder-wrapper open'; folderWrapper.id = `folder-wrapper-${folderName}`; folderWrapper.dataset.folderName = folderName;
         
-        const folderWrapper = document.createElement('div');
-        folderWrapper.className = 'dial-folder-wrapper open';
-        folderWrapper.id = `folder-wrapper-${folderName}`;
-        folderWrapper.dataset.folderName = folderName;
-        
-        const header = document.createElement('div');
-        header.className = 'dial-folder-header';
-        header.innerHTML = `📂 ${folderName}`;
+        const header = document.createElement('div'); header.className = 'dial-folder-header'; header.innerHTML = `📂 ${folderName}`;
         header.addEventListener('click', () => toggleFolderUI(folderName));
-        header.addEventListener('dragover', handleFolderDragOver);
-        header.addEventListener('dragleave', handleFolderDragLeave);
-        header.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
+        header.addEventListener('dragover', handleFolderDragOver); header.addEventListener('dragleave', handleFolderDragLeave); header.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
         
-        const content = document.createElement('div');
-        content.className = 'dial-folder-content';
-        
-        const inner = document.createElement('div');
-        inner.className = 'dial-folder-inner';
-        inner.id = `folder-inner-${folderName}`;
+        const content = document.createElement('div'); content.className = 'dial-folder-content';
+        const inner = document.createElement('div'); inner.className = 'dial-folder-inner'; inner.id = `folder-inner-${folderName}`;
         
         grouped[folderName].forEach(dial => { inner.appendChild(createDialElement(dial)); });
         content.appendChild(inner); folderWrapper.appendChild(header); folderWrapper.appendChild(content); container.appendChild(folderWrapper);
       });
-
       grouped._root.forEach(dial => { container.appendChild(createDialElement(dial)); });
     }
 
     function createDialElement(dial) {
-      let domain = 'example.com';
-      try { domain = new URL(dial.url).hostname; } catch(e){}
+      let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
       let imgSrc = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'draggable-wrapper'; wrapper.draggable = true;
-      wrapper.dataset.dialData = encodeURIComponent(JSON.stringify(dial));
-      
-      wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'dial'));
-      wrapper.addEventListener('dragover', (e) => e.preventDefault());
-      wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial'));
-      wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
-
+      const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = true; wrapper.dataset.dialData = encodeURIComponent(JSON.stringify(dial));
+      wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'dial')); wrapper.addEventListener('dragover', (e) => e.preventDefault()); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
       wrapper.innerHTML = `<a href="${dial.url}" class="dial-card" target="_blank" rel="noopener"><img src="${imgSrc}" alt="${dial.name}" /><span>${dial.name}</span></a><button class="card-delete-btn" title="Remove" onclick="removeDial(${dial._origIdx})">&times;</button>`;
       return wrapper;
     }
@@ -650,114 +660,242 @@
     function removeDial(idx) { state.dials.splice(idx, 1); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); }
     
     function saveNewDial() {
-      let name = document.getElementById('dial-title').value.trim();
-      let url = document.getElementById('dial-url').value.trim();
-      let folder = document.getElementById('dial-folder').value.trim();
-      let img = document.getElementById('dial-img').value.trim();
-      
+      let name = document.getElementById('dial-title').value.trim(); let url = document.getElementById('dial-url').value.trim();
+      let folder = document.getElementById('dial-folder').value.trim(); let img = document.getElementById('dial-img').value.trim();
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
-
-      state.dials.push({ name, url, img, folder });
-      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
-      renderDials(); closeModal('dial-modal');
+      state.dials.push({ name, url, img, folder }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
     }
 
     // ===== RENDER SERVICES & PING =====
     function renderServices() {
       const container = document.getElementById('services-container');
-      if (state.services.length === 0) {
-        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No hosted services configured.</div>';
-        return;
-      }
+      if (state.services.length === 0) { container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No hosted services configured.</div>'; return; }
       container.innerHTML = '';
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
-        const wrapper = document.createElement('div');
-        wrapper.className = 'draggable-wrapper'; wrapper.draggable = true;
-        wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
-
-        wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'service'));
-        wrapper.addEventListener('dragover', (e) => e.preventDefault());
-        wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service'));
-        wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
-
+        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = true; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
+        wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'service')); wrapper.addEventListener('dragover', (e) => e.preventDefault()); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
         wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a><button class="card-delete-btn" title="Remove" onclick="removeService(${idx})">&times;</button>`;
         container.appendChild(wrapper);
       });
       pingServices();
     }
-
     function pingServices() {
       state.services.forEach((srv, idx) => {
-        const dot = document.getElementById(`srv-dot-${idx}`);
-        if (!dot) return;
-        fetch(srv.url, { mode: 'no-cors', cache: 'no-store' })
-          .then(() => { dot.style.background = '#3fb950'; dot.style.boxShadow = '0 0 6px #3fb950'; })
-          .catch(() => { dot.style.background = 'var(--danger)'; dot.style.boxShadow = '0 0 6px var(--danger)'; });
+        const dot = document.getElementById(`srv-dot-${idx}`); if (!dot) return;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        fetch(srv.url, { mode: 'no-cors', cache: 'no-store', signal: controller.signal })
+          .then(() => { clearTimeout(timeoutId); dot.style.background = '#3fb950'; dot.style.boxShadow = '0 0 6px #3fb950'; })
+          .catch(() => { clearTimeout(timeoutId); dot.style.background = 'var(--danger)'; dot.style.boxShadow = '0 0 6px var(--danger)'; });
       });
     }
-
     function removeService(idx) { state.services.splice(idx, 1); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); }
     function saveNewService() {
-      let name = document.getElementById('srv-name').value.trim();
-      const desc = document.getElementById('srv-desc').value.trim();
-      let url = document.getElementById('srv-url').value.trim();
+      let name = document.getElementById('srv-name').value.trim(); const desc = document.getElementById('srv-desc').value.trim(); let url = document.getElementById('srv-url').value.trim();
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
-      
-      state.services.push({ name, desc, url });
-      localStorage.setItem('dash_services', JSON.stringify(state.services));
-      renderServices(); closeModal('service-modal');
+      state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
+
+    // ===== MASTER AUTO-DISCOVERY RSS ENGINE =====
+    const fetchRSS = async () => {
+      const el = document.getElementById('rssFeedList');
+      const titleEl = document.getElementById('rssHeaderTitle');
+      if (!el) return;
+      const urls = state.rssFeeds;
+      let masterArticleDeck = [];
+
+      if (urls.length === 0) {
+        el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">No active feeds. Open settings to add your favorite news sites.</div>';
+        if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
+        return;
+      }
+
+      const feedPromises = urls.map(async (url) => {
+        try {
+          let proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+          let response = await fetch(proxyUrl);
+          if (!response.ok) return [];
+          let rawDataText = await response.text();
+
+          let parser = new DOMParser();
+          let isHtml = rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html');
+          let xmlDoc;
+
+          // Auto-discover hidden RSS/Atom feeds from regular website HTML
+          if (isHtml) {
+            const htmlDoc = parser.parseFromString(rawDataText, "text/html");
+            const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') ||
+                              htmlDoc.querySelector('link[type="application/atom+xml"]') ||
+                              htmlDoc.querySelector('link[rel="alternate"][href*="feed"]') ||
+                              htmlDoc.querySelector('link[rel="alternate"][href*="rss"]');
+
+            if (rssLinkEl && rssLinkEl.getAttribute('href')) {
+              let discoveredUrl = rssLinkEl.getAttribute('href');
+              if (!discoveredUrl.startsWith('http')) {
+                const baseOrigin = new URL(url).origin;
+                discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
+              }
+              proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(discoveredUrl)}`;
+              response = await fetch(proxyUrl);
+              rawDataText = await response.text();
+              xmlDoc = parser.parseFromString(rawDataText, "text/xml");
+            } else { return []; }
+          } else {
+            xmlDoc = parser.parseFromString(rawDataText, "text/xml");
+          }
+
+          const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
+          const sourceName = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || new URL(url).hostname;
+          let items = Array.from(xmlDoc.getElementsByTagName("item")).concat(Array.from(xmlDoc.getElementsByTagName("entry")));
+          let channelArticles = [];
+
+          items.forEach(item => {
+            const title = item.getElementsByTagName("title")[0]?.textContent || "Untitled Article";
+            let link = "#";
+            const linkEl = item.getElementsByTagName("link")[0];
+            if (linkEl) link = linkEl.getAttribute("href") || linkEl.textContent || "#";
+
+            const dateEl = item.getElementsByTagName("pubDate")[0] || item.getElementsByTagName("updated")[0] || item.getElementsByTagName("published")[0];
+            const rawDate = dateEl ? dateEl.textContent : "";
+            const timestamp = rawDate ? new Date(rawDate).getTime() : 0;
+            let imgUrl = '';
+
+            const enclosure = item.getElementsByTagName("enclosure")[0];
+            if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
+
+            if (!imgUrl) {
+              Array.from(item.childNodes).forEach(child => {
+                if (child.nodeName.includes('content') || child.nodeName.includes('thumbnail')) {
+                  const urlAttr = child.getAttribute('url');
+                  if (urlAttr) imgUrl = urlAttr;
+                }
+              });
+            }
+
+            if (!imgUrl) {
+              const descNode = item.getElementsByTagName("description")[0] || item.getElementsByTagName("content")[0] || item.getElementsByTagName("summary")[0];
+              const descText = descNode ? descNode.textContent : "";
+              const imgMatch = descText.match(/<img[^>]+src="([^">]+)"/i);
+              if (imgMatch && imgMatch[1]) imgUrl = imgMatch[1];
+            }
+
+            channelArticles.push({ title, link, rawDate, timestamp, sourceName, imgUrl });
+          });
+          return channelArticles;
+        } catch (err) { return []; }
+      });
+
+      const settlements = await Promise.all(feedPromises);
+      settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
+      masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
+
+      el.innerHTML = '';
+      if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
+      if (masterArticleDeck.length === 0) {
+        el.innerHTML = '<div style="color: var(--danger); font-size: 0.9rem; padding: 10px;">⚠️ Failed to parse feeds. Targets may be blocking headless requests.</div>';
+        return;
+      }
+
+      const maxDisplayCount = Math.min(masterArticleDeck.length, 9);
+      for (let i = 0; i < maxDisplayCount; i++) {
+        const art = masterArticleDeck[i];
+        let formattedDate = "Recent";
+        if (art.timestamp) {
+          formattedDate = new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+        const card = document.createElement('a');
+        card.className = 'rss-item';
+        card.href = art.link;
+        card.target = '_blank';
+        card.rel = 'noopener';
+        const imgHtml = art.imgUrl ? `<img src="${art.imgUrl}" class="rss-image" alt="Cover">` : `<div class="rss-image"></div>`;
+        card.innerHTML = `
+          ${imgHtml}
+          <div class="rss-meta-block">
+            <div class="rss-title">${art.title}</div>
+            <div class="rss-source-date">
+              <span class="rss-source-tag">${art.sourceName}</span>
+              <span class="rss-date">${formattedDate}</span>
+            </div>
+          </div>
+        `;
+        el.appendChild(card);
+      }
+    };
+
+    const renderRSSManager = () => {
+      const grid = document.getElementById('rssManagerGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      if (state.rssFeeds.length === 0) {
+        grid.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; padding: 6px; grid-column: 1 / -1;">No feeds active. Paste a URL above to add one.</div>';
+        return;
+      }
+      state.rssFeeds.forEach((url, index) => {
+        const item = document.createElement('div');
+        item.className = 'rss-manager-item';
+        item.title = url;
+        let iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E";
+        try {
+          const d = new URL(url).hostname;
+          iconSrc = `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+        } catch (e) {}
+        item.innerHTML = `
+          <button class="rss-delete-btn" onclick="removeRSSFeed(${index})">&times;</button>
+          <img src="${iconSrc}" onerror="this.style.display='none'" alt="site-icon">
+        `;
+        grid.appendChild(item);
+      });
+    };
+
+    const addRSSFeed = () => {
+      const input = document.getElementById('newRssInput');
+      let url = input.value.trim();
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+      if (!state.rssFeeds.includes(url)) {
+        state.rssFeeds.push(url);
+        localStorage.setItem('dash_rss_feeds', JSON.stringify(state.rssFeeds));
+        renderRSSManager();
+        fetchRSS();
+      }
+      input.value = '';
+    };
+
+    const removeRSSFeed = (index) => {
+      state.rssFeeds.splice(index, 1);
+      localStorage.setItem('dash_rss_feeds', JSON.stringify(state.rssFeeds));
+      renderRSSManager();
+      fetchRSS();
+    };
 
     // ===== RENDER BOOKMARKS =====
     function renderBookmarks() {
-      const container = document.getElementById('bookmarks-container');
-      const datalist = document.getElementById('bm-folder-list');
-      
-      if (state.bookmarks.length === 0) {
-        container.innerHTML = '<li style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px;">No saved tabs yet.</li>';
-        datalist.innerHTML = '';
-        return;
-      }
-      
+      const container = document.getElementById('bookmarks-container'); const datalist = document.getElementById('bm-folder-list');
+      if (state.bookmarks.length === 0) { container.innerHTML = '<li style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px;">No saved tabs yet.</li>'; datalist.innerHTML = ''; return; }
       const folders = [...new Set(state.bookmarks.map(bm => bm.folder || 'General'))].sort();
       datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
-
       const grouped = {};
-      state.bookmarks.forEach((bm, idx) => {
-        const f = bm.folder || 'General';
-        if (!grouped[f]) grouped[f] = [];
-        grouped[f].push({ ...bm, originalIndex: idx });
-      });
-
+      state.bookmarks.forEach((bm, idx) => { const f = bm.folder || 'General'; if (!grouped[f]) grouped[f] = []; grouped[f].push({ ...bm, originalIndex: idx }); });
       let html = '';
       Object.keys(grouped).sort().forEach(folder => {
         html += `<div class="bookmark-folder-header">${folder}</div>`;
-        grouped[folder].forEach(bm => {
-          html += `<li class="bookmark-item"><a href="${bm.url}" target="_blank" rel="noopener">${bm.title}</a><button onclick="removeBookmark(${bm.originalIndex})">&times;</button></li>`;
-        });
+        grouped[folder].forEach(bm => { html += `<li class="bookmark-item"><a href="${bm.url}" target="_blank" rel="noopener">${bm.title}</a><button onclick="removeBookmark(${bm.originalIndex})">&times;</button></li>`; });
       });
       container.innerHTML = html;
     }
-
     function addBookmark() {
-      let title = document.getElementById('bm-title').value.trim();
-      let url = document.getElementById('bm-url').value.trim();
-      const folder = document.getElementById('bm-folder').value.trim() || 'General';
-
+      let title = document.getElementById('bm-title').value.trim(); let url = document.getElementById('bm-url').value.trim(); const folder = document.getElementById('bm-folder').value.trim() || 'General';
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!title) title = generateSmartLabel(url);
-
-      state.bookmarks.unshift({ title, url, folder });
-      localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
-      
-      document.getElementById('bm-title').value = ''; document.getElementById('bm-url').value = ''; document.getElementById('bm-folder').value = '';
-      renderBookmarks();
+      state.bookmarks.unshift({ title, url, folder }); localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
+      document.getElementById('bm-title').value = ''; document.getElementById('bm-url').value = ''; document.getElementById('bm-folder').value = ''; renderBookmarks();
     }
     function removeBookmark(idx) { state.bookmarks.splice(idx, 1); localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks)); renderBookmarks(); }
 
@@ -765,34 +903,19 @@
     function initGoogleAuth() {
       if (typeof google === 'undefined' || !state.googleClientId) return;
       tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: state.googleClientId,
-        scope: 'https://www.googleapis.com/auth/calendar.events.readonly',
+        client_id: state.googleClientId, scope: 'https://www.googleapis.com/auth/calendar.events.readonly',
         callback: (res) => { if (res && res.access_token) { state.googleToken = res.access_token; localStorage.setItem('dash_google_token', state.googleToken); fetchCalendarEvents(); } },
       });
       if (state.googleToken) { fetchCalendarEvents(); }
     }
-    function handleGoogleAuth() {
-      if (!state.googleClientId) { alert('Please add your Google OAuth Client ID in Settings first.'); openSettingsModal(); return; }
-      if (!tokenClient) initGoogleAuth();
-      if (tokenClient) { tokenClient.requestAccessToken({ prompt: '' }); }
-    }
-    function handleGoogleSignout() {
-      if (state.googleToken) {
-        google.accounts.oauth2.revoke(state.googleToken, () => {
-          state.googleToken = null; localStorage.removeItem('dash_google_token');
-          document.getElementById('cal-auth-section').style.display = 'flex';
-          document.getElementById('cal-events-section').style.display = 'none';
-        });
-      }
-    }
+    function handleGoogleAuth() { if (!state.googleClientId) { alert('Please add your Google OAuth Client ID in Settings first.'); openSettingsModal(); return; } if (!tokenClient) initGoogleAuth(); if (tokenClient) { tokenClient.requestAccessToken({ prompt: '' }); } }
+    function handleGoogleSignout() { if (state.googleToken) { google.accounts.oauth2.revoke(state.googleToken, () => { state.googleToken = null; localStorage.removeItem('dash_google_token'); document.getElementById('cal-auth-section').style.display = 'flex'; document.getElementById('cal-events-section').style.display = 'none'; }); } }
     async function fetchCalendarEvents() {
       if (!state.googleToken) return;
       try {
-        const timeMin = new Date().toISOString();
-        const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&maxResults=20&singleEvents=true&orderBy=startTime`;
+        const timeMin = new Date().toISOString(); const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&maxResults=20&singleEvents=true&orderBy=startTime`;
         const res = await fetch(url, { headers: { Authorization: `Bearer ${state.googleToken}` } });
-        if (res.status === 401) { handleGoogleSignout(); return; }
-        const data = await res.json(); renderCalendarEvents(data.items || []);
+        if (res.status === 401) { handleGoogleSignout(); return; } const data = await res.json(); renderCalendarEvents(data.items || []);
       } catch (err) { console.error('Error fetching events:', err); }
     }
     function renderCalendarEvents(events) {
@@ -831,11 +954,15 @@
       document.getElementById('settings-wallpaper').value = state.wallpaper; document.getElementById('settings-client-id').value = state.googleClientId;
       if (document.getElementById('toggle-mod-dials')) document.getElementById('toggle-mod-dials').checked = state.modules.dials;
       if (document.getElementById('toggle-mod-services')) document.getElementById('toggle-mod-services').checked = state.modules.services;
+      if (document.getElementById('toggle-mod-news')) document.getElementById('toggle-mod-news').checked = state.modules.news;
       if (document.getElementById('toggle-mod-builtin-cal')) document.getElementById('toggle-mod-builtin-cal').checked = state.modules.builtin_cal;
       if (document.getElementById('toggle-mod-gcal')) document.getElementById('toggle-mod-gcal').checked = state.modules.gcal;
       if (document.getElementById('toggle-mod-bookmarks')) document.getElementById('toggle-mod-bookmarks').checked = state.modules.bookmarks;
+      
       const customEngines = state.searchEngines.filter(e => e.isCustom); const listContainer = document.getElementById('custom-engines-list');
       listContainer.innerHTML = customEngines.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>' : customEngines.map(e => `<div class="se-settings-item"><div style="display:flex; align-items:center;"><span class="se-color-dot" style="background: ${e.colors[0]}"></span><strong>${e.name}</strong></div><button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button></div>`).join('');
+      
+      renderRSSManager();
       document.getElementById('settings-modal').style.display = 'flex'; setTimeout(() => document.getElementById('settings-modal').classList.add('show'), 10);
     }
     function openAddDialModal() { document.getElementById('dial-title').value = ''; document.getElementById('dial-url').value = ''; document.getElementById('dial-folder').value = ''; document.getElementById('dial-img').value = ''; document.getElementById('dial-modal').style.display = 'flex'; setTimeout(() => document.getElementById('dial-modal').classList.add('show'), 10); }
@@ -859,6 +986,7 @@
           if (importedState.dials) localStorage.setItem('dash_dials', JSON.stringify(importedState.dials));
           if (importedState.bookmarks) localStorage.setItem('dash_bookmarks', JSON.stringify(importedState.bookmarks));
           if (importedState.services) localStorage.setItem('dash_services', JSON.stringify(importedState.services));
+          if (importedState.rssFeeds) localStorage.setItem('dash_rss_feeds', JSON.stringify(importedState.rssFeeds));
           if (importedState.modules) localStorage.setItem('dash_modules', JSON.stringify(importedState.modules));
           if (importedState.searchEngines) localStorage.setItem('dash_search_engines', JSON.stringify(importedState.searchEngines));
           if (importedState.activeEngineId) localStorage.setItem('dash_active_engine', importedState.activeEngineId);
@@ -873,7 +1001,7 @@
       const cid = document.getElementById('settings-client-id').value.trim();
       if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
       state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
-      state.modules = { dials: document.getElementById('toggle-mod-dials').checked, services: document.getElementById('toggle-mod-services').checked, builtin_cal: document.getElementById('toggle-mod-builtin-cal').checked, gcal: document.getElementById('toggle-mod-gcal').checked, bookmarks: document.getElementById('toggle-mod-bookmarks').checked };
+      state.modules = { dials: document.getElementById('toggle-mod-dials').checked, services: document.getElementById('toggle-mod-services').checked, news: document.getElementById('toggle-mod-news').checked, builtin_cal: document.getElementById('toggle-mod-builtin-cal').checked, gcal: document.getElementById('toggle-mod-gcal').checked, bookmarks: document.getElementById('toggle-mod-bookmarks').checked };
       localStorage.setItem('dash_modules', JSON.stringify(state.modules));
       applyModuleVisibility(); initGoogleAuth(); closeModal('settings-modal');
     }
@@ -881,6 +1009,7 @@
     function applyModuleVisibility() {
       document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
       document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
+      document.getElementById('section-news').style.display = state.modules.news ? 'flex' : 'none';
       document.getElementById('nav-btn-builtin-cal').style.display = state.modules.builtin_cal ? 'inline-block' : 'none';
       const gcalBtn = document.getElementById('nav-btn-calendar'); gcalBtn.style.display = state.modules.gcal ? 'inline-block' : 'none';
       if (!state.modules.gcal) document.getElementById('calendar-drawer').classList.remove('open');
@@ -906,7 +1035,10 @@
     // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
-      renderEngineDropdown(); renderDials(); renderServices(); renderBookmarks(); applyModuleVisibility(); setTimeout(initGoogleAuth, 500);
+      renderEngineDropdown(); renderDials(); renderServices(); renderBookmarks(); 
+      applyModuleVisibility();
+      if (state.modules.news) fetchRSS();
+      setTimeout(initGoogleAuth, 500);
     });
   </script>
 </body>
