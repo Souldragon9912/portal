@@ -704,7 +704,7 @@
       state.services.forEach((srv, idx) => {
         const dot = document.getElementById(`srv-dot-${idx}`); if (!dot) return;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         fetch(srv.url, { mode: 'no-cors', cache: 'no-store', signal: controller.signal })
           .then(() => { clearTimeout(timeoutId); dot.style.background = '#3fb950'; dot.style.boxShadow = '0 0 6px #3fb950'; })
           .catch(() => { clearTimeout(timeoutId); dot.style.background = 'var(--danger)'; dot.style.boxShadow = '0 0 6px var(--danger)'; });
@@ -1008,7 +1008,7 @@
       renderEngineDropdown(); renderDials(); renderServices(); renderBookmarks(); 
       applyModuleVisibility();
       if (state.modules.news) fetchRSS();
-      setTimeout(initGoogleAuth, 500);
+      setTimeout(initGoogleAuth, 4000);
     });
   </script>
 </body>
