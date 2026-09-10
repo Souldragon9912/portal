@@ -116,25 +116,25 @@
     .search-box input { flex: 1; font-size: 15px; }
     .search-box input:focus { background: rgba(255, 255, 255, 0.1); }
 
-    /* --- Movable Sections (Speed Dials, Services, News) --- */
+    /* --- Movable Sections --- */
     #section-dials {
       background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important;
       position: absolute; top: 160px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
     }
+    #section-dials .panel-header { display: none !important; }
+
     #section-services {
-      background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important;
-      position: absolute; top: 380px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
+      background: var(--bg-glass) !important; backdrop-filter: blur(16px) !important; border: 1px solid var(--border-glass) !important; border-radius: 18px !important; padding: 24px !important;
+      position: absolute; top: 420px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
     }
     #section-news {
       background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important;
-      position: absolute; top: 600px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
+      position: absolute; top: 680px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
     }
 
     .main-panel.edit-mode-container {
       border: 2px dashed var(--accent) !important;
       background: rgba(0, 0, 0, 0.3) !important;
-      padding: 20px !important;
-      border-radius: 16px;
       cursor: grab;
     }
     .main-panel.edit-mode-container:active { cursor: grabbing; }
@@ -145,7 +145,7 @@
     .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
     .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr)); gap: 16px; width: 100%; }
-    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr)); gap: 16px; width: 100%; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
     
     .dial-folder-wrapper { grid-column: 1 / -1; background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--card-radius); padding: 16px; display: flex; flex-direction: column; }
     .dial-folder-header { font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s, background 0.2s; padding: 8px 12px; border-radius: 8px; margin: -8px -8px 8px -8px; }
@@ -174,29 +174,45 @@
       width: 100%; 
       pointer-events: auto; 
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-      aspect-ratio: 1;
     }
-    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; }
-    .service-card { padding: 14px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; text-align: center; }
+    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: 1; }
+    
+    /* Short rectangle service cards */
+    .service-card { 
+      padding: 14px 16px; 
+      flex-direction: column; 
+      justify-content: center; 
+      gap: 6px; 
+      border-radius: 12px;
+      aspect-ratio: auto;
+    }
     
     .add-dial-tile {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
       color: var(--text-muted);
       border: 2px dashed rgba(255, 255, 255, 0.2);
       background: rgba(22, 27, 34, 0.25);
+      aspect-ratio: 1;
     }
-    .add-dial-tile:hover {
+    .add-service-tile {
+      aspect-ratio: auto;
+      min-height: 70px;
+      flex-direction: row;
+      justify-content: center;
+      gap: 8px;
+    }
+    .add-dial-tile:hover, .add-service-tile:hover {
       color: var(--accent);
       border-color: var(--accent);
       background: rgba(88, 166, 255, 0.1);
       transform: translateY(-4px);
     }
-    .add-dial-tile span:first-child { font-size: 28px; font-weight: 300; }
-    .add-dial-tile span:last-child { font-size: 12px; font-weight: 500; }
+    .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 24px; font-weight: 300; }
+    .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 12px; font-weight: 500; }
 
     .dial-card:hover, .service-card:hover { 
       background: rgba(33, 38, 45, 0.85); 
@@ -319,8 +335,8 @@
       .dial-card img, .service-card img { width: 28px; height: 28px; }
       .dial-card span, .service-card .name { font-size: 11px; }
       .service-card .desc { display: none; }
-      .add-dial-tile span:first-child { font-size: 22px; }
-      .add-dial-tile span:last-child { font-size: 10px; }
+      .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
+      .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 10px; }
 
       #section-news { margin-top: 20px; }
       .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
@@ -367,10 +383,6 @@
 
     <!-- Movable Speed Dials Section -->
     <div class="main-panel" id="section-dials" draggable="false">
-      <div class="panel-header">
-        <span class="panel-title">⚡ Speed Dials</span>
-        <button class="badge-btn" onclick="openAddDialModal()">+ Add Link</button>
-      </div>
       <div class="speed-dial-grid" id="speed-dials-container"></div>
     </div>
 
@@ -378,7 +390,6 @@
     <div class="main-panel" id="section-services" draggable="false">
       <div class="panel-header">
         <span class="panel-title">🖥 Self-Hosted Services</span>
-        <button class="badge-btn" onclick="openAddServiceModal()">+ Add Service</button>
       </div>
       <div class="services-grid" id="services-container"></div>
     </div>
@@ -1014,7 +1025,7 @@
       });
 
       const addServiceTile = document.createElement('div');
-      addServiceTile.className = 'add-dial-tile';
+      addServiceTile.className = 'add-dial-tile add-service-tile';
       addServiceTile.onclick = openAddServiceModal;
       addServiceTile.innerHTML = `<span>+</span><span>Add Service</span>`;
       container.appendChild(addServiceTile);
