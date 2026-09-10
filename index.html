@@ -92,6 +92,30 @@
     .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
+    /* --- Floating Bottom-Right Lock & Save Button --- */
+    .floating-lock-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #ff9500;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+      cursor: pointer;
+      z-index: 300;
+      border: none;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s, background 0.2s;
+      animation: fadeInSlide 0.3s ease-out;
+    }
+    .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
+    .floating-lock-btn.show { display: flex; }
+
     /* --- Inline Calendar --- */
     .inline-calendar-wrapper { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease; background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; width: 100%; max-width: 1100px; margin-bottom: 0; border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; }
     .inline-calendar-wrapper.open { max-height: 500px; opacity: 1; padding: 24px; margin-bottom: 28px; border-color: var(--border-glass); }
@@ -121,8 +145,6 @@
       background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important;
       position: absolute; top: 160px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
     }
-    #section-dials .panel-header { display: none !important; }
-
     #section-services {
       background: var(--bg-glass) !important; backdrop-filter: blur(16px) !important; border: 1px solid var(--border-glass) !important; border-radius: 18px !important; padding: 24px !important;
       position: absolute; top: 420px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
@@ -177,7 +199,6 @@
     }
     .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: 1; }
     
-    /* Short rectangle service cards */
     .service-card { 
       padding: 14px 16px; 
       flex-direction: column; 
@@ -197,6 +218,7 @@
       border: 2px dashed rgba(255, 255, 255, 0.2);
       background: rgba(22, 27, 34, 0.25);
       aspect-ratio: 1;
+      border-radius: var(--card-radius);
     }
     .add-service-tile {
       aspect-ratio: auto;
@@ -204,6 +226,7 @@
       flex-direction: row;
       justify-content: center;
       gap: 8px;
+      border-radius: 12px;
     }
     .add-dial-tile:hover, .add-service-tile:hover {
       color: var(--accent);
@@ -360,6 +383,9 @@
     </div>
   </div>
 
+  <!-- Floating Lock & Save Button (Only visible in edit mode) -->
+  <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock & Save Layout</button>
+
   <!-- ========================================== -->
   <!--           INLINE BUILT-IN CALENDAR         -->
   <!-- ========================================== -->
@@ -482,6 +508,8 @@
               <option value="4px">Sharp Square (4px)</option>
               <option value="12px">Rounded Rectangle (12px)</option>
               <option value="20px" selected>Smooth Squircle (20px)</option>
+              <option value="30% 70% 70% 30% / 30% 30% 70% 70%">Organic Blob</option>
+              <option value="15px 40px 15px 40px">Asymmetric Leaf</option>
               <option value="50px">Opera Style Pill (50px)</option>
               <option value="50%">Full Circle / Capsule (50%)</option>
             </select>
@@ -700,6 +728,7 @@
     function toggleEditMode() {
       isEditMode = !isEditMode;
       const btn = document.getElementById('editModeBtn');
+      const floatBtn = document.getElementById('floatingLockBtn');
       const topNav = document.getElementById('topNavWidget');
       const searchWidget = document.getElementById('searchWidget');
       const dialsSection = document.getElementById('section-dials');
@@ -708,9 +737,12 @@
       const body = document.body;
 
       if (isEditMode) {
-        btn.classList.add('active-edit');
-        btn.style.background = '#ff9500';
-        btn.innerText = '🔒 Lock Layout';
+        if (btn) {
+          btn.classList.add('active-edit');
+          btn.style.background = '#ff9500';
+          btn.innerText = '🔒 Lock Layout';
+        }
+        if (floatBtn) floatBtn.classList.add('show');
         
         topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
         searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
@@ -722,9 +754,12 @@
         body.classList.add('edit-mode');
         closeModal('settings-modal');
       } else {
-        btn.classList.remove('active-edit');
-        btn.style.background = '#333';
-        btn.innerText = '✏ Unlock Layout';
+        if (btn) {
+          btn.classList.remove('active-edit');
+          btn.style.background = '#333';
+          btn.innerText = '✏ Unlock Layout';
+        }
+        if (floatBtn) floatBtn.classList.remove('show');
         
         topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
         searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
