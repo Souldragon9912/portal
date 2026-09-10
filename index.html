@@ -88,13 +88,22 @@
     .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
     .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
-    /* --- Grids & Ultra-Clear Opera Glass Cards --- */
-    .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+    /* --- Unboxed Speed Dials with Heavy Frosted Glass --- */
+    #section-dials {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+    #section-dials .panel-header { display: none !important; }
+
+    .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; width: 100%; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
     
-    .dial-folder-wrapper { grid-column: 1 / -1; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; }
+    .dial-folder-wrapper { grid-column: 1 / -1; background: rgba(22, 27, 34, 0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; }
     .dial-folder-header { font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s, background 0.2s; padding: 8px 12px; border-radius: 8px; margin: -8px -8px 8px -8px; }
-    .dial-folder-header:hover { color: var(--accent); background: rgba(255,255,255,0.05); }
+    .dial-folder-header:hover { color: var(--accent); background: rgba(255,255,255,0.08); }
     .dial-folder-header.drag-over-folder { background: rgba(88, 166, 255, 0.2); color: var(--accent); border: 1px dashed var(--accent); }
     
     .dial-folder-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
@@ -106,29 +115,30 @@
     .draggable-wrapper:active { cursor: grabbing; }
     
     .dial-card, .service-card { 
-      background: transparent; 
-      backdrop-filter: none; 
-      -webkit-backdrop-filter: none; 
-      border: 1px solid rgba(255, 255, 255, 0.1); 
-      border-radius: 12px; 
+      background: rgba(22, 27, 34, 0.55); 
+      backdrop-filter: blur(16px); 
+      -webkit-backdrop-filter: blur(16px); 
+      border: 1px solid rgba(255, 255, 255, 0.18); 
+      border-radius: 14px; 
       display: flex; 
       text-decoration: none; 
       color: var(--text-main); 
-      transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s, backdrop-filter 0.2s; 
+      transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s; 
       width: 100%; 
       pointer-events: none; 
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
     .draggable-wrapper a { pointer-events: auto; }
     .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
     .service-card { padding: 14px; flex-direction: column; gap: 6px; }
     
     .dial-card:hover, .service-card:hover { 
-      background: rgba(255, 255, 255, 0.1); 
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(33, 38, 45, 0.75); 
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       transform: translateY(-4px); 
-      border-color: rgba(255, 255, 255, 0.3); 
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); 
+      border-color: rgba(255, 255, 255, 0.4); 
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); 
     }
     
     .dial-card img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
@@ -142,8 +152,8 @@
 
     /* --- Visual RSS Deck Cards --- */
     .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
-    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
-    .rss-item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .rss-item:hover { background: rgba(33, 38, 45, 0.85); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
     .rss-image { width: 100%; height: 150px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
     .rss-meta-block { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; justify-content: space-between; }
     .rss-title { font-size: 0.92rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -218,10 +228,9 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      header { padding: 8px 12px; margin-bottom: 16px; }
-      .widget-toggles, header > div:last-child > div { display: none !important; } /* Hide extra toggles/clocks on mobile */
+      header { padding: 8px 12px; margin-bottom: 16px; justify-content: flex-end; }
+      .widget-toggles, header > div:last-child > div { display: none !important; } 
       
-      /* Hide Services, Calendars, and Settings containers on mobile, show only Search, Dials, and News stream */
       #section-services, .inline-calendar-wrapper { display: none !important; }
       
       .speed-dial-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
@@ -229,14 +238,13 @@
       .dial-card img { width: 28px; height: 28px; }
       .dial-card span { font-size: 11px; }
 
-      /* Strip out heavy bounding box from news panel on mobile, display pure stream icons/cards */
       #section-news {
         background: transparent !important;
         backdrop-filter: none !important;
         border: none !important;
         padding: 0 !important;
       }
-      #section-news .panel-header { display: none !important; } /* Hide news panel header box on mobile */
+      #section-news .panel-header { display: none !important; } 
       .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
       .rss-item { background: rgba(22, 27, 34, 0.85); backdrop-filter: blur(8px); }
     }
@@ -882,7 +890,7 @@
 
       let balancedDeck = [];
       const sourceKeys = Object.keys(groupedBySource);
-      let maxPerSource = 2;
+      let maxPerSource = 3;
       
       for (let i = 0; i < maxPerSource; i++) {
         sourceKeys.forEach(src => {
