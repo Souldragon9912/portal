@@ -32,6 +32,7 @@
       --card-bg: rgba(22, 27, 34, 0.55);
       --card-blur: 16px;
       --card-radius: 14px;
+      --card-min-width: 130px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -125,7 +126,7 @@
     }
     #section-dials .panel-header { display: none !important; }
 
-    .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; width: 100%; }
+    .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr)); gap: 16px; width: 100%; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
     
     .dial-folder-wrapper { grid-column: 1 / -1; background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--card-radius); padding: 16px; display: flex; flex-direction: column; }
@@ -134,7 +135,7 @@
     .dial-folder-header.drag-over-folder { background: rgba(88, 166, 255, 0.2); color: var(--accent); border: 1px dashed var(--accent); }
     
     .dial-folder-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
-    .dial-folder-inner { overflow: hidden; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+    .dial-folder-inner { overflow: hidden; display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr)); gap: 16px; }
     .dial-folder-wrapper.open .dial-folder-content { grid-template-rows: 1fr; }
     .dial-folder-wrapper.open .dial-folder-inner { padding-top: 8px; }
 
@@ -438,26 +439,40 @@
         </div>
       </div>
 
-      <!-- NEW: Frosted Glass & Icon Shape Customizer -->
+      <!-- NEW: Advanced Frosted Glass, Tile Shapes & Tile Size Customizer -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
-        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 6px;">Frosted Glass & Tile Appearance</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Tile Appearance & Glass Customizer</label>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
           <div>
-            <label style="font-size: 11px;">Glass Blur Intensity</label>
-            <select id="settings-blur" style="width:100%; margin-top:4px;">
-              <option value="8px">Low (8px)</option>
-              <option value="16px" selected>Medium (16px)</option>
-              <option value="24px">High (24px)</option>
-              <option value="40px">Maximum (40px)</option>
+            <label style="font-size: 11px;">Tile Shape Preset</label>
+            <select id="settings-shape" style="width:100%; margin-top:4px;">
+              <option value="4px">Sharp Square (4px)</option>
+              <option value="12px">Rounded Rectangle (12px)</option>
+              <option value="20px" selected>Smooth Squircle (20px)</option>
+              <option value="50px">Opera Style Pill (50px)</option>
+              <option value="50%">Full Circle / Capsule (50%)</option>
             </select>
           </div>
           <div>
-            <label style="font-size: 11px;">Tile Corner Radius</label>
-            <select id="settings-radius" style="width:100%; margin-top:4px;">
-              <option value="4px">Square (4px)</option>
-              <option value="14px" selected>Rounded (14px)</option>
-              <option value="50%">Circle / Pill (50%)</option>
+            <label style="font-size: 11px;">Tile Size Scale</label>
+            <select id="settings-size" style="width:100%; margin-top:4px;">
+              <option value="100px">Compact (100px)</option>
+              <option value="130px" selected>Standard (130px)</option>
+              <option value="160px">Large (160px)</option>
+              <option value="190px">Extra Large (190px)</option>
             </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="font-size: 11px;">Glass Blur (px)</label>
+            <input type="number" id="settings-blur-num" min="0" max="40" value="16" style="width:100%; margin-top:4px;" />
+          </div>
+          <div>
+            <label style="font-size: 11px;">Glass Opacity (%)</label>
+            <input type="number" id="settings-opacity-num" min="10" max="100" value="55" style="width:100%; margin-top:4px;" />
           </div>
         </div>
       </div>
@@ -578,12 +593,21 @@
     }
     setInterval(updateClock, 1000); updateClock();
 
-    // ===== APPLY USER FROSTED GLASS SETTINGS =====
+    // ===== APPLY USER FROSTED GLASS & SHAPE SETTINGS =====
     function applyGlassPreferences() {
-      const blur = localStorage.getItem('dash_blur') || '16px';
-      const radius = localStorage.getItem('dash_radius') || '14px';
+      const blur = (localStorage.getItem('dash_blur') || '16') + 'px';
+      const opacity = localStorage.getItem('dash_opacity') || '55';
+      const radius = localStorage.getItem('dash_radius') || '20px';
+      const minWidth = localStorage.getItem('dash_min_width') || '130px';
+
+      // Convert opacity percentage to alpha hex/float
+      const alpha = opacity / 100;
+      const cardBg = `rgba(22, 27, 34, ${alpha})`;
+
+      document.documentElement.style.setProperty('--card-bg', cardBg);
       document.documentElement.style.setProperty('--card-blur', blur);
       document.documentElement.style.setProperty('--card-radius', radius);
+      document.documentElement.style.setProperty('--card-min-width', minWidth);
     }
     applyGlassPreferences();
 
@@ -1195,8 +1219,10 @@
     }
     function openSettingsModal() {
       document.getElementById('settings-wallpaper').value = state.wallpaper; document.getElementById('settings-client-id').value = state.googleClientId;
-      document.getElementById('settings-blur').value = localStorage.getItem('dash_blur') || '16px';
-      document.getElementById('settings-radius').value = localStorage.getItem('dash_radius') || '14px';
+      document.getElementById('settings-shape').value = localStorage.getItem('dash_radius') || '20px';
+      document.getElementById('settings-size').value = localStorage.getItem('dash_min_width') || '130px';
+      document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
+      document.getElementById('settings-opacity-num').value = parseInt(localStorage.getItem('dash_opacity')) || 55;
 
       if (document.getElementById('toggle-mod-dials')) document.getElementById('toggle-mod-dials').checked = state.modules.dials;
       if (document.getElementById('toggle-mod-services')) document.getElementById('toggle-mod-services').checked = state.modules.services;
@@ -1245,14 +1271,18 @@
     function saveSettings() {
       const wp = document.getElementById('settings-wallpaper').value.trim();
       const cid = document.getElementById('settings-client-id').value.trim();
-      const blurVal = document.getElementById('settings-blur').value;
-      const radiusVal = document.getElementById('settings-radius').value;
+      const radiusVal = document.getElementById('settings-shape').value;
+      const sizeVal = document.getElementById('settings-size').value;
+      const blurVal = document.getElementById('settings-blur-num').value;
+      const opacityVal = document.getElementById('settings-opacity-num').value;
 
       if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
       state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
       
-      localStorage.setItem('dash_blur', blurVal);
       localStorage.setItem('dash_radius', radiusVal);
+      localStorage.setItem('dash_min_width', sizeVal);
+      localStorage.setItem('dash_blur', blurVal);
+      localStorage.setItem('dash_opacity', opacityVal);
       applyGlassPreferences();
 
       state.modules = { dials: document.getElementById('toggle-mod-dials').checked, services: document.getElementById('toggle-mod-services').checked, news: document.getElementById('toggle-mod-news').checked, builtin_cal: document.getElementById('toggle-mod-builtin-cal').checked, gcal: document.getElementById('toggle-mod-gcal').checked, bookmarks: document.getElementById('toggle-mod-bookmarks').checked };
