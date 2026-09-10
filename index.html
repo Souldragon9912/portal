@@ -42,6 +42,7 @@
       align-items: center;
       transition: background-image 0.5s ease-in-out;
       overflow-x: hidden;
+      position: relative;
     }
 
     @keyframes fadeInSlide {
@@ -54,18 +55,29 @@
       100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
-    /* --- Unboxed Edge-to-Edge Top Navigation --- */
+    /* --- Movable Top Navigation Bar --- */
     .top-nav-bar {
-      width: 100%;
-      max-width: 1200px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding: 0 10px;
+      gap: 15px;
+      padding: 10px 16px;
+      background: rgba(22, 27, 34, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      cursor: grab;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 50;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      user-select: none;
     }
+    .top-nav-bar:active { cursor: grabbing; }
     .widget-toggles { display: flex; gap: 10px; }
-    .nav-btn { background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
     /* --- Inline Calendar --- */
@@ -78,9 +90,10 @@
     .cal-day.empty { background: transparent; }
     .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
 
-    /* --- Central Search --- */
-    .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; }
-    .search-box-wrapper { position: relative; padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; }
+    /* --- Movable Central Search Bar --- */
+    .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
+    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; cursor: grab; z-index: 40; }
+    .search-box-wrapper:active { cursor: grabbing; }
     .search-box-wrapper::before { content: ""; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%; background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1)); transform: translate(-50%, -50%) rotate(0deg); animation: spin-border 4s linear infinite; z-index: 0; }
     .search-box { position: relative; z-index: 1; width: 100%; display: flex; gap: 10px; background: rgba(18, 22, 28, 0.95); padding: 8px; border-radius: 14px; }
     .search-box select, .search-box input { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-glass); padding: 10px 14px; border-radius: 10px; outline: none; transition: background 0.2s; }
@@ -88,7 +101,7 @@
     .search-box input:focus { background: rgba(255, 255, 255, 0.1); }
 
     /* --- Content Panels --- */
-    .main-panel { width: 100%; background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 18px; animation: fadeInSlide 0.7s ease-out forwards; opacity: 0; }
+    .main-panel { width: 100%; margin-top: 80px; background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 18px; animation: fadeInSlide 0.7s ease-out forwards; opacity: 0; }
     #section-services { animation-delay: 0.1s; }
     #section-news { animation-delay: 0.15s; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
@@ -96,13 +109,14 @@
     .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
     .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
-    /* --- Unboxed Speed Dials with Heavy Frosted Glass --- */
+    /* --- Unboxed Speed Dials & Add Tile --- */
     #section-dials {
       background: transparent !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       border: none !important;
       padding: 0 !important;
+      margin-top: 120px;
     }
     #section-dials .panel-header { display: none !important; }
 
@@ -122,7 +136,7 @@
     .draggable-wrapper { position: relative; cursor: grab; }
     .draggable-wrapper:active { cursor: grabbing; }
     
-    .dial-card, .service-card { 
+    .dial-card, .service-card, .add-dial-tile { 
       background: rgba(22, 27, 34, 0.55); 
       backdrop-filter: blur(16px); 
       -webkit-backdrop-filter: blur(16px); 
@@ -135,11 +149,31 @@
       width: 100%; 
       pointer-events: none; 
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      aspect-ratio: 1;
     }
-    .draggable-wrapper a { pointer-events: auto; }
-    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
-    .service-card { padding: 14px; flex-direction: column; gap: 6px; }
+    .draggable-wrapper a, .add-dial-tile { pointer-events: auto; }
+    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; }
+    .service-card { padding: 14px; flex-direction: column; gap: 6px; aspect-ratio: auto; }
     
+    .add-dial-tile {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      background: rgba(22, 27, 34, 0.25);
+    }
+    .add-dial-tile:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(88, 166, 255, 0.1);
+      transform: translateY(-4px);
+    }
+    .add-dial-tile span:first-child { font-size: 28px; font-weight: 300; }
+    .add-dial-tile span:last-child { font-size: 12px; font-weight: 500; }
+
     .dial-card:hover, .service-card:hover { 
       background: rgba(33, 38, 45, 0.75); 
       backdrop-filter: blur(20px);
@@ -158,7 +192,23 @@
     .draggable-wrapper:hover .card-delete-btn { display: flex; }
     .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
 
-    /* --- Visual RSS Deck Cards --- */
+    /* --- Unboxed News Stream with Floating Refresh Button --- */
+    #section-news {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      border: none !important;
+      padding: 0 !important;
+      margin-top: 40px;
+    }
+    .news-floating-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+    .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+
     .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
     .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
     .rss-item:hover { background: rgba(33, 38, 45, 0.85); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
@@ -236,23 +286,23 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      .top-nav-bar { padding: 0 4px; margin-bottom: 12px; justify-content: flex-end; }
+      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: flex-end; }
       .widget-toggles, .top-nav-bar > div:last-child > div { display: none !important; } 
       
+      .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
+      .hero-container { margin-top: 0; gap: 16px; }
+      #section-dials { margin-top: 0; }
+
       #section-services, .inline-calendar-wrapper { display: none !important; }
       
       .speed-dial-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-      .dial-card { padding: 10px 4px; gap: 6px; }
+      .dial-card, .add-dial-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
       .dial-card img { width: 28px; height: 28px; }
       .dial-card span { font-size: 11px; }
+      .add-dial-tile span:first-child { font-size: 22px; }
+      .add-dial-tile span:last-child { font-size: 10px; }
 
-      #section-news {
-        background: transparent !important;
-        backdrop-filter: none !important;
-        border: none !important;
-        padding: 0 !important;
-      }
-      #section-news .panel-header { display: none !important; } 
+      #section-news { margin-top: 20px; }
       .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
       .rss-item { background: rgba(22, 27, 34, 0.85); backdrop-filter: blur(8px); }
     }
@@ -261,16 +311,16 @@
 <body>
 
   <!-- ========================================== -->
-  <!--           UNBOXED TOP NAVIGATION           -->
+  <!--           MOVABLE TOP NAVIGATION           -->
   <!-- ========================================== -->
-  <div class="top-nav-bar">
+  <div class="top-nav-bar" id="topNavWidget" draggable="true">
     <div class="widget-toggles">
       <button class="nav-btn" id="nav-btn-builtin-cal" onclick="toggleInlineCalendar()">📅 Calendar View</button>
       <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal Sync</button>
       <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Saved Bookmarks</button>
     </div>
-    <div style="display: flex; align-items: center;">
-      <div id="live-clock" style="font-weight: 600; font-size: 15px; margin-right: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);"></div>
+    <div style="display: flex; align-items: center; margin-left: 15px;">
+      <div id="live-clock" style="font-weight: 600; font-size: 15px; margin-right: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);"></div>
       <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
     </div>
   </div>
@@ -288,8 +338,8 @@
   <!-- ========================================== -->
   <main class="hero-container">
     
-    <!-- Central Search Bar -->
-    <div class="search-box-wrapper" id="search-wrapper">
+    <!-- Movable Central Search Bar -->
+    <div class="search-box-wrapper" id="searchWidget" draggable="true">
       <form class="search-box" id="search-form">
         <select id="engine-select" onchange="changeActiveEngine(this.value)"></select>
         <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
@@ -316,8 +366,8 @@
 
     <!-- Multi-Feed Graphical RSS Deck -->
     <div class="main-panel" id="section-news" style="display: none;">
-      <div class="panel-header">
-        <span class="panel-title" id="rssHeaderTitle">📡 Aggregated News Stream</span>
+      <div class="news-floating-header">
+        <span class="news-title-clean" id="rssHeaderTitle">📡 Aggregated News Stream</span>
         <button class="badge-btn" onclick="fetchRSS()">Refresh</button>
       </div>
       <div class="rss-feed-list" id="rssFeedList">
@@ -502,6 +552,45 @@
     }
     setInterval(updateClock, 1000); updateClock();
 
+    // ===== DRAGGABLE WIDGET POSITIONS =====
+    function initDraggableWidget(widgetId, storageKey) {
+      const widget = document.getElementById(widgetId);
+      if (!widget) return;
+
+      const savedPos = JSON.parse(localStorage.getItem(storageKey));
+      if (savedPos) {
+        widget.style.left = savedPos.x + 'px';
+        widget.style.top = savedPos.y + 'px';
+        widget.style.transform = 'none';
+      }
+
+      let offsetX, offsetY, isDragging = false;
+
+      widget.addEventListener('dragstart', (e) => {
+        const rect = widget.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+      });
+
+      window.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+
+      widget.addEventListener('dragend', (e) => {
+        const x = e.clientX - offsetX;
+        const y = e.clientY - offsetY;
+        widget.style.left = x + 'px';
+        widget.style.top = y + 'px';
+        widget.style.transform = 'none';
+        localStorage.setItem(storageKey, JSON.stringify({ x, y }));
+      });
+    }
+
+    window.addEventListener('load', () => {
+      initDraggableWidget('topNavWidget', 'pos_topNavWidget');
+      initDraggableWidget('searchWidget', 'pos_searchWidget');
+    });
+
     // ===== SMART URL PARSER =====
     function generateSmartLabel(urlStr) {
       try {
@@ -674,10 +763,9 @@
     }
     function toggleFolderUI(folderId) { document.getElementById(`folder-wrapper-${folderId}`).classList.toggle('open'); }
 
-    // ===== RENDER DIALS =====
+    // ===== RENDER DIALS (WITH OPERA-STYLE ADD TILE) =====
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
-      if (state.dials.length === 0) { container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No speed dials added.</div>'; if (datalist) datalist.innerHTML = ''; return; }
       
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
@@ -705,7 +793,15 @@
         grouped[folderName].forEach(dial => { inner.appendChild(createDialElement(dial)); });
         content.appendChild(inner); folderWrapper.appendChild(header); folderWrapper.appendChild(content); container.appendChild(folderWrapper);
       });
+
       grouped._root.forEach(dial => { container.appendChild(createDialElement(dial)); });
+
+      // Always append Opera-style Add Tile at the end
+      const addTile = document.createElement('div');
+      addTile.className = 'add-dial-tile';
+      addTile.onclick = openAddDialModal;
+      addTile.innerHTML = `<span>+</span><span>Add Tile</span>`;
+      container.appendChild(addTile);
     }
 
     function createDialElement(dial) {
@@ -761,7 +857,7 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== AUTO-DISCOVERY RSS ENGINE (GUARANTEED EQUAL REPRESENTATION) =====
+    // ===== TRUE FAIR-SHARE INTERLEAVING RSS ENGINE =====
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
@@ -882,7 +978,6 @@
             channelArticles.push({ title, link, rawDate, timestamp, sourceName, imgUrl });
           });
 
-          // Sort each individual feed's articles newest first
           channelArticles.sort((a, b) => b.timestamp - a.timestamp);
           return channelArticles;
         } catch (err) { return []; }
@@ -890,7 +985,7 @@
 
       const sourceDecks = await Promise.all(feedPromises);
       
-      // Guaranteed Round-Robin Interleaving: Pick 1 from Source A, 1 from Source B, 1 from Source C, etc.
+      // True Fair-Share Round Robin Interleaving across all sources
       let masterArticleDeck = [];
       let maxLength = Math.max(...sourceDecks.map(deck => deck.length), 0);
 
