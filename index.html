@@ -54,10 +54,18 @@
       100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
-    /* --- Header --- */
-    header { width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; background: var(--bg-glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border-glass); padding: 14px 24px; border-radius: 16px; position: relative; }
+    /* --- Unboxed Edge-to-Edge Top Navigation --- */
+    .top-nav-bar {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
     .widget-toggles { display: flex; gap: 10px; }
-    .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .nav-btn { background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
     /* --- Inline Calendar --- */
@@ -228,8 +236,8 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      header { padding: 8px 12px; margin-bottom: 16px; justify-content: flex-end; }
-      .widget-toggles, header > div:last-child > div { display: none !important; } 
+      .top-nav-bar { padding: 0 4px; margin-bottom: 12px; justify-content: flex-end; }
+      .widget-toggles, .top-nav-bar > div:last-child > div { display: none !important; } 
       
       #section-services, .inline-calendar-wrapper { display: none !important; }
       
@@ -253,19 +261,19 @@
 <body>
 
   <!-- ========================================== -->
-  <!--                 TOP HEADER                 -->
+  <!--           UNBOXED TOP NAVIGATION           -->
   <!-- ========================================== -->
-  <header>
+  <div class="top-nav-bar">
     <div class="widget-toggles">
       <button class="nav-btn" id="nav-btn-builtin-cal" onclick="toggleInlineCalendar()">📅 Calendar View</button>
       <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal Sync</button>
       <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Saved Bookmarks</button>
     </div>
     <div style="display: flex; align-items: center;">
-      <div id="live-clock" style="font-weight: 600; font-size: 15px; margin-right: 20px;"></div>
+      <div id="live-clock" style="font-weight: 600; font-size: 15px; margin-right: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);"></div>
       <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
     </div>
-  </header>
+  </div>
 
   <!-- ========================================== -->
   <!--           INLINE BUILT-IN CALENDAR         -->
@@ -753,13 +761,12 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== RESTORED AUTO-DISCOVERY RSS ENGINE (WITH BALANCED INTERLEAVING) =====
+    // ===== AUTO-DISCOVERY RSS ENGINE (GUARANTEED EQUAL REPRESENTATION) =====
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
       if (!el) return;
       const urls = state.rssFeeds;
-      let masterArticleDeck = [];
 
       if (urls.length === 0) {
         el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">No active feeds. Open settings to add your favorite news sites.</div>';
@@ -874,34 +881,26 @@
 
             channelArticles.push({ title, link, rawDate, timestamp, sourceName, imgUrl });
           });
+
+          // Sort each individual feed's articles newest first
+          channelArticles.sort((a, b) => b.timestamp - a.timestamp);
           return channelArticles;
         } catch (err) { return []; }
       });
 
-      const settlements = await Promise.all(feedPromises);
-      settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
-
-      // Balanced Interleaving: Mix sources evenly so one high-frequency site doesn't dominate
-      const groupedBySource = {};
-      masterArticleDeck.forEach(art => {
-        if (!groupedBySource[art.sourceName]) groupedBySource[art.sourceName] = [];
-        groupedBySource[art.sourceName].push(art);
-      });
-
-      let balancedDeck = [];
-      const sourceKeys = Object.keys(groupedBySource);
-      let maxPerSource = 3;
+      const sourceDecks = await Promise.all(feedPromises);
       
-      for (let i = 0; i < maxPerSource; i++) {
-        sourceKeys.forEach(src => {
-          if (groupedBySource[src][i]) {
-            balancedDeck.push(groupedBySource[src][i]);
+      // Guaranteed Round-Robin Interleaving: Pick 1 from Source A, 1 from Source B, 1 from Source C, etc.
+      let masterArticleDeck = [];
+      let maxLength = Math.max(...sourceDecks.map(deck => deck.length), 0);
+
+      for (let i = 0; i < maxLength; i++) {
+        sourceDecks.forEach(deck => {
+          if (deck[i]) {
+            masterArticleDeck.push(deck[i]);
           }
         });
       }
-      
-      balancedDeck.sort((a, b) => b.timestamp - a.timestamp);
-      masterArticleDeck = balancedDeck;
 
       el.innerHTML = '';
       if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
@@ -910,7 +909,7 @@
         return;
       }
 
-      const maxDisplayCount = Math.min(masterArticleDeck.length, 9);
+      const maxDisplayCount = Math.min(masterArticleDeck.length, 12);
       for (let i = 0; i < maxDisplayCount; i++) {
         const art = masterArticleDeck[i];
         let formattedDate = "Recent";
