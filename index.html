@@ -27,6 +27,11 @@
       --se-c2: #EA4335; 
       --se-c3: #FBBC05; 
       --se-c4: #34A853;
+
+      /* User Configurable Customizations */
+      --card-bg: rgba(22, 27, 34, 0.55);
+      --card-blur: 16px;
+      --card-radius: 14px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -109,7 +114,7 @@
     .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
     .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
-    /* --- Unboxed Speed Dials & Add Tile --- */
+    /* --- Configurable Speed Dials & Add Tile --- */
     #section-dials {
       background: transparent !important;
       backdrop-filter: none !important;
@@ -123,7 +128,7 @@
     .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; width: 100%; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
     
-    .dial-folder-wrapper { grid-column: 1 / -1; background: rgba(22, 27, 34, 0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; }
+    .dial-folder-wrapper { grid-column: 1 / -1; background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--card-radius); padding: 16px; display: flex; flex-direction: column; }
     .dial-folder-header { font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s, background 0.2s; padding: 8px 12px; border-radius: 8px; margin: -8px -8px 8px -8px; }
     .dial-folder-header:hover { color: var(--accent); background: rgba(255,255,255,0.08); }
     .dial-folder-header.drag-over-folder { background: rgba(88, 166, 255, 0.2); color: var(--accent); border: 1px dashed var(--accent); }
@@ -137,11 +142,11 @@
     .draggable-wrapper:active { cursor: grabbing; }
     
     .dial-card, .service-card, .add-dial-tile { 
-      background: rgba(22, 27, 34, 0.55); 
-      backdrop-filter: blur(16px); 
-      -webkit-backdrop-filter: blur(16px); 
+      background: var(--card-bg); 
+      backdrop-filter: blur(var(--card-blur)); 
+      -webkit-backdrop-filter: blur(var(--card-blur)); 
       border: 1px solid rgba(255, 255, 255, 0.18); 
-      border-radius: 14px; 
+      border-radius: var(--card-radius); 
       display: flex; 
       text-decoration: none; 
       color: var(--text-main); 
@@ -175,9 +180,7 @@
     .add-dial-tile span:last-child { font-size: 12px; font-weight: 500; }
 
     .dial-card:hover, .service-card:hover { 
-      background: rgba(33, 38, 45, 0.75); 
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(33, 38, 45, 0.85); 
       transform: translateY(-4px); 
       border-color: rgba(255, 255, 255, 0.4); 
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); 
@@ -210,7 +213,7 @@
     .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
 
     .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
-    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: var(--card-radius); background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
     .rss-item:hover { background: rgba(33, 38, 45, 0.85); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
     .rss-image { width: 100%; height: 150px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
     .rss-meta-block { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; justify-content: space-between; }
@@ -260,8 +263,8 @@
     .modal.show .modal-content { transform: scale(1); }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 12px; color: var(--text-muted); }
-    .form-group input { background: #0d1117; border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
-    .form-group input:focus { border-color: var(--accent); outline: none; }
+    .form-group input, .form-group select { background: #0d1117; border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); outline: none; }
     
     /* Settings Modal UI */
     .se-settings-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
@@ -304,7 +307,6 @@
 
       #section-news { margin-top: 20px; }
       .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
-      .rss-item { background: rgba(22, 27, 34, 0.85); backdrop-filter: blur(8px); }
     }
   </style>
 </head>
@@ -436,6 +438,30 @@
         </div>
       </div>
 
+      <!-- NEW: Frosted Glass & Icon Shape Customizer -->
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 6px;">Frosted Glass & Tile Appearance</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="font-size: 11px;">Glass Blur Intensity</label>
+            <select id="settings-blur" style="width:100%; margin-top:4px;">
+              <option value="8px">Low (8px)</option>
+              <option value="16px" selected>Medium (16px)</option>
+              <option value="24px">High (24px)</option>
+              <option value="40px">Maximum (40px)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11px;">Tile Corner Radius</label>
+            <select id="settings-radius" style="width:100%; margin-top:4px;">
+              <option value="4px">Square (4px)</option>
+              <option value="14px" selected>Rounded (14px)</option>
+              <option value="50%">Circle / Pill (50%)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <!-- Search Engines -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Search Engines</label>
@@ -552,6 +578,15 @@
     }
     setInterval(updateClock, 1000); updateClock();
 
+    // ===== APPLY USER FROSTED GLASS SETTINGS =====
+    function applyGlassPreferences() {
+      const blur = localStorage.getItem('dash_blur') || '16px';
+      const radius = localStorage.getItem('dash_radius') || '14px';
+      document.documentElement.style.setProperty('--card-blur', blur);
+      document.documentElement.style.setProperty('--card-radius', radius);
+    }
+    applyGlassPreferences();
+
     // ===== DRAGGABLE WIDGET POSITIONS =====
     function initDraggableWidget(widgetId, storageKey) {
       const widget = document.getElementById(widgetId);
@@ -564,7 +599,7 @@
         widget.style.transform = 'none';
       }
 
-      let offsetX, offsetY, isDragging = false;
+      let offsetX, offsetY;
 
       widget.addEventListener('dragstart', (e) => {
         const rect = widget.getBoundingClientRect();
@@ -763,7 +798,7 @@
     }
     function toggleFolderUI(folderId) { document.getElementById(`folder-wrapper-${folderId}`).classList.toggle('open'); }
 
-    // ===== RENDER DIALS (WITH OPERA-STYLE ADD TILE) =====
+    // ===== RENDER DIALS =====
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
       
@@ -796,7 +831,6 @@
 
       grouped._root.forEach(dial => { container.appendChild(createDialElement(dial)); });
 
-      // Always append Opera-style Add Tile at the end
       const addTile = document.createElement('div');
       addTile.className = 'add-dial-tile';
       addTile.onclick = openAddDialModal;
@@ -857,7 +891,7 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== TRUE FAIR-SHARE INTERLEAVING RSS ENGINE =====
+    // ===== TRIPLE-PROXY BULLETPROOF RSS ENGINE =====
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
@@ -876,7 +910,8 @@
         try {
           const proxies = [
             `https://api.allorigins.win/raw?url=`,
-            `https://corsproxy.io/?url=`
+            `https://corsproxy.io/?url=`,
+            `https://api.codetabs.com/v1/proxy?quest=`
           ];
 
           let rawDataText = null;
@@ -925,13 +960,18 @@
             } else {
               try {
                 const fallbackUrl = url.replace(/\/$/, '') + '/feed/';
-                const res = await fetch(`https://api.allorigins.win/raw?url=` + encodeURIComponent(fallbackUrl));
-                if (res.ok) {
-                  const rssText = await res.text();
-                  xmlDoc = parser.parseFromString(rssText, "text/xml");
-                } else {
-                  return [];
+                let rssText = null;
+                for (let p of proxies) {
+                  try {
+                    const res = await fetch(p + encodeURIComponent(fallbackUrl));
+                    if (res.ok) {
+                      rssText = await res.text();
+                      break;
+                    }
+                  } catch (e) {}
                 }
+                if (!rssText) return [];
+                xmlDoc = parser.parseFromString(rssText, "text/xml");
               } catch (e) {
                 return [];
               }
@@ -985,7 +1025,7 @@
 
       const sourceDecks = await Promise.all(feedPromises);
       
-      // True Fair-Share Round Robin Interleaving across all sources
+      // Fair-Share Interleaving
       let masterArticleDeck = [];
       let maxLength = Math.max(...sourceDecks.map(deck => deck.length), 0);
 
@@ -1155,6 +1195,9 @@
     }
     function openSettingsModal() {
       document.getElementById('settings-wallpaper').value = state.wallpaper; document.getElementById('settings-client-id').value = state.googleClientId;
+      document.getElementById('settings-blur').value = localStorage.getItem('dash_blur') || '16px';
+      document.getElementById('settings-radius').value = localStorage.getItem('dash_radius') || '14px';
+
       if (document.getElementById('toggle-mod-dials')) document.getElementById('toggle-mod-dials').checked = state.modules.dials;
       if (document.getElementById('toggle-mod-services')) document.getElementById('toggle-mod-services').checked = state.modules.services;
       if (document.getElementById('toggle-mod-news')) document.getElementById('toggle-mod-news').checked = state.modules.news;
@@ -1202,8 +1245,16 @@
     function saveSettings() {
       const wp = document.getElementById('settings-wallpaper').value.trim();
       const cid = document.getElementById('settings-client-id').value.trim();
+      const blurVal = document.getElementById('settings-blur').value;
+      const radiusVal = document.getElementById('settings-radius').value;
+
       if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
       state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
+      
+      localStorage.setItem('dash_blur', blurVal);
+      localStorage.setItem('dash_radius', radiusVal);
+      applyGlassPreferences();
+
       state.modules = { dials: document.getElementById('toggle-mod-dials').checked, services: document.getElementById('toggle-mod-services').checked, news: document.getElementById('toggle-mod-news').checked, builtin_cal: document.getElementById('toggle-mod-builtin-cal').checked, gcal: document.getElementById('toggle-mod-gcal').checked, bookmarks: document.getElementById('toggle-mod-bookmarks').checked };
       localStorage.setItem('dash_modules', JSON.stringify(state.modules));
       applyModuleVisibility(); initGoogleAuth(); closeModal('settings-modal');
