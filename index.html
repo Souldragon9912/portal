@@ -215,15 +215,30 @@
     .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #fff; }
     .btn-primary:hover { background: var(--accent-hover); }
 
-    /* --- Mobile Responsiveness Fixes --- */
+    /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
-      body { padding: 12px; }
-      header { flex-direction: column; gap: 12px; padding: 12px; }
-      .widget-toggles { flex-wrap: wrap; justify-content: center; width: 100%; }
+      body { padding: 8px; }
+      header { padding: 8px 12px; margin-bottom: 16px; }
+      .widget-toggles, header > div:last-child > div { display: none !important; } /* Hide extra toggles/clocks on mobile */
+      
+      /* Hide Services, Calendars, and Settings containers on mobile, show only Search, Dials, and News stream */
+      #section-services, .inline-calendar-wrapper { display: none !important; }
+      
       .speed-dial-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-      .services-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .rss-feed-list { grid-template-columns: 1fr; }
-      .drawer { width: 100vw; }
+      .dial-card { padding: 10px 4px; gap: 6px; }
+      .dial-card img { width: 28px; height: 28px; }
+      .dial-card span { font-size: 11px; }
+
+      /* Strip out heavy bounding box from news panel on mobile, display pure stream icons/cards */
+      #section-news {
+        background: transparent !important;
+        backdrop-filter: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+      #section-news .panel-header { display: none !important; } /* Hide news panel header box on mobile */
+      .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
+      .rss-item { background: rgba(22, 27, 34, 0.85); backdrop-filter: blur(8px); }
     }
   </style>
 </head>
@@ -867,7 +882,7 @@
 
       let balancedDeck = [];
       const sourceKeys = Object.keys(groupedBySource);
-      let maxPerSource = 3;
+      let maxPerSource = 2;
       
       for (let i = 0; i < maxPerSource; i++) {
         sourceKeys.forEach(src => {
