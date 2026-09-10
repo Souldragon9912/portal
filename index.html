@@ -91,7 +91,6 @@
     .widget-toggles { display: flex; gap: 10px; }
     .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
-    .nav-btn.active-edit { background: #ff9500; border-color: #ff9500; color: #fff; }
 
     /* --- Inline Calendar --- */
     .inline-calendar-wrapper { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease; background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; width: 100%; max-width: 1100px; margin-bottom: 0; border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; }
@@ -117,43 +116,36 @@
     .search-box input { flex: 1; font-size: 15px; }
     .search-box input:focus { background: rgba(255, 255, 255, 0.1); }
 
-    /* --- Content Panels --- */
-    .main-panel { width: 100%; margin-top: 80px; background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 18px; animation: fadeInSlide 0.7s ease-out forwards; opacity: 0; }
-    #section-services { animation-delay: 0.1s; }
-    #section-news { animation-delay: 0.15s; }
-    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
-    .panel-title { font-size: 16px; font-weight: 600; }
-    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
-    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
-
-    /* --- Movable Speed Dials Section --- */
+    /* --- Movable Sections (Speed Dials, Services, News) --- */
     #section-dials {
-      background: transparent !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      border: none !important;
-      padding: 0 !important;
-      margin-top: 140px;
-      position: absolute;
-      top: 160px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 1000px;
-      transition: border 0.3s ease, background 0.3s ease;
+      background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important;
+      position: absolute; top: 160px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
     }
-    #section-dials.edit-mode-container {
+    #section-services {
+      background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important;
+      position: absolute; top: 380px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
+    }
+    #section-news {
+      background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important;
+      position: absolute; top: 600px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
+    }
+
+    .main-panel.edit-mode-container {
       border: 2px dashed var(--accent) !important;
       background: rgba(0, 0, 0, 0.3) !important;
       padding: 20px !important;
       border-radius: 16px;
       cursor: grab;
     }
-    #section-dials.edit-mode-container:active { cursor: grabbing; }
-    #section-dials .panel-header { display: none !important; }
+    .main-panel.edit-mode-container:active { cursor: grabbing; }
+
+    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
+    .panel-title { font-size: 16px; font-weight: 600; }
+    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
+    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
     .speed-dial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr)); gap: 16px; width: 100%; }
-    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr)); gap: 16px; width: 100%; }
     
     .dial-folder-wrapper { grid-column: 1 / -1; background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--card-radius); padding: 16px; display: flex; flex-direction: column; }
     .dial-folder-header { font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s, background 0.2s; padding: 8px 12px; border-radius: 8px; margin: -8px -8px 8px -8px; }
@@ -185,7 +177,7 @@
       aspect-ratio: 1;
     }
     .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; }
-    .service-card { padding: 14px; flex-direction: column; gap: 6px; aspect-ratio: auto; }
+    .service-card { padding: 14px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; text-align: center; }
     
     .add-dial-tile {
       flex-direction: column;
@@ -215,8 +207,8 @@
     
     .dial-card img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
     .service-card .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #fbbc05; box-shadow: 0 0 6px #fbbc05; transition: background 0.3s, box-shadow 0.3s; }
-    .service-card .name { font-size: 14px; font-weight: 600; }
-    .service-card .desc { font-size: 11px; color: var(--text-muted); }
+    .service-card .name { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .service-card .desc { font-size: 11px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     
     .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
     .edit-mode .draggable-wrapper:hover .card-delete-btn { display: flex; }
@@ -226,14 +218,7 @@
     .edit-mode .draggable-wrapper:hover .card-edit-btn { display: flex; }
     .card-edit-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.25); transform: scale(1.1); }
 
-    /* --- Unboxed News Stream with Floating Refresh Button --- */
-    #section-news {
-      background: transparent !important;
-      backdrop-filter: none !important;
-      border: none !important;
-      padding: 0 !important;
-      margin-top: 300px;
-    }
+    /* --- News Stream --- */
     .news-floating-header {
       display: flex;
       justify-content: space-between;
@@ -325,14 +310,15 @@
       
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
-      #section-dials { margin-top: 0; position: relative; top: 0; left: 0; transform: none; }
+      #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
 
-      #section-services, .inline-calendar-wrapper { display: none !important; }
+      .inline-calendar-wrapper { display: none !important; }
       
-      .speed-dial-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-      .dial-card, .add-dial-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
-      .dial-card img { width: 28px; height: 28px; }
-      .dial-card span { font-size: 11px; }
+      .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      .dial-card, .service-card, .add-dial-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
+      .dial-card img, .service-card img { width: 28px; height: 28px; }
+      .dial-card span, .service-card .name { font-size: 11px; }
+      .service-card .desc { display: none; }
       .add-dial-tile span:first-child { font-size: 22px; }
       .add-dial-tile span:last-child { font-size: 10px; }
 
@@ -353,7 +339,6 @@
       <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Saved Bookmarks</button>
     </div>
     <div style="display: flex; align-items: center; margin-left: 15px;">
-      <button class="nav-btn" id="editModeBtn" onclick="toggleEditMode()" style="margin-right: 10px;">✏ Edit Layout</button>
       <div id="live-clock" style="font-weight: 600; font-size: 15px; margin-right: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);"></div>
       <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
     </div>
@@ -389,8 +374,8 @@
       <div class="speed-dial-grid" id="speed-dials-container"></div>
     </div>
 
-    <!-- Self-Hosted Services Section -->
-    <div class="main-panel" id="section-services">
+    <!-- Movable Self-Hosted Services Section -->
+    <div class="main-panel" id="section-services" draggable="false">
       <div class="panel-header">
         <span class="panel-title">🖥 Self-Hosted Services</span>
         <button class="badge-btn" onclick="openAddServiceModal()">+ Add Service</button>
@@ -398,8 +383,8 @@
       <div class="services-grid" id="services-container"></div>
     </div>
 
-    <!-- Multi-Feed Graphical RSS Deck -->
-    <div class="main-panel" id="section-news" style="display: none;">
+    <!-- Movable Multi-Feed Graphical RSS Deck -->
+    <div class="main-panel" id="section-news" draggable="false" style="display: none;">
       <div class="news-floating-header">
         <span class="news-title-clean" id="rssHeaderTitle">📡 Aggregated News Stream</span>
         <button class="badge-btn" onclick="fetchRSS()">Refresh</button>
@@ -470,10 +455,15 @@
         </div>
       </div>
 
-      <!-- Advanced Frosted Glass, Tile Shapes & Tile Size Customizer -->
+      <!-- Appearance & Layout Settings (Includes Edit Mode Toggle) -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
-        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Tile Appearance & Glass Customizer</label>
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Appearance & Layout Control</label>
         
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
+          <span style="font-size: 12px;">Layout Edit Mode</span>
+          <button class="badge-btn" id="editModeBtn" onclick="toggleEditMode()" style="background: #333;">✏ Unlock Layout</button>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
           <div>
             <label style="font-size: 11px;">Tile Shape Preset</label>
@@ -702,36 +692,48 @@
       const topNav = document.getElementById('topNavWidget');
       const searchWidget = document.getElementById('searchWidget');
       const dialsSection = document.getElementById('section-dials');
+      const servicesSection = document.getElementById('section-services');
+      const newsSection = document.getElementById('section-news');
       const body = document.body;
 
       if (isEditMode) {
         btn.classList.add('active-edit');
+        btn.style.background = '#ff9500';
         btn.innerText = '🔒 Lock Layout';
-        topNav.setAttribute('draggable', 'true');
-        topNav.classList.add('edit-unlocked');
-        searchWidget.setAttribute('draggable', 'true');
-        searchWidget.classList.add('edit-unlocked');
-        dialsSection.setAttribute('draggable', 'true');
-        dialsSection.classList.add('edit-mode-container');
+        
+        topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
+        searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
+        
+        dialsSection.setAttribute('draggable', 'true'); dialsSection.classList.add('edit-mode-container');
+        servicesSection.setAttribute('draggable', 'true'); servicesSection.classList.add('edit-mode-container');
+        newsSection.setAttribute('draggable', 'true'); newsSection.classList.add('edit-mode-container');
+        
         body.classList.add('edit-mode');
+        closeModal('settings-modal');
       } else {
         btn.classList.remove('active-edit');
-        btn.innerText = '✏ Edit Layout';
-        topNav.setAttribute('draggable', 'false');
-        topNav.classList.remove('edit-unlocked');
-        searchWidget.setAttribute('draggable', 'false');
-        searchWidget.classList.remove('edit-unlocked');
-        dialsSection.setAttribute('draggable', 'false');
-        dialsSection.classList.remove('edit-mode-container');
+        btn.style.background = '#333';
+        btn.innerText = '✏ Unlock Layout';
+        
+        topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
+        searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
+        
+        dialsSection.setAttribute('draggable', 'false'); dialsSection.classList.remove('edit-mode-container');
+        servicesSection.setAttribute('draggable', 'false'); servicesSection.classList.remove('edit-mode-container');
+        newsSection.setAttribute('draggable', 'false'); newsSection.classList.remove('edit-mode-container');
+        
         body.classList.remove('edit-mode');
       }
       renderDials();
+      renderServices();
     }
 
     window.addEventListener('load', () => {
       initDraggableWidget('topNavWidget', 'pos_topNavWidget');
       initDraggableWidget('searchWidget', 'pos_searchWidget');
       initDraggableWidget('section-dials', 'pos_dialsSection', true);
+      initDraggableWidget('section-services', 'pos_servicesSection', true);
+      initDraggableWidget('section-news', 'pos_newsSection', true);
     });
 
     // ===== SMART URL PARSER =====
@@ -817,7 +819,7 @@
       if (query.startsWith('http://') || query.startsWith('https://')) { window.open(query, '_blank'); }
       else if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(query)) { window.open('http://' + query, '_blank'); }
       else { const ae = state.searchEngines.find(eng => eng.id === state.activeEngineId); window.open((ae ? ae.url : 'https://www.google.com/search?q=') + encodeURIComponent(query), '_blank'); }
-      searchInput.value = ''; // Automatically clear search bar after submit
+      searchInput.value = '';
     });
 
     // ===== FLIP ANIMATION DRAG AND DROP =====
@@ -996,18 +998,27 @@
       state.dials.push({ name, url, img, folder }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
     }
 
-    // ===== RENDER SERVICES & PING =====
+    // ===== RENDER SERVICES & PING (WITH ADD TILE) =====
     function renderServices() {
       const container = document.getElementById('services-container');
-      if (state.services.length === 0) { container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; grid-column: 1/-1;">No hosted services configured.</div>'; return; }
       container.innerHTML = '';
+      
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
         const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = isEditMode; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
         wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'service')); wrapper.addEventListener('dragover', (e) => e.preventDefault()); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
-        wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a><button class="card-delete-btn" title="Remove" onclick="removeService(${idx})">&times;</button>`;
+        
+        let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>` : '';
+        wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center; width:100%;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a>${deleteBtnHtml}`;
         container.appendChild(wrapper);
       });
+
+      const addServiceTile = document.createElement('div');
+      addServiceTile.className = 'add-dial-tile';
+      addServiceTile.onclick = openAddServiceModal;
+      addServiceTile.innerHTML = `<span>+</span><span>Add Service</span>`;
+      container.appendChild(addServiceTile);
+
       pingServices();
     }
     function pingServices() {
