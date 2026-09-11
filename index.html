@@ -180,8 +180,8 @@
     .dial-folder-wrapper.open .dial-folder-inner { padding-top: 8px; }
 
     .draggable-wrapper { position: relative; cursor: default; }
-    .edit-mode .draggable-wrapper { cursor: grab; }
-    .edit-mode .draggable-wrapper:active { cursor: grabbing; }
+    body.edit-mode .draggable-wrapper { cursor: grab; }
+    body.edit-mode .draggable-wrapper:active { cursor: grabbing; }
     
     .dial-card, .service-card, .add-dial-tile { 
       background: var(--card-bg); 
@@ -250,11 +250,11 @@
     .service-card .desc { font-size: 11px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     
     .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
-    .edit-mode .draggable-wrapper:hover .card-delete-btn { display: flex; }
+    body.edit-mode .draggable-wrapper:hover .card-delete-btn { display: flex; }
     .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
 
     .card-edit-btn { position: absolute; top: 6px; left: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: all 0.2s; z-index: 10; }
-    .edit-mode .draggable-wrapper:hover .card-edit-btn { display: flex; }
+    body.edit-mode .draggable-wrapper:hover .card-edit-btn { display: flex; }
     .card-edit-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.25); transform: scale(1.1); }
 
     /* --- News Stream --- */
@@ -868,49 +868,30 @@
       searchInput.value = '';
     });
 
-    // ===== FLIP ANIMATION DRAG AND DROP =====
+    // ===== NATIVE DRAG AND DROP REORDERING =====
     let draggedNode = null;
     let dragType = null;
 
     function handleDragStart(e, type) { 
+      if (!isEditMode) { e.preventDefault(); return; }
       draggedNode = e.currentTarget; 
       dragType = type; 
       e.dataTransfer.effectAllowed = 'move'; 
-      setTimeout(() => { draggedNode.style.opacity = '0'; }, 0); 
     }
 
     function handleDragEnter(e, type) {
       e.preventDefault();
-      const targetNode = e.currentTarget;
+      if (!isEditMode) return;
+      const targetNode = e.currentTarget.closest('.draggable-wrapper');
       
-      if (draggedNode && draggedNode !== targetNode && dragType === type && draggedNode.parentNode === targetNode.parentNode) {
+      if (draggedNode && targetNode && draggedNode !== targetNode && dragType === type && draggedNode.parentNode === targetNode.parentNode) {
         const parent = targetNode.parentNode;
         const children = Array.from(parent.children);
         const draggedIdx = children.indexOf(draggedNode);
         const targetIdx = children.indexOf(targetNode);
 
-        const rects = new Map();
-        parent.querySelectorAll('.draggable-wrapper').forEach(el => rects.set(el, el.getBoundingClientRect()));
-
         if (draggedIdx < targetIdx) { parent.insertBefore(draggedNode, targetNode.nextSibling); } 
         else { parent.insertBefore(draggedNode, targetNode); }
-
-        parent.querySelectorAll('.draggable-wrapper').forEach(el => {
-          const oldRect = rects.get(el);
-          const newRect = el.getBoundingClientRect();
-          if (oldRect) {
-            const dx = oldRect.left - newRect.left;
-            const dy = oldRect.top - newRect.top;
-            if (dx || dy) {
-              el.style.transform = `translate(${dx}px, ${dy}px)`;
-              el.style.transition = 'none';
-              requestAnimationFrame(() => {
-                el.style.transform = '';
-                el.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
-              });
-            }
-          }
-        });
       }
     }
 
@@ -939,7 +920,6 @@
     }
 
     function handleDragEnd(e, type) { 
-      if (draggedNode) draggedNode.style.opacity = '1'; 
       if (type === 'dial') syncDialStateFromDOM(); else syncServiceStateFromDOM();
       draggedNode = null; dragType = null;
     }
@@ -999,7 +979,7 @@
       let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
       let imgSrc = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
       const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = isEditMode; wrapper.dataset.dialData = encodeURIComponent(JSON.stringify(dial));
-      wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'dial')); wrapper.addEventListener('dragover', (e) => e.preventDefault()); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
+      wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'dial')); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
       
       let editBtnHtml = isEditMode ? `<button class="card-edit-btn" title="Edit" onclick="event.stopPropagation(); openEditDialModal(${dial._origIdx})">✎</button>` : '';
       let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeDial(${dial._origIdx})">&times;</button>` : '';
@@ -1044,7 +1024,7 @@
       state.dials.push({ name, url, img, folder }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
     }
 
-    // ===== RENDER SERVICES & PING (WITH ADD TILE) =====
+    // ===== RENDER SERVICES & PING =====
     function renderServices() {
       const container = document.getElementById('services-container');
       container.innerHTML = '';
@@ -1052,7 +1032,7 @@
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
         const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = isEditMode; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
-        wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'service')); wrapper.addEventListener('dragover', (e) => e.preventDefault()); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
+        wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'service')); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
         
         let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>` : '';
         wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center; width:100%;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a>${deleteBtnHtml}`;
