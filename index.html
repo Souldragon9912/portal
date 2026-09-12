@@ -222,34 +222,48 @@
       white-space: nowrap;
     }
 
-    /* Expanded Folder View overlay box */
-    .expanded-folder-box {
-      grid-column: 1 / -1;
-      background: rgba(18, 22, 28, 0.92);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+    /* True Opera-Style Popover Folder Overlay */
+    .folder-popover-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 250;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeInSlide 0.2s ease-out;
+    }
+    .folder-popover-box {
+      background: rgba(18, 22, 28, 0.95);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1px solid var(--accent);
       border-radius: var(--card-radius);
-      padding: 20px;
+      padding: 24px;
+      width: 90%;
+      max-width: 420px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      animation: fadeInSlide 0.3s ease-out;
+      gap: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
     }
-    .expanded-folder-header {
+    .folder-popover-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
       color: var(--accent);
       border-bottom: 1px solid var(--border-glass);
-      padding-bottom: 8px;
+      padding-bottom: 10px;
     }
-    .expanded-folder-inner-grid {
+    .folder-popover-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 14px;
+      max-height: 300px;
+      overflow-y: auto;
     }
 
     .draggable-wrapper { position: relative; cursor: grab; }
@@ -959,12 +973,17 @@
     let dragType = null;
 
     function handleDragStart(e, type) { 
+      if (isEditMode) {
+        // If in section edit mode, don't trigger item drag
+        return;
+      }
       draggedNode = e.currentTarget; 
       dragType = type; 
       e.dataTransfer.effectAllowed = 'move'; 
     }
 
     function handleDragEnter(e, type) {
+      if (isEditMode) return;
       e.preventDefault();
       const targetNode = e.currentTarget.closest('.draggable-wrapper');
       
@@ -985,12 +1004,10 @@
          const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
          data.folder = ''; newDials.push(data);
       });
-      document.querySelectorAll('.expanded-folder-inner-grid').forEach(folderGrid => {
-         const folderName = folderGrid.dataset.folderName;
-         folderGrid.querySelectorAll('.draggable-wrapper').forEach(node => {
-            const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-            data.folder = folderName; newDials.push(data);
-         });
+      document.querySelectorAll('.folder-popover-grid .draggable-wrapper').forEach(node => {
+         const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+         const folderName = node.closest('.folder-popover-box').dataset.folderName;
+         data.folder = folderName; newDials.push(data);
       });
       state.dials = newDials; localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); 
     }
@@ -1004,18 +1021,16 @@
     }
 
     function handleDragEnd(e, type) { 
+      if (isEditMode) return;
       if (type === 'dial') syncDialStateFromDOM(); else syncServiceStateFromDOM();
       draggedNode = null; dragType = null;
     }
 
-    function handleFolderDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over-folder'); return false; }
-    function handleFolderDragLeave(e) { e.currentTarget.classList.remove('drag-over-folder'); }
+    function handleFolderDragOver(e) { e.preventDefault(); return false; }
     function handleDropToFolder(e, folderName) {
-      e.stopPropagation(); e.currentTarget.classList.remove('drag-over-folder');
+      e.stopPropagation();
       if (draggedNode && dragType === 'dial') {
         const draggedData = JSON.parse(decodeURIComponent(draggedNode.dataset.dialData));
-        draggedData.folder = folderName;
-        // Update state directly
         const targetDial = state.dials.find(d => d.name === draggedData.name && d.url === draggedData.url);
         if (targetDial) targetDial.folder = folderName;
         localStorage.setItem('dash_dials', JSON.stringify(state.dials));
@@ -1023,10 +1038,9 @@
       }
     }
 
-    // ===== RENDER DIALS WITH OPERA MICRO FOLDERS =====
+    // ===== RENDER DIALS =====
     function renderDials() {
-      const container = document.getElementById('speed-dials-container'); 
-      const datalist = document.getElementById('dial-folder-list');
+      const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
       
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
@@ -1049,7 +1063,6 @@
         folderTile.className = 'dial-folder-tile';
         folderTile.dataset.folderName = folderName;
 
-        // Build 2x2 preview grid images
         let previewImgs = '';
         for (let i = 0; i < Math.min(items.length, 4); i++) {
           let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
@@ -1062,9 +1075,8 @@
           <span>📂 ${folderName}</span>
         `;
 
-        folderTile.addEventListener('click', () => toggleExpandedFolder(folderName, items));
+        folderTile.addEventListener('click', () => openFolderPopover(folderName, items));
         folderTile.addEventListener('dragover', handleFolderDragOver); 
-        folderTile.addEventListener('dragleave', handleFolderDragLeave); 
         folderTile.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
 
         container.appendChild(folderTile);
@@ -1080,28 +1092,23 @@
       container.appendChild(addTile);
     }
 
-    let activeExpandedFolder = null;
-    function toggleExpandedFolder(folderName, items) {
-      // Check if already open
-      const existing = document.getElementById(`expanded-box-${folderName}`);
-      if (existing) {
-        existing.remove();
-        activeExpandedFolder = null;
-        return;
-      }
-      // Close any other open folder box
-      document.querySelectorAll('.expanded-folder-box').forEach(b => b.remove());
+    function openFolderPopover(folderName, items) {
+      // Close any existing popover
+      const existing = document.getElementById('folderPopoverOverlay');
+      if (existing) existing.remove();
 
-      const box = document.createElement('div');
-      box.className = 'expanded-folder-box';
-      box.id = `expanded-box-${folderName}`;
+      const overlay = document.createElement('div');
+      overlay.className = 'folder-popover-overlay';
+      overlay.id = 'folderPopoverOverlay';
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
       let innerHtml = `
-        <div class="expanded-folder-header">
-          <span>📂 Folder: ${folderName}</span>
-          <button class="badge-btn" onclick="document.getElementById('expanded-box-${folderName}').remove()">&times; Close</button>
-        </div>
-        <div class="expanded-folder-inner-grid" data-folder-name="${folderName}">
+        <div class="folder-popover-box" data-folder-name="${folderName}">
+          <div class="folder-popover-header">
+            <span>📂 ${folderName}</span>
+            <button class="badge-btn" onclick="document.getElementById('folderPopoverOverlay').remove()">&times;</button>
+          </div>
+          <div class="folder-popover-grid">
       `;
 
       items.forEach(dial => {
@@ -1116,11 +1123,9 @@
         `;
       });
 
-      innerHtml += `</div>`;
-      box.innerHTML = innerHtml;
-      
-      // Insert right after the container grid or append
-      document.getElementById('section-dials').appendChild(box);
+      innerHtml += `</div></div>`;
+      overlay.innerHTML = innerHtml;
+      document.body.appendChild(overlay);
     }
 
     function createDialElement(dial) {
