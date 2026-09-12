@@ -170,15 +170,87 @@
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
     
-    .dial-folder-wrapper { grid-column: 1 / -1; background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--card-radius); padding: 16px; display: flex; flex-direction: column; }
-    .dial-folder-header { font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s, background 0.2s; padding: 8px 12px; border-radius: 8px; margin: -8px -8px 8px -8px; }
-    .dial-folder-header:hover { color: var(--accent); background: rgba(255,255,255,0.08); }
-    .dial-folder-header.drag-over-folder { background: rgba(88, 166, 255, 0.2); color: var(--accent); border: 1px dashed var(--accent); }
-    
-    .dial-folder-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
-    .dial-folder-inner { overflow: hidden; display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; }
-    .dial-folder-wrapper.open .dial-folder-content { grid-template-rows: 1fr; }
-    .dial-folder-wrapper.open .dial-folder-inner { padding-top: 8px; }
+    /* --- Opera/Brave Micro Folder Styles --- */
+    .dial-folder-tile {
+      background: var(--card-bg);
+      backdrop-filter: blur(var(--card-blur));
+      -webkit-backdrop-filter: blur(var(--card-blur));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: var(--card-radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      aspect-ratio: 1;
+      width: 100%;
+      position: relative;
+      transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+    .dial-folder-tile:hover {
+      background: rgba(33, 38, 45, 0.85);
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .folder-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 4px;
+      width: 44px;
+      height: 44px;
+      padding: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+    .folder-preview-grid img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .dial-folder-tile span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-top: 6px;
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Expanded Folder View overlay box */
+    .expanded-folder-box {
+      grid-column: 1 / -1;
+      background: rgba(18, 22, 28, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--accent);
+      border-radius: var(--card-radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadeInSlide 0.3s ease-out;
+    }
+    .expanded-folder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 8px;
+    }
+    .expanded-folder-inner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+    }
 
     .draggable-wrapper { position: relative; cursor: grab; }
     .draggable-wrapper:active { cursor: grabbing; }
@@ -250,7 +322,7 @@
     .service-card .desc { font-size: 11px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     
     .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
-    body.edit-mode .draggable-wrapper:hover .card-delete-btn, .draggable-wrapper:hover .card-delete-btn { display: flex; }
+    .draggable-wrapper:hover .card-delete-btn { display: flex; }
     .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
 
     .card-edit-btn { position: absolute; top: 6px; left: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: all 0.2s; z-index: 10; }
@@ -354,9 +426,9 @@
       .inline-calendar-wrapper { display: none !important; }
       
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-      .dial-card, .service-card, .add-dial-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
-      .dial-card img, .service-card img { width: 28px; height: 28px; }
-      .dial-card span, .service-card .name { font-size: 11px; }
+      .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
+      .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
+      .dial-card span, .service-card .name, .dial-folder-tile span { font-size: 11px; }
       .service-card .desc { display: none; }
       .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
       .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 10px; }
@@ -913,9 +985,9 @@
          const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
          data.folder = ''; newDials.push(data);
       });
-      document.querySelectorAll('.dial-folder-wrapper').forEach(folderNode => {
-         const folderName = folderNode.dataset.folderName;
-         folderNode.querySelectorAll('.dial-folder-inner > .draggable-wrapper').forEach(node => {
+      document.querySelectorAll('.expanded-folder-inner-grid').forEach(folderGrid => {
+         const folderName = folderGrid.dataset.folderName;
+         folderGrid.querySelectorAll('.draggable-wrapper').forEach(node => {
             const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
             data.folder = folderName; newDials.push(data);
          });
@@ -941,16 +1013,20 @@
     function handleDropToFolder(e, folderName) {
       e.stopPropagation(); e.currentTarget.classList.remove('drag-over-folder');
       if (draggedNode && dragType === 'dial') {
-        const folderInner = document.getElementById(`folder-inner-${folderName}`);
-        if (folderInner) folderInner.appendChild(draggedNode);
-        syncDialStateFromDOM();
+        const draggedData = JSON.parse(decodeURIComponent(draggedNode.dataset.dialData));
+        draggedData.folder = folderName;
+        // Update state directly
+        const targetDial = state.dials.find(d => d.name === draggedData.name && d.url === draggedData.url);
+        if (targetDial) targetDial.folder = folderName;
+        localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+        renderDials();
       }
     }
-    function toggleFolderUI(folderId) { document.getElementById(`folder-wrapper-${folderId}`).classList.toggle('open'); }
 
-    // ===== RENDER DIALS =====
+    // ===== RENDER DIALS WITH OPERA MICRO FOLDERS =====
     function renderDials() {
-      const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
+      const container = document.getElementById('speed-dials-container'); 
+      const datalist = document.getElementById('dial-folder-list');
       
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
@@ -964,21 +1040,37 @@
 
       container.innerHTML = '';
 
+      // Render Folders as Micro Tiles
       Object.keys(grouped).sort().forEach(folderName => {
         if (folderName === '_root') return;
-        const folderWrapper = document.createElement('div'); folderWrapper.className = 'dial-folder-wrapper open'; folderWrapper.id = `folder-wrapper-${folderName}`; folderWrapper.dataset.folderName = folderName;
+        const items = grouped[folderName];
         
-        const header = document.createElement('div'); header.className = 'dial-folder-header'; header.innerHTML = `📂 ${folderName}`;
-        header.addEventListener('click', () => toggleFolderUI(folderName));
-        header.addEventListener('dragover', handleFolderDragOver); header.addEventListener('dragleave', handleFolderDragLeave); header.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
-        
-        const content = document.createElement('div'); content.className = 'dial-folder-content';
-        const inner = document.createElement('div'); inner.className = 'dial-folder-inner'; inner.id = `folder-inner-${folderName}`;
-        
-        grouped[folderName].forEach(dial => { inner.appendChild(createDialElement(dial)); });
-        content.appendChild(inner); folderWrapper.appendChild(header); folderWrapper.appendChild(content); container.appendChild(folderWrapper);
+        const folderTile = document.createElement('div');
+        folderTile.className = 'dial-folder-tile';
+        folderTile.dataset.folderName = folderName;
+
+        // Build 2x2 preview grid images
+        let previewImgs = '';
+        for (let i = 0; i < Math.min(items.length, 4); i++) {
+          let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
+          let img = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+          previewImgs += `<img src="${img}" alt="icon">`;
+        }
+
+        folderTile.innerHTML = `
+          <div class="folder-preview-grid">${previewImgs}</div>
+          <span>📂 ${folderName}</span>
+        `;
+
+        folderTile.addEventListener('click', () => toggleExpandedFolder(folderName, items));
+        folderTile.addEventListener('dragover', handleFolderDragOver); 
+        folderTile.addEventListener('dragleave', handleFolderDragLeave); 
+        folderTile.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
+
+        container.appendChild(folderTile);
       });
 
+      // Render Root Dials
       grouped._root.forEach(dial => { container.appendChild(createDialElement(dial)); });
 
       const addTile = document.createElement('div');
@@ -986,6 +1078,49 @@
       addTile.onclick = openAddDialModal;
       addTile.innerHTML = `<span>+</span><span>Add Tile</span>`;
       container.appendChild(addTile);
+    }
+
+    let activeExpandedFolder = null;
+    function toggleExpandedFolder(folderName, items) {
+      // Check if already open
+      const existing = document.getElementById(`expanded-box-${folderName}`);
+      if (existing) {
+        existing.remove();
+        activeExpandedFolder = null;
+        return;
+      }
+      // Close any other open folder box
+      document.querySelectorAll('.expanded-folder-box').forEach(b => b.remove());
+
+      const box = document.createElement('div');
+      box.className = 'expanded-folder-box';
+      box.id = `expanded-box-${folderName}`;
+
+      let innerHtml = `
+        <div class="expanded-folder-header">
+          <span>📂 Folder: ${folderName}</span>
+          <button class="badge-btn" onclick="document.getElementById('expanded-box-${folderName}').remove()">&times; Close</button>
+        </div>
+        <div class="expanded-folder-inner-grid" data-folder-name="${folderName}">
+      `;
+
+      items.forEach(dial => {
+        let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
+        let imgSrc = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+        innerHtml += `
+          <div class="draggable-wrapper" draggable="true" ondragstart="handleDragStart(event, 'dial')" ondragenter="handleDragEnter(event, 'dial')" ondragend="handleDragEnd(event, 'dial')" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
+            <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener"><img src="${imgSrc}" alt="${dial.name}" /><span>${dial.name}</span></a>
+            ${isEditMode ? `<button class="card-edit-btn" title="Edit" onclick="event.stopPropagation(); openEditDialModal(${dial._origIdx})">✎</button>` : ''}
+            ${isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeDial(${dial._origIdx})">&times;</button>` : ''}
+          </div>
+        `;
+      });
+
+      innerHtml += `</div>`;
+      box.innerHTML = innerHtml;
+      
+      // Insert right after the container grid or append
+      document.getElementById('section-dials').appendChild(box);
     }
 
     function createDialElement(dial) {
