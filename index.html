@@ -52,9 +52,9 @@
       position: relative;
     }
 
-    @keyframes smoothAccordionOpen {
-      0% { opacity: 0; transform: scaleY(0.92) translateY(-10px); max-height: 0; }
-      100% { opacity: 1; transform: scaleY(1) translateY(0); max-height: 500px; }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes spin-border {
@@ -112,6 +112,7 @@
       align-items: center;
       gap: 8px;
       transition: transform 0.2s, background 0.2s;
+      animation: fadeInSlide 0.3s ease-out;
     }
     .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
     .floating-lock-btn.show { display: flex; }
@@ -128,7 +129,7 @@
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
-    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); z-index: 40; transition: border 0.3s; }
+    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 40; transition: border 0.3s; }
     .search-box-wrapper.edit-unlocked {
       cursor: grab;
       border: 2px dashed var(--accent);
@@ -166,10 +167,17 @@
     .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
     .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
-    .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; }
+    /* --- Speed Dial Dynamic Grid --- */
+    .speed-dial-grid { 
+      display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; 
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .speed-dial-grid.fade-out { opacity: 0; transform: scale(0.97); }
+    .speed-dial-grid.fade-in { opacity: 1; transform: scale(1); }
+
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
     
-    /* --- Polished Opera-Style Micro Folders & Accordion --- */
+    /* --- True Opera-Style Micro Folders --- */
     .dial-folder-tile {
       background: var(--card-bg);
       backdrop-filter: blur(var(--card-blur));
@@ -201,7 +209,7 @@
       width: 50px;
       height: 50px;
       padding: 4px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.25);
       border-radius: 12px;
     }
     .folder-preview-grid img {
@@ -211,39 +219,26 @@
       border-radius: 4px;
     }
     .dial-folder-tile span {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--text-main);
-      margin-top: 6px;
+      margin-top: 8px;
       max-width: 90%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    /* Unboxed Accordion Dropdown Row with Smooth Spring Physics */
-    .expanded-folder-accordion {
-      grid-column: 1 / -1;
-      background: rgba(18, 22, 28, 0.92);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: var(--card-radius);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      transform-origin: top center;
-      animation: smoothAccordionOpen 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      overflow: hidden;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    /* Back Tile for inside folders */
+    .back-tile {
+      background: rgba(88, 166, 255, 0.15) !important;
+      border-color: var(--accent) !important;
     }
-    .expanded-folder-inner-grid {
-      display: grid;
-      grid-template-columns: var(--dial-grid-cols);
-      gap: 14px;
+    .back-tile:hover {
+      background: rgba(88, 166, 255, 0.25) !important;
     }
 
+    /* --- Universal Draggable Item Setup --- */
     .draggable-wrapper { position: relative; cursor: grab; }
     .draggable-wrapper:active { cursor: grabbing; }
     
@@ -263,40 +258,18 @@
     }
     .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: 1; }
     
-    .service-card { 
-      padding: 14px 16px; 
-      flex-direction: column; 
-      justify-content: center; 
-      gap: 6px; 
-      border-radius: 12px;
-      aspect-ratio: auto;
-    }
+    .service-card { padding: 14px 16px; flex-direction: column; justify-content: center; gap: 6px; border-radius: 12px; aspect-ratio: auto; }
     
     .add-dial-tile {
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      color: var(--text-muted);
-      border: 2px dashed rgba(255, 255, 255, 0.2);
-      background: rgba(22, 27, 34, 0.25);
-      aspect-ratio: 1;
-      border-radius: var(--card-radius);
+      flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+      color: var(--text-muted); border: 2px dashed rgba(255, 255, 255, 0.2); background: rgba(22, 27, 34, 0.25);
+      aspect-ratio: 1; border-radius: var(--card-radius);
     }
     .add-service-tile {
-      aspect-ratio: auto;
-      min-height: 70px;
-      flex-direction: row;
-      justify-content: center;
-      gap: 8px;
-      border-radius: 12px;
+      aspect-ratio: auto; min-height: 70px; flex-direction: row; justify-content: center; gap: 8px; border-radius: 12px;
     }
     .add-dial-tile:hover, .add-service-tile:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: rgba(88, 166, 255, 0.1);
-      transform: translateY(-4px);
+      color: var(--accent); border-color: var(--accent); background: rgba(88, 166, 255, 0.1); transform: translateY(-4px);
     }
     .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 24px; font-weight: 300; }
     .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 12px; font-weight: 500; }
@@ -313,22 +286,34 @@
     .service-card .name { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .service-card .desc { font-size: 11px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     
-    .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
-    .draggable-wrapper:hover .card-delete-btn { display: flex; }
+    .card-delete-btn, .card-edit-btn { 
+      position: absolute; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; 
+      width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 10; 
+    }
+    .card-delete-btn { top: 6px; right: 6px; font-size: 14px; }
+    .card-edit-btn { top: 6px; left: 6px; font-size: 12px; }
+    .draggable-wrapper:hover .card-delete-btn, .draggable-wrapper:hover .card-edit-btn { display: flex; }
     .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
-
-    .card-edit-btn { position: absolute; top: 6px; left: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: all 0.2s; z-index: 10; }
-    .draggable-wrapper:hover .card-edit-btn { display: flex; }
     .card-edit-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.25); transform: scale(1.1); }
 
-    /* --- News Stream --- */
-    .news-floating-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding: 0 4px;
+    /* --- Hover-to-Merge Drop Zones --- */
+    body.is-dragging-dial .dial-merge-overlay,
+    body.is-dragging-dial .folder-merge-overlay { display: block; pointer-events: auto; }
+    
+    .dial-merge-overlay {
+      display: none; position: absolute; top: 25%; left: 25%; right: 25%; bottom: 25%; z-index: 20;
+      border-radius: 50%; background: rgba(88, 166, 255, 0.3); border: 2px dashed var(--accent);
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
     }
+    .folder-merge-overlay {
+      display: none; position: absolute; inset: 0; z-index: 20;
+      border-radius: var(--card-radius); background: rgba(88, 166, 255, 0.3); border: 2px dashed var(--accent);
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    }
+    .dial-merge-overlay.drag-hover, .folder-merge-overlay.drag-hover { opacity: 1; transform: scale(1.1); }
+
+    /* --- News Stream --- */
+    .news-floating-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
     .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
 
     .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
@@ -341,31 +326,25 @@
     .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 8px; border-radius: 6px; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .rss-date { font-family: monospace; font-size: 11px; }
 
-    /* --- Visual RSS Feed Manager (Modal) --- */
+    /* --- Drawers & Modals Omitted for Brevity (unchanged visually) --- */
     .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
     .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
     .rss-manager-item:hover { transform: scale(1.05); }
     .rss-manager-item img { width: 26px; height: 26px; border-radius: 6px; }
     .rss-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; border: none; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: background 0.2s; }
     .rss-delete-btn:hover { background: #dc2626; }
-
-    /* --- Drawers --- */
     .drawer { position: fixed; top: 0; bottom: 0; width: 440px; max-width: 90vw; background: rgba(13, 17, 23, 0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border-glass); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     .drawer-right { right: 0; transform: translateX(100%); }
     .drawer-right.open { transform: translateX(0); }
     .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .drawer-close { background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
     .drawer-close:hover { color: var(--text-main); }
-    
-    /* Google Calendar Auth & Events UI */
     .cal-auth-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 16px; background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; }
     .events-container { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-right: 4px; }
     .cal-event-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s; }
     .cal-event-card:hover { border-color: var(--accent); }
     .cal-event-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
     .cal-event-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--accent); }
-
-    /* Bookmarks Drawer UI */
     .bookmark-input-group { display: flex; flex-direction: column; gap: 8px; }
     .bookmark-input-group input { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
     .bookmarks-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; padding-right: 4px; }
@@ -374,8 +353,6 @@
     .bookmark-item a { color: var(--text-main); text-decoration: none; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
     .bookmark-item a:hover { color: var(--accent); }
     .bookmark-item button { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 16px; }
-
-    /* --- Modals --- */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 200; opacity: 0; transition: opacity 0.3s; }
     .modal.show { opacity: 1; }
     .modal-content { background: #161b22; border: 1px solid var(--border-glass); border-radius: 16px; width: 90%; max-width: 540px; padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -384,8 +361,6 @@
     .form-group label { font-size: 12px; color: var(--text-muted); }
     .form-group input, .form-group select { background: #0d1117; border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
     .form-group input:focus, .form-group select:focus { border-color: var(--accent); outline: none; }
-    
-    /* Settings Modal UI */
     .se-settings-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
     .se-settings-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass); font-size: 12px; }
     .se-settings-item .se-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
@@ -397,7 +372,6 @@
     .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
     input:checked + .slider { background-color: var(--accent); }
     input:checked + .slider:before { transform: translateX(18px); }
-
     .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
     .modal-footer button { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
     .btn-secondary { background: transparent; border: 1px solid var(--border-glass); color: var(--text-main); }
@@ -408,9 +382,10 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: space-between; }
+      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: space-between; padding: 10px; }
       .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; }
       .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
+      .top-nav-bar > div:last-child > div { display: none; } /* hide clock on tiny screens */
       
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
@@ -431,7 +406,7 @@
     }
   </style>
 </head>
-<body class="">
+<body>
 
   <!-- ========================================== -->
   <!--           MOVABLE TOP NAVIGATION           -->
@@ -947,7 +922,7 @@
       searchInput.value = '';
     });
 
-    // ===== ALWAYS ACTIVE DRAG AND DROP =====
+    // ===== ALWAYS ACTIVE DRAG, REORDER, AND MERGE =====
     let draggedNode = null;
     let dragType = null;
 
@@ -955,7 +930,8 @@
       if (isEditMode) return;
       draggedNode = e.currentTarget; 
       dragType = type; 
-      e.dataTransfer.effectAllowed = 'move'; 
+      e.dataTransfer.effectAllowed = 'move';
+      document.body.classList.add('is-dragging-dial');
     }
 
     function handleDragEnter(e, type) {
@@ -975,17 +951,43 @@
     }
 
     function syncDialStateFromDOM() {
-      const newDials = [];
+      // Rebuild the state array from exactly what is in the DOM
+      let newDials = [];
+      
+      // 1. Root Dials
       document.querySelectorAll('#speed-dials-container > .draggable-wrapper').forEach(node => {
-         const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-         data.folder = ''; newDials.push(data);
+         if(node.dataset.dialData) {
+           const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+           data.folder = ''; 
+           newDials.push(data);
+         }
       });
-      document.querySelectorAll('.expanded-folder-inner-grid .draggable-wrapper').forEach(node => {
-         const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-         const folderName = node.closest('.expanded-folder-accordion').dataset.folderName;
-         data.folder = folderName; newDials.push(data);
+
+      // 2. Closed Folders (Items not in DOM, keep from old state)
+      const visibleFolders = Array.from(document.querySelectorAll('#speed-dials-container > .dial-folder-tile'))
+                                 .map(f => f.dataset.folderName);
+      
+      // If there's an active expanded folder, pull its new order from its grid
+      if (activeDialFolder) {
+        document.querySelectorAll('.expanded-folder-inner-grid .draggable-wrapper').forEach(node => {
+           if(node.dataset.dialData) {
+             const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+             data.folder = activeDialFolder; 
+             newDials.push(data);
+           }
+        });
+      }
+
+      // Preserve items from folders that are currently closed
+      visibleFolders.forEach(fname => {
+        if (fname !== activeDialFolder) {
+          const folderItems = state.dials.filter(d => d.folder === fname);
+          newDials.push(...folderItems);
+        }
       });
-      state.dials = newDials; localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); 
+
+      state.dials = newDials; 
+      localStorage.setItem('dash_dials', JSON.stringify(state.dials)); 
     }
 
     function syncServiceStateFromDOM() {
@@ -997,26 +999,59 @@
     }
 
     function handleDragEnd(e, type) { 
+      document.body.classList.remove('is-dragging-dial');
       if (isEditMode) return;
-      if (type === 'dial') syncDialStateFromDOM(); else syncServiceStateFromDOM();
+      if (type === 'dial') {
+        syncDialStateFromDOM(); 
+        renderDials(); // re-render to update arrays fully
+      } else {
+        syncServiceStateFromDOM();
+      }
       draggedNode = null; dragType = null;
+      document.querySelectorAll('.drag-hover').forEach(el => el.classList.remove('drag-hover'));
     }
 
-    function handleFolderDragOver(e) { e.preventDefault(); return false; }
-    function handleDropToFolder(e, folderName) {
-      e.stopPropagation();
-      if (isEditMode) return;
+    function handleMergeEnter(e) { e.preventDefault(); e.currentTarget.classList.add('drag-hover'); }
+    function handleMergeLeave(e) { e.currentTarget.classList.remove('drag-hover'); }
+    
+    function mergeWithDial(e, targetIdx) {
+      e.stopPropagation(); e.preventDefault();
+      e.currentTarget.classList.remove('drag-hover');
       if (draggedNode && dragType === 'dial') {
         const draggedData = JSON.parse(decodeURIComponent(draggedNode.dataset.dialData));
-        const targetDial = state.dials.find(d => d.name === draggedData.name && d.url === draggedData.url);
-        if (targetDial) targetDial.folder = folderName;
+        const draggedDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
+        const targetDial = state.dials[targetIdx];
+
+        if (!targetDial || !draggedDial || targetDial === draggedDial) return;
+
+        let folderName = targetDial.folder;
+        if (!folderName) {
+            folderName = prompt("Enter a name for the new folder:", "New Folder");
+            if (!folderName) return; 
+            targetDial.folder = folderName;
+        }
+        draggedDial.folder = folderName;
         localStorage.setItem('dash_dials', JSON.stringify(state.dials));
         renderDials();
       }
     }
 
-    // ===== RENDER DIALS WITH POLISHED ACCORDION FOLDERS =====
-    let openAccordionFolder = null;
+    function addToFolder(e, folderName) {
+      e.stopPropagation(); e.preventDefault();
+      e.currentTarget.classList.remove('drag-hover');
+      if (draggedNode && dragType === 'dial') {
+        const draggedData = JSON.parse(decodeURIComponent(draggedNode.dataset.dialData));
+        const draggedDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
+        if (draggedDial) {
+          draggedDial.folder = folderName;
+          localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+          renderDials();
+        }
+      }
+    }
+
+    // ===== RENDER DIALS WITH TRUE OPERA FOLDER EXPANSION =====
+    let activeDialFolder = null;
 
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
@@ -1031,105 +1066,96 @@
         else { grouped._root.push(dial); }
       });
 
-      container.innerHTML = '';
-      const allRenderNodes = [];
-
-      Object.keys(grouped).sort().forEach(folderName => {
-        if (folderName === '_root') return;
-        const items = grouped[folderName];
+      // Animate View Transition
+      container.style.opacity = 0;
+      setTimeout(() => {
+        container.innerHTML = '';
         
-        const folderTile = document.createElement('div');
-        folderTile.className = 'dial-folder-tile draggable-wrapper';
-        folderTile.draggable = true;
-        folderTile.dataset.folderName = folderName;
-        folderTile.addEventListener('dragstart', (e) => handleDragStart(e, 'dial'));
-        folderTile.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial'));
-        folderTile.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
+        if (activeDialFolder) {
+          // --- FULL GRID REPLACEMENT (OPERA STYLE) ---
+          const backTile = document.createElement('div');
+          backTile.className = 'add-dial-tile back-tile';
+          backTile.onclick = () => switchDialView(null);
+          backTile.innerHTML = `<span style="font-weight:600;">&larr;</span><span>Back</span>`;
+          container.appendChild(backTile);
 
-        let previewImgs = '';
-        for (let i = 0; i < Math.min(items.length, 4); i++) {
-          let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
-          let img = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
-          previewImgs += `<img src="${img}" alt="icon">`;
+          const items = grouped[activeDialFolder] || [];
+          items.forEach(dial => {
+            container.appendChild(createDialElement(dial));
+          });
+
+        } else {
+          // --- STANDARD ROOT GRID ---
+          Object.keys(grouped).sort().forEach(folderName => {
+            if (folderName === '_root') return;
+            const items = grouped[folderName];
+            
+            const folderTile = document.createElement('div');
+            folderTile.className = 'dial-folder-tile draggable-wrapper';
+            folderTile.draggable = !isEditMode;
+            folderTile.dataset.folderName = folderName;
+            folderTile.addEventListener('dragstart', (e) => handleDragStart(e, 'folder'));
+            folderTile.addEventListener('dragenter', (e) => handleDragEnter(e, 'folder'));
+            folderTile.addEventListener('dragend', (e) => handleDragEnd(e, 'folder'));
+
+            let previewImgs = '';
+            for (let i = 0; i < Math.min(items.length, 4); i++) {
+              let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
+              let img = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+              previewImgs += `<img src="${img}" alt="icon">`;
+            }
+
+            folderTile.innerHTML = `
+              <div class="folder-merge-overlay" ondragenter="handleMergeEnter(event)" ondragleave="handleMergeLeave(event)" ondrop="addToFolder(event, '${folderName}')" ondragover="event.preventDefault()"></div>
+              <div class="folder-preview-grid">${previewImgs}</div>
+              <span>${folderName}</span>
+            `;
+
+            folderTile.addEventListener('click', (e) => {
+              if (isEditMode) return;
+              switchDialView(folderName);
+            });
+
+            container.appendChild(folderTile);
+          });
+
+          grouped._root.forEach(dial => {
+            container.appendChild(createDialElement(dial));
+          });
+
+          const addTile = document.createElement('div');
+          addTile.className = 'add-dial-tile';
+          addTile.onclick = openAddDialModal;
+          addTile.innerHTML = `<span>+</span><span>Add Tile</span>`;
+          container.appendChild(addTile);
         }
 
-        folderTile.innerHTML = `
-          <div class="folder-preview-grid">${previewImgs}</div>
-          <span>${folderName}</span>
-        `;
-
-        folderTile.addEventListener('click', (e) => {
-          if (isEditMode) return;
-          toggleAccordionFolder(folderName);
-        });
-        folderTile.addEventListener('dragover', handleFolderDragOver); 
-        folderTile.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
-
-        allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile, items });
-      });
-
-      grouped._root.forEach(dial => {
-        allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
-      });
-
-      const addTile = document.createElement('div');
-      addTile.className = 'add-dial-tile';
-      addTile.onclick = openAddDialModal;
-      addTile.innerHTML = `<span>+</span><span>Add Tile</span>`;
-      allRenderNodes.push({ type: 'add', node: addTile });
-
-      allRenderNodes.forEach(item => {
-        container.appendChild(item.node);
-        if (item.type === 'folder' && openAccordionFolder === item.name) {
-          const accordion = createAccordionBox(item.name, item.items);
-          container.appendChild(accordion);
-        }
-      });
+        container.style.opacity = 1;
+        container.style.transform = 'scale(1)';
+      }, 150);
     }
 
-    function toggleAccordionFolder(folderName) {
-      if (openAccordionFolder === folderName) {
-        openAccordionFolder = null;
-      } else {
-        openAccordionFolder = folderName;
-      }
+    function switchDialView(folderName) {
+      const container = document.getElementById('speed-dials-container');
+      container.style.transform = 'scale(0.95)';
+      activeDialFolder = folderName;
       renderDials();
-    }
-
-    function createAccordionBox(folderName, items) {
-      const box = document.createElement('div');
-      box.className = 'expanded-folder-accordion';
-      box.dataset.folderName = folderName;
-
-      let innerHtml = `<div class="expanded-folder-inner-grid" data-folder-name="${folderName}">`;
-
-      items.forEach(dial => {
-        let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
-        let imgSrc = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-        innerHtml += `
-          <div class="draggable-wrapper" draggable="true" ondragstart="handleDragStart(event, 'dial')" ondragenter="handleDragEnter(event, 'dial')" ondragend="handleDragEnd(event, 'dial')" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
-            <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener"><img src="${imgSrc}" alt="${dial.name}" /><span>${dial.name}</span></a>
-            ${isEditMode ? `<button class="card-edit-btn" title="Edit" onclick="event.stopPropagation(); openEditDialModal(${dial._origIdx})">✎</button>` : ''}
-            ${isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeDial(${dial._origIdx})">&times;</button>` : ''}
-          </div>
-        `;
-      });
-
-      innerHtml += `</div>`;
-      box.innerHTML = innerHtml;
-      return box;
     }
 
     function createDialElement(dial) {
       let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
       let imgSrc = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-      const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = true; wrapper.dataset.dialData = encodeURIComponent(JSON.stringify(dial));
+      const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = !isEditMode; wrapper.dataset.dialData = encodeURIComponent(JSON.stringify(dial));
       wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'dial')); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
       
       let editBtnHtml = isEditMode ? `<button class="card-edit-btn" title="Edit" onclick="event.stopPropagation(); openEditDialModal(${dial._origIdx})">✎</button>` : '';
       let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeDial(${dial._origIdx})">&times;</button>` : '';
 
-      wrapper.innerHTML = `<a href="${dial.url}" class="dial-card" target="_blank" rel="noopener"><img src="${imgSrc}" alt="${dial.name}" /><span>${dial.name}</span></a>${editBtnHtml}${deleteBtnHtml}`;
+      wrapper.innerHTML = `
+        <div class="dial-merge-overlay" ondragenter="handleMergeEnter(event)" ondragleave="handleMergeLeave(event)" ondrop="mergeWithDial(event, ${dial._origIdx})" ondragover="event.preventDefault()"></div>
+        <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener"><img src="${imgSrc}" alt="${dial.name}" /><span>${dial.name}</span></a>
+        ${editBtnHtml}${deleteBtnHtml}
+      `;
       return wrapper;
     }
 
@@ -1166,6 +1192,10 @@
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
+      
+      // Auto-assign to active folder if we are viewing one
+      if (activeDialFolder && !folder) folder = activeDialFolder;
+
       state.dials.push({ name, url, img, folder }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
     }
 
@@ -1176,7 +1206,7 @@
       
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = true; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
+        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = !isEditMode; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
         wrapper.addEventListener('dragstart', (e) => handleDragStart(e, 'service')); wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service')); wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
         
         let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>` : '';
@@ -1211,7 +1241,7 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== MULTI-PROXY BULLETPROOF RSS ENGINE =====
+    // ===== ALL-ORIGINS RAW BULLETPROOF RSS ENGINE =====
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
@@ -1228,30 +1258,19 @@
 
       const feedPromises = urls.map(async (url) => {
         try {
-          const proxies = [
-            `https://api.allorigins.win/raw?url=`,
-            `https://corsproxy.io/?url=`,
-            `https://api.codetabs.com/v1/proxy?quest=`
-          ];
+          // Bypassing rss2json limits and using allorigins to fetch raw HTML/XML directly
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          const res = await fetch(proxyUrl);
+          const data = await res.json();
+          
+          if (!data || !data.contents) return [];
 
-          let rawDataText = null;
-          for (let p of proxies) {
-            try {
-              const res = await fetch(p + encodeURIComponent(url));
-              if (res.ok) {
-                rawDataText = await res.text();
-                break;
-              }
-            } catch (e) {}
-          }
-
-          if (!rawDataText) return [];
-
+          let rawDataText = data.contents;
           let parser = new DOMParser();
-          let isHtml = rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html');
           let xmlDoc;
 
-          if (isHtml) {
+          // If the URL returned HTML, try to auto-discover the RSS link inside the <head>
+          if (rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html')) {
             const htmlDoc = parser.parseFromString(rawDataText, "text/html");
             const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') ||
                               htmlDoc.querySelector('link[type="application/atom+xml"]') ||
@@ -1264,41 +1283,25 @@
                 const baseOrigin = new URL(url).origin;
                 discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
               }
-
-              let rssText = null;
-              for (let p of proxies) {
-                try {
-                  const res = await fetch(p + encodeURIComponent(discoveredUrl));
-                  if (res.ok) {
-                    rssText = await res.text();
-                    break;
-                  }
-                } catch (e) {}
-              }
-              if (!rssText) return [];
-              xmlDoc = parser.parseFromString(rssText, "text/xml");
+              const feedRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(discoveredUrl)}`);
+              const feedData = await feedRes.json();
+              if(feedData && feedData.contents) {
+                  xmlDoc = parser.parseFromString(feedData.contents, "text/xml");
+              } else return [];
             } else {
-              try {
-                const fallbackUrl = url.replace(/\/$/, '') + '/feed/';
-                let rssText = null;
-                for (let p of proxies) {
-                  try {
-                    const res = await fetch(p + encodeURIComponent(fallbackUrl));
-                    if (res.ok) {
-                      rssText = await res.text();
-                      break;
-                    }
-                  } catch (e) {}
-                }
-                if (!rssText) return [];
-                xmlDoc = parser.parseFromString(rssText, "text/xml");
-              } catch (e) {
-                return [];
-              }
+              // Fallback guess
+              const fallbackUrl = url.replace(/\/$/, '') + '/feed/';
+              const fallbackRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(fallbackUrl)}`);
+              const fallbackData = await fallbackRes.json();
+              if(fallbackData && fallbackData.contents) {
+                  xmlDoc = parser.parseFromString(fallbackData.contents, "text/xml");
+              } else return [];
             }
           } else {
             xmlDoc = parser.parseFromString(rawDataText, "text/xml");
           }
+
+          if(!xmlDoc) return [];
 
           const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
           const sourceName = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || new URL(url).hostname;
@@ -1340,7 +1343,7 @@
 
           channelArticles.sort((a, b) => b.timestamp - a.timestamp);
           return channelArticles;
-        } catch (err) { return []; }
+        } catch (err) { console.error(err); return []; }
       });
 
       const sourceDecks = await Promise.all(feedPromises);
