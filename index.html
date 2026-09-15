@@ -52,9 +52,9 @@
       position: relative;
     }
 
-    @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes smoothSlideDown {
+      from { opacity: 0; transform: translateY(-12px); max-height: 0; }
+      to { opacity: 1; transform: translateY(0); max-height: 400px; }
     }
 
     @keyframes spin-border {
@@ -67,7 +67,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
       padding: 10px 16px;
       background: rgba(22, 27, 34, 0.65);
       backdrop-filter: blur(12px);
@@ -89,7 +89,7 @@
     }
     .top-nav-bar.edit-unlocked:active { cursor: grabbing; }
 
-    .widget-toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+    .widget-toggles { display: flex; gap: 10px; }
     .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
@@ -112,7 +112,6 @@
       align-items: center;
       gap: 8px;
       transition: transform 0.2s, background 0.2s;
-      animation: fadeInSlide 0.3s ease-out;
     }
     .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
     .floating-lock-btn.show { display: flex; }
@@ -129,7 +128,7 @@
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
-    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 40; transition: border 0.3s; }
+    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); z-index: 40; transition: border 0.3s; }
     .search-box-wrapper.edit-unlocked {
       cursor: grab;
       border: 2px dashed var(--accent);
@@ -170,7 +169,7 @@
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
     
-    /* --- True Opera-Style Micro Folders & In-Grid Accordion --- */
+    /* --- Unboxed Accordion Micro Folders --- */
     .dial-folder-tile {
       background: var(--card-bg);
       backdrop-filter: blur(var(--card-blur));
@@ -222,19 +221,20 @@
       white-space: nowrap;
     }
 
-    /* Accordion row that spans the full grid width below the folder */
+    /* Unboxed Accordion Dropdown Row */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
-      background: rgba(18, 22, 28, 0.90);
+      background: rgba(18, 22, 28, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--accent);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: var(--card-radius);
       padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      animation: fadeInSlide 0.25s ease-out;
+      animation: smoothSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      overflow: hidden;
       box-shadow: 0 8px 30px rgba(0,0,0,0.5);
     }
     .expanded-folder-header {
@@ -447,12 +447,12 @@
   <!-- ========================================== -->
   <div class="top-nav-bar" id="topNavWidget" draggable="false">
     <div class="widget-toggles">
-      <button class="nav-btn" id="nav-btn-builtin-cal" onclick="toggleInlineCalendar()">📅 Calendar View</button>
-      <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal Sync</button>
-      <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Saved Bookmarks</button>
+      <button class="nav-btn" id="nav-btn-builtin-cal" onclick="toggleInlineCalendar()">📅 Calendar</button>
+      <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal</button>
+      <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
     </div>
-    <div style="display: flex; align-items: center; margin-left: 15px;">
-      <div id="live-clock" style="font-weight: 600; font-size: 15px; margin-right: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);"></div>
+    <div style="display: flex; align-items: center; margin-left: 10px;">
+      <div id="live-clock" style="font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);"></div>
       <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
     </div>
   </div>
@@ -956,12 +956,12 @@
       searchInput.value = '';
     });
 
-    // ===== ALWAYS ACTIVE DRAG AND DROP (FOR REORDERING & FOLDERS) =====
+    // ===== ALWAYS ACTIVE ITEM REORDERING & FOLDERS =====
     let draggedNode = null;
     let dragType = null;
 
     function handleDragStart(e, type) { 
-      if (isEditMode) return; // Ignore item drag if section edit mode is active
+      if (isEditMode) return;
       draggedNode = e.currentTarget; 
       dragType = type; 
       e.dataTransfer.effectAllowed = 'move'; 
@@ -1014,6 +1014,7 @@
     function handleFolderDragOver(e) { e.preventDefault(); return false; }
     function handleDropToFolder(e, folderName) {
       e.stopPropagation();
+      if (isEditMode) return;
       if (draggedNode && dragType === 'dial') {
         const draggedData = JSON.parse(decodeURIComponent(draggedNode.dataset.dialData));
         const targetDial = state.dials.find(d => d.name === draggedData.name && d.url === draggedData.url);
@@ -1040,8 +1041,6 @@
       });
 
       container.innerHTML = '';
-
-      // We will render items and inject the accordion right below the row containing the folder tile
       const allRenderNodes = [];
 
       // Render Folders as Micro Tiles
@@ -1051,7 +1050,7 @@
         
         const folderTile = document.createElement('div');
         folderTile.className = 'dial-folder-tile draggable-wrapper';
-        folderTile.draggable = true;
+        folderTile.draggable = !isEditMode;
         folderTile.dataset.folderName = folderName;
         folderTile.addEventListener('dragstart', (e) => handleDragStart(e, 'dial'));
         folderTile.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial'));
@@ -1071,7 +1070,7 @@
 
         folderTile.addEventListener('click', (e) => {
           if (isEditMode) return;
-          toggleAccordionFolder(folderName, items, folderTile);
+          toggleAccordionFolder(folderName, items);
         });
         folderTile.addEventListener('dragover', handleFolderDragOver); 
         folderTile.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
@@ -1091,10 +1090,9 @@
       addTile.innerHTML = `<span>+</span><span>Add Tile</span>`;
       allRenderNodes.push({ type: 'add', node: addTile });
 
-      // Append nodes to grid container
+      // Append nodes to grid container with accordion injection
       allRenderNodes.forEach(item => {
         container.appendChild(item.node);
-        // If this folder is currently open, inject the accordion row right after it
         if (item.type === 'folder' && openAccordionFolder === item.name) {
           const accordion = createAccordionBox(item.name, item.items);
           container.appendChild(accordion);
@@ -1102,7 +1100,7 @@
       });
     }
 
-    function toggleAccordionFolder(folderName, items, folderTileEl) {
+    function toggleAccordionFolder(folderName, items) {
       if (openAccordionFolder === folderName) {
         openAccordionFolder = null;
       } else {
