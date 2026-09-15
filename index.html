@@ -53,7 +53,7 @@
     }
 
     @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(15px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -67,7 +67,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
       padding: 10px 16px;
       background: rgba(22, 27, 34, 0.65);
       backdrop-filter: blur(12px);
@@ -89,7 +89,7 @@
     }
     .top-nav-bar.edit-unlocked:active { cursor: grabbing; }
 
-    .widget-toggles { display: flex; gap: 10px; }
+    .widget-toggles { display: flex; gap: 8px; flex-wrap: wrap; }
     .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
@@ -170,7 +170,7 @@
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
     
-    /* --- Opera/Brave Micro Folder Styles --- */
+    /* --- True Opera-Style Micro Folders & In-Grid Accordion --- */
     .dial-folder-tile {
       background: var(--card-bg);
       backdrop-filter: blur(var(--card-blur));
@@ -199,10 +199,10 @@
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
       gap: 4px;
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       padding: 4px;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.25);
       border-radius: 10px;
     }
     .folder-preview-grid img {
@@ -222,48 +222,35 @@
       white-space: nowrap;
     }
 
-    /* True Opera-Style Popover Folder Overlay */
-    .folder-popover-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      z-index: 250;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: fadeInSlide 0.2s ease-out;
-    }
-    .folder-popover-box {
-      background: rgba(18, 22, 28, 0.95);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+    /* Accordion row that spans the full grid width below the folder */
+    .expanded-folder-accordion {
+      grid-column: 1 / -1;
+      background: rgba(18, 22, 28, 0.90);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--accent);
       border-radius: var(--card-radius);
-      padding: 24px;
-      width: 90%;
-      max-width: 420px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      gap: 12px;
+      animation: fadeInSlide 0.25s ease-out;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
     }
-    .folder-popover-header {
+    .expanded-folder-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--accent);
       border-bottom: 1px solid var(--border-glass);
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
-    .folder-popover-grid {
+    .expanded-folder-inner-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 14px;
-      max-height: 300px;
-      overflow-y: auto;
+      grid-template-columns: var(--dial-grid-cols);
+      gap: 12px;
     }
 
     .draggable-wrapper { position: relative; cursor: grab; }
@@ -430,8 +417,9 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: flex-end; }
-      .widget-toggles, .top-nav-bar > div:last-child > div { display: none !important; } 
+      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: space-between; }
+      .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; }
+      .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
       
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
@@ -583,7 +571,7 @@
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Appearance & Layout Control</label>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
-          <span style="font-size: 12px;">Layout Edit Mode</span>
+          <span style="font-size: 12px;">Layout Edit Mode (Sections)</span>
           <button class="badge-btn" id="editModeBtn" onclick="toggleEditMode()" style="background: #333;">✏ Unlock Layout</button>
         </div>
 
@@ -973,10 +961,7 @@
     let dragType = null;
 
     function handleDragStart(e, type) { 
-      if (isEditMode) {
-        // If in section edit mode, don't trigger item drag
-        return;
-      }
+      if (isEditMode) return; // Ignore item drag if section edit mode is active
       draggedNode = e.currentTarget; 
       dragType = type; 
       e.dataTransfer.effectAllowed = 'move'; 
@@ -1004,9 +989,9 @@
          const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
          data.folder = ''; newDials.push(data);
       });
-      document.querySelectorAll('.folder-popover-grid .draggable-wrapper').forEach(node => {
+      document.querySelectorAll('.expanded-folder-inner-grid .draggable-wrapper').forEach(node => {
          const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-         const folderName = node.closest('.folder-popover-box').dataset.folderName;
+         const folderName = node.closest('.expanded-folder-accordion').dataset.folderName;
          data.folder = folderName; newDials.push(data);
       });
       state.dials = newDials; localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); 
@@ -1038,7 +1023,9 @@
       }
     }
 
-    // ===== RENDER DIALS =====
+    // ===== RENDER DIALS WITH IN-GRID ACCORDION FOLDERS =====
+    let openAccordionFolder = null;
+
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
       
@@ -1054,14 +1041,21 @@
 
       container.innerHTML = '';
 
+      // We will render items and inject the accordion right below the row containing the folder tile
+      const allRenderNodes = [];
+
       // Render Folders as Micro Tiles
       Object.keys(grouped).sort().forEach(folderName => {
         if (folderName === '_root') return;
         const items = grouped[folderName];
         
         const folderTile = document.createElement('div');
-        folderTile.className = 'dial-folder-tile';
+        folderTile.className = 'dial-folder-tile draggable-wrapper';
+        folderTile.draggable = true;
         folderTile.dataset.folderName = folderName;
+        folderTile.addEventListener('dragstart', (e) => handleDragStart(e, 'dial'));
+        folderTile.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial'));
+        folderTile.addEventListener('dragend', (e) => handleDragEnd(e, 'dial'));
 
         let previewImgs = '';
         for (let i = 0; i < Math.min(items.length, 4); i++) {
@@ -1072,43 +1066,62 @@
 
         folderTile.innerHTML = `
           <div class="folder-preview-grid">${previewImgs}</div>
-          <span>📂 ${folderName}</span>
+          <span>${folderName}</span>
         `;
 
-        folderTile.addEventListener('click', () => openFolderPopover(folderName, items));
+        folderTile.addEventListener('click', (e) => {
+          if (isEditMode) return;
+          toggleAccordionFolder(folderName, items, folderTile);
+        });
         folderTile.addEventListener('dragover', handleFolderDragOver); 
         folderTile.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
 
-        container.appendChild(folderTile);
+        allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile, items });
       });
 
       // Render Root Dials
-      grouped._root.forEach(dial => { container.appendChild(createDialElement(dial)); });
+      grouped._root.forEach(dial => {
+        allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
+      });
 
+      // Append Add Tile
       const addTile = document.createElement('div');
       addTile.className = 'add-dial-tile';
       addTile.onclick = openAddDialModal;
       addTile.innerHTML = `<span>+</span><span>Add Tile</span>`;
-      container.appendChild(addTile);
+      allRenderNodes.push({ type: 'add', node: addTile });
+
+      // Append nodes to grid container
+      allRenderNodes.forEach(item => {
+        container.appendChild(item.node);
+        // If this folder is currently open, inject the accordion row right after it
+        if (item.type === 'folder' && openAccordionFolder === item.name) {
+          const accordion = createAccordionBox(item.name, item.items);
+          container.appendChild(accordion);
+        }
+      });
     }
 
-    function openFolderPopover(folderName, items) {
-      // Close any existing popover
-      const existing = document.getElementById('folderPopoverOverlay');
-      if (existing) existing.remove();
+    function toggleAccordionFolder(folderName, items, folderTileEl) {
+      if (openAccordionFolder === folderName) {
+        openAccordionFolder = null;
+      } else {
+        openAccordionFolder = folderName;
+      }
+      renderDials();
+    }
 
-      const overlay = document.createElement('div');
-      overlay.className = 'folder-popover-overlay';
-      overlay.id = 'folderPopoverOverlay';
-      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    function createAccordionBox(folderName, items) {
+      const box = document.createElement('div');
+      box.className = 'expanded-folder-accordion';
+      box.dataset.folderName = folderName;
 
       let innerHtml = `
-        <div class="folder-popover-box" data-folder-name="${folderName}">
-          <div class="folder-popover-header">
-            <span>📂 ${folderName}</span>
-            <button class="badge-btn" onclick="document.getElementById('folderPopoverOverlay').remove()">&times;</button>
-          </div>
-          <div class="folder-popover-grid">
+        <div class="expanded-folder-header">
+          <span>📂 Folder: ${folderName}</span>
+          <button class="badge-btn" onclick="openAccordionFolder = null; renderDials();">&times; Close</button>
+        </div>
+        <div class="expanded-folder-inner-grid" data-folder-name="${folderName}">
       `;
 
       items.forEach(dial => {
@@ -1123,9 +1136,9 @@
         `;
       });
 
-      innerHtml += `</div></div>`;
-      overlay.innerHTML = innerHtml;
-      document.body.appendChild(overlay);
+      innerHtml += `</div>`;
+      box.innerHTML = innerHtml;
+      return box;
     }
 
     function createDialElement(dial) {
