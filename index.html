@@ -52,9 +52,9 @@
       position: relative;
     }
 
-    @keyframes smoothSlideDown {
-      from { opacity: 0; transform: translateY(-12px); max-height: 0; }
-      to { opacity: 1; transform: translateY(0); max-height: 400px; }
+    @keyframes smoothAccordionOpen {
+      0% { opacity: 0; transform: scaleY(0.92) translateY(-10px); max-height: 0; }
+      100% { opacity: 1; transform: scaleY(1) translateY(0); max-height: 500px; }
     }
 
     @keyframes spin-border {
@@ -169,7 +169,7 @@
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
     
-    /* --- Unboxed Accordion Micro Folders --- */
+    /* --- Polished Opera-Style Micro Folders & Accordion --- */
     .dial-folder-tile {
       background: var(--card-bg);
       backdrop-filter: blur(var(--card-blur));
@@ -198,11 +198,11 @@
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
       gap: 4px;
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       padding: 4px;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
     }
     .folder-preview-grid img {
       width: 100%;
@@ -211,7 +211,7 @@
       border-radius: 4px;
     }
     .dial-folder-tile span {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       color: var(--text-main);
       margin-top: 6px;
@@ -221,36 +221,27 @@
       white-space: nowrap;
     }
 
-    /* Unboxed Accordion Dropdown Row */
+    /* Unboxed Accordion Dropdown Row with Smooth Spring Physics */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
-      background: rgba(18, 22, 28, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(18, 22, 28, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: var(--card-radius);
-      padding: 18px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      animation: smoothSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      gap: 14px;
+      transform-origin: top center;
+      animation: smoothAccordionOpen 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       overflow: hidden;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    }
-    .expanded-folder-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--accent);
-      border-bottom: 1px solid var(--border-glass);
-      padding-bottom: 8px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
     }
     .expanded-folder-inner-grid {
       display: grid;
       grid-template-columns: var(--dial-grid-cols);
-      gap: 12px;
+      gap: 14px;
     }
 
     .draggable-wrapper { position: relative; cursor: grab; }
@@ -956,7 +947,7 @@
       searchInput.value = '';
     });
 
-    // ===== ALWAYS ACTIVE ITEM REORDERING & FOLDERS =====
+    // ===== ALWAYS ACTIVE DRAG AND DROP =====
     let draggedNode = null;
     let dragType = null;
 
@@ -1024,7 +1015,7 @@
       }
     }
 
-    // ===== RENDER DIALS WITH IN-GRID ACCORDION FOLDERS =====
+    // ===== RENDER DIALS WITH POLISHED ACCORDION FOLDERS =====
     let openAccordionFolder = null;
 
     function renderDials() {
@@ -1043,14 +1034,13 @@
       container.innerHTML = '';
       const allRenderNodes = [];
 
-      // Render Folders as Micro Tiles
       Object.keys(grouped).sort().forEach(folderName => {
         if (folderName === '_root') return;
         const items = grouped[folderName];
         
         const folderTile = document.createElement('div');
         folderTile.className = 'dial-folder-tile draggable-wrapper';
-        folderTile.draggable = !isEditMode;
+        folderTile.draggable = true;
         folderTile.dataset.folderName = folderName;
         folderTile.addEventListener('dragstart', (e) => handleDragStart(e, 'dial'));
         folderTile.addEventListener('dragenter', (e) => handleDragEnter(e, 'dial'));
@@ -1070,7 +1060,7 @@
 
         folderTile.addEventListener('click', (e) => {
           if (isEditMode) return;
-          toggleAccordionFolder(folderName, items);
+          toggleAccordionFolder(folderName);
         });
         folderTile.addEventListener('dragover', handleFolderDragOver); 
         folderTile.addEventListener('drop', (e) => handleDropToFolder(e, folderName));
@@ -1078,19 +1068,16 @@
         allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile, items });
       });
 
-      // Render Root Dials
       grouped._root.forEach(dial => {
         allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
       });
 
-      // Append Add Tile
       const addTile = document.createElement('div');
       addTile.className = 'add-dial-tile';
       addTile.onclick = openAddDialModal;
       addTile.innerHTML = `<span>+</span><span>Add Tile</span>`;
       allRenderNodes.push({ type: 'add', node: addTile });
 
-      // Append nodes to grid container with accordion injection
       allRenderNodes.forEach(item => {
         container.appendChild(item.node);
         if (item.type === 'folder' && openAccordionFolder === item.name) {
@@ -1100,7 +1087,7 @@
       });
     }
 
-    function toggleAccordionFolder(folderName, items) {
+    function toggleAccordionFolder(folderName) {
       if (openAccordionFolder === folderName) {
         openAccordionFolder = null;
       } else {
@@ -1114,13 +1101,7 @@
       box.className = 'expanded-folder-accordion';
       box.dataset.folderName = folderName;
 
-      let innerHtml = `
-        <div class="expanded-folder-header">
-          <span>📂 Folder: ${folderName}</span>
-          <button class="badge-btn" onclick="openAccordionFolder = null; renderDials();">&times; Close</button>
-        </div>
-        <div class="expanded-folder-inner-grid" data-folder-name="${folderName}">
-      `;
+      let innerHtml = `<div class="expanded-folder-inner-grid" data-folder-name="${folderName}">`;
 
       items.forEach(dial => {
         let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
@@ -1230,7 +1211,7 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== RESTORED RELIABLE RSS ENGINE =====
+    // ===== MULTI-PROXY BULLETPROOF RSS ENGINE =====
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
@@ -1247,41 +1228,149 @@
 
       const feedPromises = urls.map(async (url) => {
         try {
-          const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-          const data = await res.json();
-          if (data.status === 'ok') {
-            return data.items.map(item => ({
-              title: item.title,
-              link: item.link,
-              timestamp: new Date(item.pubDate).getTime(),
-              sourceName: data.feed.title || new URL(url).hostname,
-              imgUrl: item.thumbnail || item.enclosure?.link || ''
-            }));
+          const proxies = [
+            `https://api.allorigins.win/raw?url=`,
+            `https://corsproxy.io/?url=`,
+            `https://api.codetabs.com/v1/proxy?quest=`
+          ];
+
+          let rawDataText = null;
+          for (let p of proxies) {
+            try {
+              const res = await fetch(p + encodeURIComponent(url));
+              if (res.ok) {
+                rawDataText = await res.text();
+                break;
+              }
+            } catch (e) {}
           }
-          return [];
-        } catch (err) {
-          return [];
-        }
+
+          if (!rawDataText) return [];
+
+          let parser = new DOMParser();
+          let isHtml = rawDataText.trim().toLowerCase().startsWith('<!doctype html') || rawDataText.includes('<html');
+          let xmlDoc;
+
+          if (isHtml) {
+            const htmlDoc = parser.parseFromString(rawDataText, "text/html");
+            const rssLinkEl = htmlDoc.querySelector('link[type="application/rss+xml"]') ||
+                              htmlDoc.querySelector('link[type="application/atom+xml"]') ||
+                              htmlDoc.querySelector('link[rel="alternate"][href*="feed"]') ||
+                              htmlDoc.querySelector('link[rel="alternate"][href*="rss"]');
+
+            if (rssLinkEl && rssLinkEl.getAttribute('href')) {
+              let discoveredUrl = rssLinkEl.getAttribute('href');
+              if (!discoveredUrl.startsWith('http')) {
+                const baseOrigin = new URL(url).origin;
+                discoveredUrl = discoveredUrl.startsWith('/') ? `${baseOrigin}${discoveredUrl}` : `${baseOrigin}/${discoveredUrl}`;
+              }
+
+              let rssText = null;
+              for (let p of proxies) {
+                try {
+                  const res = await fetch(p + encodeURIComponent(discoveredUrl));
+                  if (res.ok) {
+                    rssText = await res.text();
+                    break;
+                  }
+                } catch (e) {}
+              }
+              if (!rssText) return [];
+              xmlDoc = parser.parseFromString(rssText, "text/xml");
+            } else {
+              try {
+                const fallbackUrl = url.replace(/\/$/, '') + '/feed/';
+                let rssText = null;
+                for (let p of proxies) {
+                  try {
+                    const res = await fetch(p + encodeURIComponent(fallbackUrl));
+                    if (res.ok) {
+                      rssText = await res.text();
+                      break;
+                    }
+                  } catch (e) {}
+                }
+                if (!rssText) return [];
+                xmlDoc = parser.parseFromString(rssText, "text/xml");
+              } catch (e) {
+                return [];
+              }
+            }
+          } else {
+            xmlDoc = parser.parseFromString(rawDataText, "text/xml");
+          }
+
+          const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
+          const sourceName = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || new URL(url).hostname;
+          let items = Array.from(xmlDoc.getElementsByTagName("item")).concat(Array.from(xmlDoc.getElementsByTagName("entry")));
+          let channelArticles = [];
+
+          items.forEach(item => {
+            const title = item.getElementsByTagName("title")[0]?.textContent || "Untitled Article";
+            let link = "#";
+            const linkEl = item.getElementsByTagName("link")[0];
+            if (linkEl) link = linkEl.getAttribute("href") || linkEl.textContent || "#";
+
+            const dateEl = item.getElementsByTagName("pubDate")[0] || item.getElementsByTagName("updated")[0] || item.getElementsByTagName("published")[0];
+            const rawDate = dateEl ? dateEl.textContent : "";
+            const timestamp = rawDate ? new Date(rawDate).getTime() : 0;
+            let imgUrl = '';
+
+            const enclosure = item.getElementsByTagName("enclosure")[0];
+            if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
+
+            if (!imgUrl) {
+              Array.from(item.childNodes).forEach(child => {
+                if (child.nodeName.includes('content') || child.nodeName.includes('thumbnail')) {
+                  const urlAttr = child.getAttribute('url');
+                  if (urlAttr) imgUrl = urlAttr;
+                }
+              });
+            }
+
+            if (!imgUrl) {
+              const descNode = item.getElementsByTagName("description")[0] || item.getElementsByTagName("content")[0] || item.getElementsByTagName("summary")[0];
+              const descText = descNode ? descNode.textContent : "";
+              const imgMatch = descText.match(/<img[^>]+src="([^">]+)"/i);
+              if (imgMatch && imgMatch[1]) imgUrl = imgMatch[1];
+            }
+
+            channelArticles.push({ title, link, rawDate, timestamp, sourceName, imgUrl });
+          });
+
+          channelArticles.sort((a, b) => b.timestamp - a.timestamp);
+          return channelArticles;
+        } catch (err) { return []; }
       });
 
-      const settlements = await Promise.all(feedPromises);
+      const sourceDecks = await Promise.all(feedPromises);
+      
+      // Fair-Share Interleaving
       let masterArticleDeck = [];
-      settlements.forEach(deck => masterArticleDeck = masterArticleDeck.concat(deck));
-      masterArticleDeck.sort((a, b) => b.timestamp - a.timestamp);
+      let maxLength = Math.max(...sourceDecks.map(deck => deck.length), 0);
+
+      for (let i = 0; i < maxLength; i++) {
+        sourceDecks.forEach(deck => {
+          if (deck[i]) {
+            masterArticleDeck.push(deck[i]);
+          }
+        });
+      }
 
       el.innerHTML = '';
       if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
-      
       if (masterArticleDeck.length === 0) {
-        el.innerHTML = '<div style="color: var(--danger); font-size: 0.9rem; padding: 10px;">⚠️ Could not fetch feeds. Check direct RSS URL format.</div>';
+        el.innerHTML = '<div style="color: var(--danger); font-size: 0.9rem; padding: 10px;">⚠️ Failed to parse feeds. Target blocking requests or invalid URL.</div>';
         return;
       }
 
       const maxDisplayCount = Math.min(masterArticleDeck.length, 12);
       for (let i = 0; i < maxDisplayCount; i++) {
         const art = masterArticleDeck[i];
-        let formattedDate = art.timestamp ? new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : "Recent";
-        
+        let formattedDate = "Recent";
+        if (art.timestamp) {
+          formattedDate = new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
         const card = document.createElement('a');
         card.className = 'rss-item';
         card.href = art.link;
