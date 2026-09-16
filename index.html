@@ -32,6 +32,7 @@
       --card-bg: rgba(22, 27, 34, 0.55);
       --card-blur: 16px;
       --card-radius: 20px;
+      --card-clip: none;
       --card-min-width: 130px;
       --dial-grid-cols: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
     }
@@ -52,10 +53,16 @@
       position: relative;
     }
 
-    @keyframes smoothSlideDown {
-      from { opacity: 0; transform: scaleY(0.95) translateY(-10px); }
-      to { opacity: 1; transform: scaleY(1) translateY(0); }
+    @keyframes smoothAccordionOpen {
+      0% { opacity: 0; transform: translateY(-15px); max-height: 0; padding: 0; }
+      100% { opacity: 1; transform: translateY(0); max-height: 800px; padding: 10px 0; }
     }
+
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @keyframes spin-border {
       0% { transform: translate(-50%, -50%) rotate(0deg); }
       100% { transform: translate(-50%, -50%) rotate(360deg); }
@@ -111,6 +118,7 @@
       align-items: center;
       gap: 8px;
       transition: transform 0.2s, background 0.2s;
+      animation: fadeInSlide 0.3s ease-out;
     }
     .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
     .floating-lock-btn.show { display: flex; }
@@ -127,8 +135,11 @@
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
-    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); z-index: 40; transition: border 0.3s; }
-    .search-box-wrapper.edit-unlocked { cursor: grab; border: 2px dashed var(--accent); }
+    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 40; transition: border 0.3s; }
+    .search-box-wrapper.edit-unlocked {
+      cursor: grab;
+      border: 2px dashed var(--accent);
+    }
     .search-box-wrapper.edit-unlocked:active { cursor: grabbing; }
     .search-box-wrapper::before { content: ""; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%; background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1)); transform: translate(-50%, -50%) rotate(0deg); animation: spin-border 4s linear infinite; z-index: 0; }
     .search-box { position: relative; z-index: 1; width: 100%; display: flex; gap: 10px; background: rgba(18, 22, 28, 0.95); padding: 8px; border-radius: 14px; }
@@ -154,6 +165,7 @@
       border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; cursor: grab;
     }
     .main-panel.edit-mode-container:active { cursor: grabbing; }
+
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
     .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
@@ -163,24 +175,28 @@
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
 
     /* --- Global Draggable Tile Physics --- */
-    .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s; }
+    .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
     .draggable-wrapper:active { cursor: grabbing; }
-    .draggable-wrapper.is-dragging { opacity: 0.4; transform: scale(1.05); z-index: 100; }
-    .draggable-wrapper.drag-folder-hover { transform: scale(0.92) !important; box-shadow: 0 0 0 3px var(--accent) inset !important; border-radius: var(--card-radius); opacity: 0.85; }
+    
+    /* Less aggressive transparency on drag so it stays visible */
+    .draggable-wrapper.is-dragging { opacity: 0.8; transform: scale(1.05); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .draggable-wrapper.drag-folder-hover { transform: scale(0.92) !important; opacity: 0.85; }
 
     .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { 
       background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); 
-      border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--card-radius); 
+      border: 1px solid rgba(255, 255, 255, 0.18); 
+      border-radius: var(--card-radius); 
+      clip-path: var(--card-clip);
       display: flex; text-decoration: none; color: var(--text-main); 
       transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s; 
       width: 100%; pointer-events: auto; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); 
     }
     
     .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: 1; }
-    .service-card { padding: 14px 16px; flex-direction: column; justify-content: center; gap: 6px; border-radius: 12px; aspect-ratio: auto; }
+    .service-card { padding: 14px 16px; flex-direction: column; justify-content: center; gap: 6px; border-radius: 12px; clip-path: none; aspect-ratio: auto; }
     
-    .add-dial-tile { flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: var(--text-muted); border: 2px dashed rgba(255, 255, 255, 0.2); background: rgba(22, 27, 34, 0.25); aspect-ratio: 1; border-radius: var(--card-radius); }
-    .add-service-tile { aspect-ratio: auto; min-height: 70px; flex-direction: row; justify-content: center; gap: 8px; border-radius: 12px; }
+    .add-dial-tile { flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: var(--text-muted); border: 2px dashed rgba(255, 255, 255, 0.2); background: rgba(22, 27, 34, 0.25); aspect-ratio: 1; }
+    .add-service-tile { clip-path: none; border-radius: 12px; aspect-ratio: auto; min-height: 70px; flex-direction: row; justify-content: center; gap: 8px; }
     
     .dial-card:hover, .service-card:hover, .add-dial-tile:hover, .dial-folder-tile:hover { 
       background: rgba(33, 38, 45, 0.85); transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); 
@@ -194,30 +210,26 @@
     .service-card .desc { font-size: 11px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
     /* --- Opera/Brave Micro Folders (No Emojis) --- */
-    .dial-folder-tile { flex-direction: column; align-items: center; justify-content: center; cursor: pointer; aspect-ratio: 1; }
+    .dial-folder-tile { flex-direction: column; align-items: center; justify-content: center; cursor: pointer; aspect-ratio: 1; position: relative; }
     .folder-preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 4px; width: 48px; height: 48px; padding: 4px; background: rgba(0, 0, 0, 0.25); border-radius: 10px; margin-bottom: 8px; }
-    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; pointer-events: none; }
     .dial-folder-tile span { font-size: 12px; font-weight: 500; color: var(--text-main); max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* In-Grid Row Breakdown Accordion */
+    /* Transparent, Floating In-Grid Accordion */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
-      background: rgba(18, 22, 28, 0.85);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: var(--card-radius);
-      padding: 24px;
-      margin-top: 4px;
-      margin-bottom: 4px;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: none !important;
+      box-shadow: none !important;
       display: flex;
       flex-direction: column;
-      gap: 16px;
       transform-origin: top center;
-      animation: smoothSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.6) inset;
+      animation: smoothAccordionOpen 0.5s cubic-bezier(0.25, 1, 0.2, 1) forwards;
+      overflow: hidden;
     }
-    .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 14px; }
+    .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; }
     
     /* Edit Controls */
     .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
@@ -226,21 +238,39 @@
     .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
     .card-edit-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.25); transform: scale(1.1); }
 
+    /* --- Hover-to-Merge Drop Zones --- */
+    body.is-dragging-dial .dial-merge-overlay,
+    body.is-dragging-dial .folder-merge-overlay { display: block; pointer-events: auto; }
+    
+    .dial-merge-overlay {
+      display: none; position: absolute; top: 25%; left: 25%; right: 25%; bottom: 25%; z-index: 20;
+      border-radius: 50%; background: rgba(88, 166, 255, 0.4); border: 2px dashed var(--accent);
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    }
+    .folder-merge-overlay {
+      display: none; position: absolute; inset: 0; z-index: 20;
+      border-radius: var(--card-radius); clip-path: var(--card-clip); background: rgba(88, 166, 255, 0.4); border: 2px dashed var(--accent);
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    }
+    .draggable-wrapper.drag-folder-hover .dial-merge-overlay, 
+    .draggable-wrapper.drag-folder-hover .folder-merge-overlay { opacity: 1; transform: scale(1.1); }
+
     /* --- News Stream --- */
     .news-floating-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
     .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
 
-    .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
-    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: var(--card-radius); background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
-    .rss-item:hover { background: rgba(33, 38, 45, 0.85); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+    /* Wider, more flexible columns for the news feed so articles aren't squeezed into 2 columns */
+    .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .rss-item:hover { background: rgba(33, 38, 45, 0.95); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
     .rss-image { width: 100%; height: 150px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
     .rss-meta-block { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; justify-content: space-between; }
-    .rss-title { font-size: 0.92rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .rss-title { font-size: 0.92rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .rss-source-date { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
     .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 8px; border-radius: 6px; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .rss-date { font-family: monospace; font-size: 11px; }
 
-    /* --- Drawers & Modals (Omitted from CSS block edits to save space, unchanged) --- */
+    /* --- Settings & Drawers --- */
     .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
     .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
     .rss-manager-item:hover { transform: scale(1.05); }
@@ -296,9 +326,10 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: center; flex-wrap: wrap; padding: 12px; }
-      .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; margin-bottom: 6px; }
-      .top-nav-bar > div:last-child { width: 100%; justify-content: center; }
+      /* Mobile top bar layout */
+      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: space-between; padding: 12px; }
+      .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; justify-content: center; }
+      .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
       .top-nav-bar > div:last-child > div { display: none; } /* hide clock on tiny screens */
       
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
@@ -451,7 +482,7 @@
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Appearance & Layout Control</label>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
-          <span style="font-size: 12px;">Layout Edit Mode (Sections)</span>
+          <span style="font-size: 12px;">Layout Edit Mode (Move Sections)</span>
           <button class="badge-btn" id="editModeBtn" onclick="toggleEditMode()" style="background: #333;">✏ Unlock Layout</button>
         </div>
 
@@ -459,22 +490,24 @@
           <div>
             <label style="font-size: 11px;">Tile Shape Preset</label>
             <select id="settings-shape" style="width:100%; margin-top:4px;">
-              <option value="4px">Sharp Square (4px)</option>
-              <option value="12px">Rounded Rectangle (12px)</option>
-              <option value="20px" selected>Smooth Squircle (20px)</option>
-              <option value="30% 70% 70% 30% / 30% 30% 70% 70%">Organic Blob</option>
-              <option value="15px 40px 15px 40px">Asymmetric Leaf</option>
-              <option value="50px">Opera Style Pill (50px)</option>
-              <option value="50%">Full Circle / Capsule (50%)</option>
+              <option value="4px|none">Sharp Square</option>
+              <option value="12px|none">Rounded Rectangle</option>
+              <option value="20px|none" selected>Smooth Squircle</option>
+              <option value="50%|none">Circle / Capsule</option>
+              <option value="50% 50% 0 50%|none">Teardrop / Leaf</option>
+              <option value="0px|polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">Hexagon</option>
+              <option value="0px|polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)">Diamond / Rhombus</option>
+              <option value="0px|polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)">Cross / Puzzle</option>
             </select>
           </div>
           <div>
             <label style="font-size: 11px;">Tile Size Scale</label>
             <select id="settings-size" style="width:100%; margin-top:4px;">
+              <option value="80px">Micro (80px)</option>
               <option value="100px">Compact (100px)</option>
               <option value="130px" selected>Standard (130px)</option>
               <option value="160px">Large (160px)</option>
-              <option value="190px">Extra Large (190px)</option>
+              <option value="200px">Huge (200px)</option>
             </select>
           </div>
         </div>
@@ -488,6 +521,7 @@
             <option value="repeat(4, 1fr)">4 Columns Fixed</option>
             <option value="repeat(5, 1fr)">5 Columns Fixed</option>
             <option value="repeat(6, 1fr)">6 Columns Fixed</option>
+            <option value="repeat(8, 1fr)">8 Columns Fixed</option>
           </select>
         </div>
 
@@ -636,9 +670,10 @@
 
     // ===== APPLY USER FROSTED GLASS & SHAPE SETTINGS =====
     function applyGlassPreferences() {
+      const shapeStr = localStorage.getItem('dash_shape') || '20px|none';
+      const [radius, clip] = shapeStr.split('|');
       const blur = (localStorage.getItem('dash_blur') || '16') + 'px';
       const opacity = localStorage.getItem('dash_opacity') || '55';
-      const radius = localStorage.getItem('dash_radius') || '20px';
       const minWidth = localStorage.getItem('dash_min_width') || '130px';
       const gridCols = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
 
@@ -648,6 +683,7 @@
       document.documentElement.style.setProperty('--card-bg', cardBg);
       document.documentElement.style.setProperty('--card-blur', blur);
       document.documentElement.style.setProperty('--card-radius', radius);
+      document.documentElement.style.setProperty('--card-clip', clip);
       document.documentElement.style.setProperty('--card-min-width', minWidth);
       document.documentElement.style.setProperty('--dial-grid-cols', gridCols);
     }
@@ -697,7 +733,7 @@
       const dialsSection = document.getElementById('section-dials');
       const servicesSection = document.getElementById('section-services');
       const newsSection = document.getElementById('section-news');
-
+      
       if (isEditMode) {
         if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Layout'; }
         if (floatBtn) floatBtn.classList.add('show');
@@ -808,11 +844,10 @@
     let mergeTarget = null;
 
     function handleTileDragStart(e) { 
-      if (isEditMode) return;
+      if (isEditMode) return; // Prevent tile drag if moving whole section
       draggedNode = e.currentTarget; 
       e.dataTransfer.effectAllowed = 'move'; 
-      e.dataTransfer.setData('text/plain', ''); // Firefox fix
-      setTimeout(() => draggedNode.classList.add('is-dragging'), 0);
+      setTimeout(() => draggedNode.classList.add('is-dragging'), 10);
     }
 
     function handleTileDragOver(e) {
@@ -826,7 +861,7 @@
       const relX = e.clientX - rect.left;
       const relY = e.clientY - rect.top;
 
-      // 30% center bounding box for merge folder hover
+      // 30% center bounding box for merge folder hover trigger
       const marginX = rect.width * 0.3;
       const marginY = rect.height * 0.3;
       const isMergeZone = (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY);
@@ -860,7 +895,7 @@
       if (!draggedNode) return;
 
       if (mergeTarget) {
-        // Handle Merge
+        // Handle Merge into Folder
         mergeTarget.classList.remove('drag-folder-hover');
         const draggedDataStr = draggedNode.dataset.dialData;
         const targetDataStr = mergeTarget.dataset.dialData;
@@ -871,10 +906,8 @@
             const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
 
             if (targetFolderStr) {
-               // Dropped onto an existing folder
                activeDial.folder = targetFolderStr;
             } else if (targetDataStr) {
-               // Dropped onto a normal tile
                const targetData = JSON.parse(decodeURIComponent(targetDataStr));
                const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
                const newFolder = prompt("Name your new folder:", "New Folder");
@@ -887,6 +920,7 @@
             renderDials();
         }
       } else {
+        // Just reordered
         syncDialStateFromDOM();
       }
     }
@@ -926,6 +960,14 @@
       state.dials = newDials; localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); 
     }
 
+    function syncServiceStateFromDOM() {
+      const newServices = [];
+      document.querySelectorAll('#services-container > .draggable-wrapper').forEach(node => {
+         newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
+      });
+      state.services = newServices; localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices();
+    }
+
     // ===== RENDER DIALS WITH IN-GRID ACCORDION FOLDERS =====
     let openAccordionFolder = null;
 
@@ -952,7 +994,6 @@
         
         const folderTile = document.createElement('div');
         folderTile.className = 'dial-folder-tile draggable-wrapper';
-        folderTile.draggable = !isEditMode;
         folderTile.dataset.folderName = folderName;
         folderTile.addEventListener('dragstart', handleTileDragStart);
         folderTile.addEventListener('dragover', handleTileDragOver);
@@ -967,6 +1008,7 @@
         }
 
         folderTile.innerHTML = `
+          <div class="folder-merge-overlay"></div>
           <div class="folder-preview-grid">${previewImgs}</div>
           <span>${folderName}</span>
         `;
@@ -1043,7 +1085,7 @@
       innerHtml += `</div>`;
       box.innerHTML = innerHtml;
 
-      // Attach event listeners to inner injected HTML via container delegation
+      // Attach drag events to injected HTML
       box.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
         wrapper.addEventListener('dragstart', handleTileDragStart);
         wrapper.addEventListener('dragover', handleTileDragOver);
@@ -1062,7 +1104,8 @@
       let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeDial(${dial._origIdx})">&times;</button>` : '';
 
       return `
-        <div class="draggable-wrapper" draggable="${!isEditMode}" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
+        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
+          <div class="dial-merge-overlay"></div>
           <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener" draggable="false"><img src="${imgSrc}" alt="${dial.name}" draggable="false" /><span>${dial.name}</span></a>
           ${editBtnHtml}${deleteBtnHtml}
         </div>
@@ -1128,7 +1171,8 @@
       
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = !isEditMode; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
+        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
+        wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'service')); wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'service')); wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'service')); wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'service'));
         
         let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>` : '';
         wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center; width:100%;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a>${deleteBtnHtml}`;
@@ -1162,7 +1206,7 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== BULLETPROOF ALLORIGINS RSS MAPPER =====
+    // ===== ALL-ORIGINS RAW BULLETPROOF RSS ENGINE =====
     const rssDirectFeeds = {
       'theverge.com': 'https://www.theverge.com/rss/index.xml',
       '9to5google.com': 'https://9to5google.com/feed/',
@@ -1239,7 +1283,7 @@
              });
           }
           return [];
-        } catch (err) { return []; }
+        } catch (err) { console.error(err); return []; }
       });
 
       const sourceDecks = await Promise.all(feedPromises);
@@ -1261,7 +1305,8 @@
         return;
       }
 
-      const maxDisplayCount = Math.min(masterArticleDeck.length, 12);
+      // Ensure we display plenty of articles without an arbitrary hard cut off
+      const maxDisplayCount = Math.min(masterArticleDeck.length, 24);
       for (let i = 0; i < maxDisplayCount; i++) {
         const art = masterArticleDeck[i];
         let formattedDate = art.timestamp ? new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : "Recent";
@@ -1410,7 +1455,9 @@
     }
     function openSettingsModal() {
       document.getElementById('settings-wallpaper').value = state.wallpaper; document.getElementById('settings-client-id').value = state.googleClientId;
-      document.getElementById('settings-shape').value = localStorage.getItem('dash_radius') || '20px';
+      
+      const savedShape = localStorage.getItem('dash_shape') || '20px|none';
+      document.getElementById('settings-shape').value = savedShape;
       document.getElementById('settings-size').value = localStorage.getItem('dash_min_width') || '130px';
       document.getElementById('settings-grid-cols').value = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
       document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
@@ -1463,7 +1510,7 @@
     function saveSettings() {
       const wp = document.getElementById('settings-wallpaper').value.trim();
       const cid = document.getElementById('settings-client-id').value.trim();
-      const radiusVal = document.getElementById('settings-shape').value;
+      const shapeVal = document.getElementById('settings-shape').value;
       const sizeVal = document.getElementById('settings-size').value;
       const gridColsVal = document.getElementById('settings-grid-cols').value;
       const blurVal = document.getElementById('settings-blur-num').value;
@@ -1472,7 +1519,7 @@
       if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
       state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
       
-      localStorage.setItem('dash_radius', radiusVal);
+      localStorage.setItem('dash_shape', shapeVal);
       localStorage.setItem('dash_min_width', sizeVal);
       localStorage.setItem('dash_grid_cols', gridColsVal);
       localStorage.setItem('dash_blur', blurVal);
