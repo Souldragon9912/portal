@@ -6,7 +6,10 @@
   <title>Speed Dial</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Google Auth & Solid SortableJS Engine -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   
   <!-- ========================================== -->
   <!--                 CSS STYLES                 -->
@@ -97,12 +100,31 @@
     .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
     .floating-lock-btn.show { display: flex; }
 
-    /* --- Inline Calendar --- */
-    .inline-calendar-wrapper { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease; background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; width: 100%; max-width: 1100px; margin-bottom: 0; border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; }
-    .inline-calendar-wrapper.open { max-height: 500px; opacity: 1; padding: 24px; margin-bottom: 28px; border-color: var(--border-glass); }
-    .generic-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; width: 100%; max-width: 400px; }
-    .cal-day-header { font-size: 12px; color: var(--text-muted); font-weight: 600; padding-bottom: 8px; }
-    .cal-day { padding: 10px; font-size: 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
+    /* --- Floating & Resizable Built-in Calendar --- */
+    .inline-calendar-wrapper { 
+      position: absolute; 
+      top: 80px; left: 20px; /* Default placement */
+      background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
+      border-radius: 16px; border: 1px solid var(--border-glass); 
+      padding: 20px; 
+      display: flex; flex-direction: column; align-items: center; 
+      opacity: 0; pointer-events: none; transform: scale(0.95);
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 60; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      resize: both; overflow: hidden; /* Enables native dragging to resize */
+      min-width: 280px; min-height: 280px; 
+    }
+    .inline-calendar-wrapper.open, body.edit-mode .inline-calendar-wrapper { 
+      opacity: 1; pointer-events: auto; transform: scale(1); 
+    }
+    body.edit-mode .inline-calendar-wrapper { 
+      border: 2px dashed var(--accent) !important; background: rgba(0,0,0,0.6); cursor: grab; z-index: 999;
+    }
+    body.edit-mode .inline-calendar-wrapper:active { cursor: grabbing; }
+
+    .generic-calendar { flex-grow: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(6, 1fr); gap: 6px; text-align: center; width: 100%; height: 100%; }
+    .cal-day-header { font-size: 12px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; }
+    .cal-day { display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
     .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
     .cal-day.empty { background: transparent; }
     .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
@@ -127,8 +149,6 @@
     .main-panel.edit-mode-container:active { cursor: grabbing; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
-    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
-    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; justify-content: center; position: relative; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); justify-content: center; gap: 14px; width: 100%; }
@@ -136,13 +156,9 @@
     /* --- Global Draggable Tile Physics & FLIP Animations --- */
     .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
     .draggable-wrapper:active { cursor: grabbing; }
-    
-    /* When dragged, card stays completely invisible so only the crisp ghost image follows your mouse */
     .draggable-wrapper.is-dragging { opacity: 0.01 !important; pointer-events: none; }
     
-    /* This class triggers the flashy blue pulsing folder-merge effect */
-    .draggable-wrapper.drag-folder-hover .dial-card, 
-    .draggable-wrapper.drag-folder-hover .dial-folder-tile { 
+    .draggable-wrapper.drag-folder-hover .dial-card, .draggable-wrapper.drag-folder-hover .dial-folder-tile { 
       transform: scale(0.9) !important; 
       border-color: var(--accent) !important;
       animation: folderMergePulse 1s infinite !important;
@@ -174,8 +190,8 @@
 
     /* --- Opera/Brave Micro Folders --- */
     .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
-    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; }
-    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2); pointer-events: none; }
+    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none; }
+    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
 
     /* In-Grid Row Breakdown Accordion (Headerless) */
@@ -187,7 +203,7 @@
     }
     .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); justify-content: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
     
-    /* Strict Edit Mode Controls - Hidden universally unless body.edit-mode is active */
+    /* Edit Controls */
     .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
     .card-edit-btn { position: absolute; top: 6px; left: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: all 0.2s; z-index: 10; }
     body.edit-mode .draggable-wrapper:hover .card-delete-btn, body.edit-mode .draggable-wrapper:hover .card-edit-btn { display: flex; }
@@ -208,32 +224,28 @@
     .rss-date { font-family: monospace; font-size: 11px; }
 
     /* --- Modals & Drawers --- */
-    .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
-    .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-    .rss-manager-item:hover { transform: scale(1.05); }
-    .rss-manager-item img { width: 26px; height: 26px; border-radius: 6px; }
-    .rss-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; border: none; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: background 0.2s; }
-    .rss-delete-btn:hover { background: #dc2626; }
     .drawer { position: fixed; top: 0; bottom: 0; width: 440px; max-width: 90vw; background: rgba(13, 17, 23, 0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border-glass); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     .drawer-right { right: 0; transform: translateX(100%); }
     .drawer-right.open { transform: translateX(0); }
     .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .drawer-close { background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
     .drawer-close:hover { color: var(--text-main); }
-    .cal-auth-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 16px; background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; }
-    .events-container { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-right: 4px; }
-    .cal-event-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s; }
-    .cal-event-card:hover { border-color: var(--accent); }
-    .cal-event-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
-    .cal-event-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--accent); }
-    .bookmark-input-group { display: flex; flex-direction: column; gap: 8px; }
+    
+    /* NEW: Bookmarks Design Overhaul */
+    .bookmark-input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
     .bookmark-input-group input { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
-    .bookmarks-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; padding-right: 4px; }
-    .bookmark-folder-header { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 14px; margin-bottom: 2px; border-bottom: 1px solid var(--border-glass); padding-bottom: 4px; font-weight: 600; }
-    .bookmark-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-glass-card); border: 1px solid var(--border-glass); padding: 12px 14px; border-radius: 10px; }
-    .bookmark-item a { color: var(--text-main); text-decoration: none; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
-    .bookmark-item a:hover { color: var(--accent); }
-    .bookmark-item button { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 16px; }
+    .bookmarks-list { list-style: none; display: flex; flex-direction: column; gap: 0; flex: 1; overflow-y: auto; padding-right: 4px; margin-top: 4px; }
+    .bookmark-folder-header { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; margin-bottom: 6px; border-bottom: 1px solid rgba(88,166,255,0.2); padding-bottom: 4px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    
+    .bookmark-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; transition: all 0.2s; }
+    .bookmark-item:hover { background: rgba(88,166,255,0.08); border-color: rgba(88,166,255,0.3); transform: translateX(4px); }
+    .bookmark-item img { width: 18px; height: 18px; border-radius: 4px; margin-right: 12px; }
+    .bookmark-item a { color: var(--text-main); text-decoration: none; font-size: 13.5px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bookmark-item button { opacity: 0; background: rgba(248,81,73,0.1); border: none; color: var(--danger); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; }
+    .bookmark-item:hover button { opacity: 1; }
+    .bookmark-item button:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+
+    /* Modals & Menus */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 200; opacity: 0; transition: opacity 0.3s; }
     .modal.show { opacity: 1; }
     .modal-content { background: #161b22; border: 1px solid var(--border-glass); border-radius: 16px; width: 90%; max-width: 540px; padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -242,9 +254,21 @@
     .form-group label { font-size: 12px; color: var(--text-muted); }
     .form-group input, .form-group select { background: #0d1117; border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
     .form-group input:focus, .form-group select:focus { border-color: var(--accent); outline: none; }
-    .se-settings-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-    .se-settings-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass); font-size: 12px; }
-    .se-settings-item .se-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+
+    .btn-secondary { background: transparent; border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 500; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.05); }
+    .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 500; }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    /* RSS Grid Config */
+    .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
+    .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .rss-manager-item:hover { transform: scale(1.05); }
+    .rss-manager-item img { width: 26px; height: 26px; border-radius: 6px; }
+    .rss-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; border: none; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: background 0.2s; }
+    .rss-delete-btn:hover { background: #dc2626; }
+
+    /* Modules Toggles */
     .modules-toggle-list { display: flex; flex-direction: column; gap: 12px; background: #0d1117; border: 1px solid var(--border-glass); padding: 14px; border-radius: 10px; }
     .toggle-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
     .toggle-switch { position: relative; display: inline-block; width: 38px; height: 20px; }
@@ -253,28 +277,18 @@
     .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
     input:checked + .slider { background-color: var(--accent); }
     input:checked + .slider:before { transform: translateX(18px); }
-    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
-    .modal-footer button { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
-    .btn-secondary { background: transparent; border: 1px solid var(--border-glass); color: var(--text-main); }
-    .btn-secondary:hover { background: rgba(255,255,255,0.05); }
-    .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-hover); }
 
-    /* --- Mobile Minimalist Optimizations --- */
+    /* Mobile Minimalist Optimizations */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: space-between; padding: 10px; flex-wrap: wrap; }
       .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
       .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
       .top-nav-bar > div:last-child { width: 100%; justify-content: center; margin-top: 4px; margin-left: 0 !important; }
-      .top-nav-bar > div:last-child > div { display: none; }
-      
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
       #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
-
       .inline-calendar-wrapper { display: none !important; }
-      
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
       .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
       .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
@@ -282,25 +296,25 @@
       .service-card .desc { display: none; }
       .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
       .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 10px; }
-
       #section-news { margin-top: 20px; }
       .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
     }
   </style>
 </head>
-<body class="">
+<body>
 
   <!-- ========================================== -->
   <!--           MOVABLE TOP NAVIGATION           -->
   <!-- ========================================== -->
   <div class="top-nav-bar" id="topNavWidget" draggable="false">
     <div class="widget-toggles">
-      <button class="nav-btn" id="nav-btn-builtin-cal" onclick="toggleInlineCalendar()">📅 Calendar</button>
+      <!-- Old Calendar button removed, action bound to clock -->
       <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal</button>
       <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
     </div>
     <div style="display: flex; align-items: center; margin-left: 10px;">
-      <div id="live-clock" style="font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);"></div>
+      <!-- Clock toggles the built-in calendar -->
+      <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Mini Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
       <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
     </div>
   </div>
@@ -311,7 +325,7 @@
   <!-- ========================================== -->
   <!--           INLINE BUILT-IN CALENDAR         -->
   <!-- ========================================== -->
-  <div class="inline-calendar-wrapper" id="inline-calendar-wrapper">
+  <div class="inline-calendar-wrapper" id="inline-calendar-wrapper" draggable="false">
     <h3 id="cal-month-title" style="margin-bottom: 12px; font-size: 18px;"></h3>
     <div class="generic-calendar" id="generic-calendar-grid"></div>
   </div>
@@ -564,18 +578,20 @@
       <div class="form-group"><label>Folder (Optional)</label><input type="text" id="dial-folder" placeholder="e.g. Social, Work..." list="dial-folder-list" /></div>
       <datalist id="dial-folder-list"></datalist>
       
-      <!-- Icon Search -->
+      <!-- Icon Setup Form -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
-        <label style="color: var(--text-main); font-weight: 500;">Search Official Icons (Powered by Iconify)</label>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Search for an app name (e.g. ubuntu, plex) to select an icon, or paste a URL below.</p>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="add-icon-search-input" placeholder="e.g. portainer" style="flex: 1;" onkeyup="if(event.key==='Enter') searchIcons('add')" />
-          <button class="badge-btn" type="button" onclick="searchIcons('add')">Search</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label style="color: var(--text-main); font-weight: 500;">Custom Icon / Image</label>
+          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons8</button>
         </div>
-        <div id="add-icon-results" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-top: 8px; display: none;"></div>
-        
-        <label style="margin-top: 10px;">Or Custom Image URL</label>
-        <input type="text" id="dial-img" placeholder="https://..." />
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from Icons8.</p>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="text" id="dial-img" placeholder="App name or https://...png" style="flex: 1;" oninput="previewIcon('add')" />
+        </div>
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+          <img id="add-icon-img" src="" style="width: 32px; height: 32px; border-radius: 6px; display: none; object-fit: cover;" />
+          <span id="add-icon-status" style="font-size: 12px; color: var(--text-muted);"></span>
+        </div>
       </div>
 
       <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('dial-modal')">Cancel</button><button class="btn-primary" onclick="saveNewDial()">Add Link</button></div>
@@ -593,18 +609,20 @@
       <div class="form-group"><label>URL</label><input type="url" id="edit-dial-url" /></div>
       <div class="form-group"><label>Folder (Optional)</label><input type="text" id="edit-dial-folder" list="dial-folder-list" /></div>
       
-      <!-- Icon Search -->
+      <!-- Icon Setup Form -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
-        <label style="color: var(--text-main); font-weight: 500;">Search Official Icons (Powered by Iconify)</label>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Search for an app name (e.g. ubuntu, plex) to select an icon, or paste a URL below.</p>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="edit-icon-search-input" placeholder="e.g. netflix" style="flex: 1;" onkeyup="if(event.key==='Enter') searchIcons('edit')" />
-          <button class="badge-btn" type="button" onclick="searchIcons('edit')">Search</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label style="color: var(--text-main); font-weight: 500;">Custom Icon / Image</label>
+          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons8</button>
         </div>
-        <div id="edit-icon-results" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-top: 8px; display: none;"></div>
-        
-        <label style="margin-top: 10px;">Or Custom Image URL</label>
-        <input type="text" id="edit-dial-img" placeholder="https://..." />
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from Icons8.</p>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="text" id="edit-dial-img" placeholder="App name or https://...png" style="flex: 1;" oninput="previewIcon('edit')" />
+        </div>
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+          <img id="edit-icon-img" src="" style="width: 32px; height: 32px; border-radius: 6px; display: none; object-fit: cover;" />
+          <span id="edit-icon-status" style="font-size: 12px; color: var(--text-muted);"></span>
+        </div>
       </div>
 
       <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('edit-dial-modal')">Cancel</button><button class="btn-primary" onclick="saveEditedDial()">Save Changes</button></div>
@@ -628,6 +646,8 @@
   <!--             JAVASCRIPT ENGINE              -->
   <!-- ========================================== -->
   <script>
+    // ===== CONFIGURATION =====
+    const ICON_SEARCH_SITE = "https://icons8.com/icons/all"; 
 
     // ===== LIVE CLOCK =====
     function updateClock() {
@@ -666,6 +686,7 @@
       if (savedPos) {
         widget.style.left = savedPos.x + 'px';
         widget.style.top = savedPos.y + 'px';
+        widget.style.right = 'auto'; // Prevent conflicts with default CSS placements
         widget.style.transform = 'none';
       }
 
@@ -686,6 +707,7 @@
         const y = e.clientY - offsetY;
         widget.style.left = x + 'px';
         widget.style.top = y + 'px';
+        widget.style.right = 'auto';
         widget.style.transform = 'none';
         localStorage.setItem(storageKey, JSON.stringify({ x, y }));
       });
@@ -701,27 +723,51 @@
       const dialsSection = document.getElementById('section-dials');
       const servicesSection = document.getElementById('section-services');
       const newsSection = document.getElementById('section-news');
+      const calWidget = document.getElementById('inline-calendar-wrapper');
       
       if (isEditMode) {
         if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Sections'; }
         if (floatBtn) floatBtn.classList.add('show');
+        
         topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
         searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
         dialsSection.setAttribute('draggable', 'true'); dialsSection.classList.add('edit-mode-container');
         servicesSection.setAttribute('draggable', 'true'); servicesSection.classList.add('edit-mode-container');
         newsSection.setAttribute('draggable', 'true'); newsSection.classList.add('edit-mode-container');
+        calWidget.setAttribute('draggable', 'true'); calWidget.classList.add('edit-mode-container');
+        
         closeModal('settings-modal');
         document.body.classList.add('edit-mode');
+        
+        if(rootSortable) rootSortable.option("disabled", true);
+        if(accordionSortable) accordionSortable.option("disabled", true);
+        if(servicesSortable) servicesSortable.option("disabled", true);
+
       } else {
         if (btn) { btn.classList.remove('active-edit'); btn.style.background = '#333'; btn.innerText = '✏ Unlock Layout'; }
         if (floatBtn) floatBtn.classList.remove('show');
+        
         topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
         searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
         dialsSection.setAttribute('draggable', 'false'); dialsSection.classList.remove('edit-mode-container');
         servicesSection.setAttribute('draggable', 'false'); servicesSection.classList.remove('edit-mode-container');
         newsSection.setAttribute('draggable', 'false'); newsSection.classList.remove('edit-mode-container');
+        calWidget.setAttribute('draggable', 'false'); calWidget.classList.remove('edit-mode-container');
+        
         document.body.classList.remove('edit-mode');
+
+        if(rootSortable) rootSortable.option("disabled", false);
+        if(accordionSortable) accordionSortable.option("disabled", false);
+        if(servicesSortable) servicesSortable.option("disabled", false);
       }
+    }
+
+    // Fix corrupted unencoded SVG image data upon load
+    function sanitizeDials(dials) {
+        return dials.map(d => {
+            if (d.img && d.img.includes('<svg')) { d.img = ''; }
+            return d;
+        });
     }
 
     window.addEventListener('load', () => {
@@ -730,47 +776,67 @@
       initDraggableWidget('section-dials', 'pos_dialsSection');
       initDraggableWidget('section-services', 'pos_servicesSection');
       initDraggableWidget('section-news', 'pos_newsSection');
+      initDraggableWidget('inline-calendar-wrapper', 'pos_calendarWidget');
+      
+      // Auto-save calendar manual resizes
+      const calWrapper = document.getElementById('inline-calendar-wrapper');
+      const savedSize = JSON.parse(localStorage.getItem('size_calendarWidget'));
+      if (savedSize) {
+         calWrapper.style.width = savedSize.w + 'px';
+         calWrapper.style.height = savedSize.h + 'px';
+      }
+      const ro = new ResizeObserver(() => {
+         localStorage.setItem('size_calendarWidget', JSON.stringify({
+             w: calWrapper.offsetWidth,
+             h: calWrapper.offsetHeight
+         }));
+      });
+      ro.observe(calWrapper);
+      
+      state.dials = sanitizeDials(state.dials);
+      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
     });
 
-    // ===== ICON SEARCH ENGINE (ICONIFY API) =====
-    async function searchIcons(mode) {
-       const prefix = mode === 'add' ? 'add' : 'edit';
-       const query = document.getElementById(`${prefix}-icon-search-input`).value.trim();
-       const resultsContainer = document.getElementById(`${prefix}-icon-results`);
-       if (!query) return;
-       
-       resultsContainer.style.display = 'grid';
-       resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">Searching...</span>';
-       
-       try {
-           const res = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=30`);
-           const data = await res.json();
-           if (data.icons && data.icons.length > 0) {
-               resultsContainer.innerHTML = '';
-               data.icons.forEach(iconName => {
-                   const iconUrl = `https://api.iconify.design/${iconName}.svg`;
-                   const img = document.createElement('img');
-                   img.src = iconUrl;
-                   img.style.width = '100%';
-                   img.style.height = 'auto';
-                   img.style.cursor = 'pointer';
-                   img.style.background = 'rgba(255,255,255,0.1)';
-                   img.style.padding = '4px';
-                   img.style.borderRadius = '6px';
-                   img.title = iconName;
-                   img.onclick = () => {
-                       document.getElementById(mode === 'add' ? 'dial-img' : 'edit-dial-img').value = iconUrl;
-                       resultsContainer.querySelectorAll('img').forEach(i => i.style.border = 'none');
-                       img.style.border = '2px solid var(--accent)';
-                   };
-                   resultsContainer.appendChild(img);
-               });
-           } else {
-               resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">No icons found. Try another term.</span>';
-           }
-       } catch (e) {
-           resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--danger); grid-column:1/-1;">Search failed.</span>';
-       }
+    // ===== OFFICIAL BRAND ICON FETCH ENGINE =====
+    const GLOBE_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/%3E%3C/svg%3E";
+
+    function getBrandIconUrl(inputStr) {
+        inputStr = inputStr.trim();
+        if (!inputStr) return '';
+        if (inputStr.startsWith('http://') || inputStr.startsWith('https://') || inputStr.startsWith('data:image')) {
+            return inputStr;
+        }
+        const brand = inputStr.toLowerCase().replace(/\s+/g, '-');
+        return `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/${brand}.png`;
+    }
+
+    function previewIcon(mode) {
+        const prefix = mode === 'add' ? 'dial' : 'edit-dial';
+        const inputVal = document.getElementById(`${prefix}-img`).value;
+        const imgEl = document.getElementById(`${mode}-icon-img`);
+        const statusEl = document.getElementById(`${mode}-icon-status`);
+        
+        if (!inputVal) {
+            imgEl.style.display = 'none';
+            statusEl.innerText = '';
+            return;
+        }
+
+        const targetUrl = getBrandIconUrl(inputVal);
+        const img = new Image();
+        img.onload = () => {
+            imgEl.src = targetUrl;
+            imgEl.style.display = 'block';
+            statusEl.innerText = '✅ Valid Icon Format Detected';
+            statusEl.style.color = '#34A853';
+        };
+        img.onerror = () => {
+            imgEl.src = GLOBE_SVG;
+            imgEl.style.display = 'block';
+            statusEl.innerText = '🌐 Defaulting to Globe fallback';
+            statusEl.style.color = 'var(--text-muted)';
+        };
+        img.src = targetUrl;
     }
 
     function generateSmartLabel(urlStr) {
@@ -808,6 +874,10 @@
     };
     let tokenClient = null;
 
+    let rootSortable = null;
+    let accordionSortable = null;
+    let servicesSortable = null;
+
     // ===== SEARCH ENGINE LOGIC =====
     function renderEngineDropdown() {
       const select = document.getElementById('engine-select');
@@ -828,138 +898,29 @@
       searchInput.value = '';
     });
 
-    // ===== FLAWLESS NATIVE FLIP & MERGE PHYSICS (ALWAYS ACTIVE) =====
-    let draggedNode = null;
-    let mergeTarget = null;
-    let dragType = null;
-    let lastSwapTime = 0; // Anti-Bounce Debounce Timer
+    // ===== SORTABLE.JS FOLDER MERGING LOGIC =====
+    function handleSortableMerge(draggedEl, targetEl) {
+        if (draggedEl.dataset.folderName) { renderDials(); return; } // Prevent folder-into-folder nesting
 
-    function handleTileDragStart(e, type) { 
-      e.stopPropagation(); // prevent section dragging
-      draggedNode = e.currentTarget; 
-      dragType = type;
-      e.dataTransfer.effectAllowed = 'move'; 
-      e.dataTransfer.setData('text/plain', draggedNode.dataset.dialData || draggedNode.dataset.folderName || ''); 
-      
-      // Makes original tile completely invisible so only the crisp ghost image follows cursor
-      setTimeout(() => draggedNode.classList.add('is-dragging'), 0);
-    }
-
-    function handleTileDragOver(e, type) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (!draggedNode || dragType !== type) return;
-      
-      const targetNode = e.currentTarget.closest('.draggable-wrapper');
-      if (!targetNode || draggedNode === targetNode) return;
-
-      const rect = targetNode.getBoundingClientRect();
-      const relX = e.clientX - rect.left;
-      const relY = e.clientY - rect.top;
-
-      // Clean 70% inner bounding box for Merge Zone (Hover to Merge)
-      const marginX = rect.width * 0.15;
-      const marginY = rect.height * 0.15;
-      const isMergeZone = (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY);
-
-      if (isMergeZone && type === 'dial' && !draggedNode.classList.contains('dial-folder-tile') && targetNode !== document.querySelector('.add-wrapper')) {
-          if (mergeTarget !== targetNode) {
-              if(mergeTarget) mergeTarget.classList.remove('drag-folder-hover');
-              targetNode.classList.add('drag-folder-hover');
-              mergeTarget = targetNode;
-          }
-          return;
-      } else {
-          if (mergeTarget) {
-              mergeTarget.classList.remove('drag-folder-hover');
-              mergeTarget = null;
-          }
-
-          // Anti-bounce debounce: prevent rapid vibrating if hovering on edge
-          if (Date.now() - lastSwapTime < 150) return;
-
-          const parent = targetNode.parentNode;
-          const children = Array.from(parent.children);
-          const targetIdx = children.indexOf(targetNode);
-
-          // Allow cross-container dragging (e.g. out of a folder into root)
-          const isSameContainer = (draggedNode.parentNode === parent);
-          
-          const rects = new Map();
-          children.forEach(el => rects.set(el, el.getBoundingClientRect()));
-
-          if (isSameContainer) {
-              const draggedIdx = children.indexOf(draggedNode);
-              if (draggedIdx === targetIdx) return;
-              if (draggedIdx < targetIdx) { parent.insertBefore(draggedNode, targetNode.nextSibling); } 
-              else { parent.insertBefore(draggedNode, targetNode); }
-          } else {
-              parent.insertBefore(draggedNode, targetNode);
-          }
-
-          lastSwapTime = Date.now();
-
-          // FLIP Animation Execution
-          Array.from(parent.children).forEach(el => {
-            const oldRect = rects.get(el);
-            const newRect = el.getBoundingClientRect();
-            if (oldRect && (oldRect.left !== newRect.left || oldRect.top !== newRect.top)) {
-              const dx = oldRect.left - newRect.left;
-              const dy = oldRect.top - newRect.top;
-              el.style.transform = `translate(${dx}px, ${dy}px)`;
-              el.style.transition = 'none';
-              requestAnimationFrame(() => {
-                el.style.transform = '';
-                el.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-              });
+        const draggedData = JSON.parse(decodeURIComponent(draggedEl.dataset.dialData));
+        const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
+        
+        const targetFolderStr = targetEl.dataset.folderName;
+        if (targetFolderStr) {
+            activeDial.folder = targetFolderStr;
+        } else {
+            const targetData = JSON.parse(decodeURIComponent(targetEl.dataset.dialData));
+            const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
+            const newFolder = prompt("Name your new folder:", "New Folder");
+            if (newFolder && newFolder.trim()) {
+                activeDial.folder = newFolder.trim();
+                tDial.folder = newFolder.trim();
+            } else {
+                return renderDials(); // canceled
             }
-          });
-      }
-    }
-
-    function handleTileDrop(e, type) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (!draggedNode) return;
-
-      if (mergeTarget && type === 'dial') {
-        mergeTarget.classList.remove('drag-folder-hover');
-        const targetFolderStr = mergeTarget.dataset.folderName;
-        const targetDataStr = mergeTarget.dataset.dialData;
-        const draggedDataStr = draggedNode.dataset.dialData;
-
-        if (draggedDataStr) {
-            const draggedData = JSON.parse(decodeURIComponent(draggedDataStr));
-            const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
-
-            if (targetFolderStr) {
-               activeDial.folder = targetFolderStr;
-            } else if (targetDataStr) {
-               const targetData = JSON.parse(decodeURIComponent(targetDataStr));
-               const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
-               const newFolder = prompt("Name your new folder:", "New Folder");
-               if (newFolder && newFolder.trim()) {
-                   activeDial.folder = newFolder.trim();
-                   tDial.folder = newFolder.trim();
-               }
-            }
-            localStorage.setItem('dash_dials', JSON.stringify(state.dials));
-            renderDials();
         }
-      } else {
-        if (type === 'dial') syncDialStateFromDOM(); else syncServiceStateFromDOM();
-      }
-      
-      draggedNode.classList.remove('is-dragging');
-      draggedNode = null;
-      mergeTarget = null;
-    }
-
-    function handleTileDragEnd(e, type) { 
-      if (draggedNode) draggedNode.classList.remove('is-dragging'); 
-      if (mergeTarget) mergeTarget.classList.remove('drag-folder-hover');
-      draggedNode = null; 
-      mergeTarget = null;
+        localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+        renderDials();
     }
 
     // Recursively build the state array exactly based on the sequential visual DOM order
@@ -1020,8 +981,7 @@
       document.getElementById('edit-dial-folder').value = dial.folder || '';
       document.getElementById('edit-dial-img').value = dial.img || '';
       
-      document.getElementById('edit-icon-search-input').value = '';
-      document.getElementById('edit-icon-results').style.display = 'none';
+      previewIcon('edit');
 
       document.getElementById('edit-dial-modal').style.display = 'flex';
       setTimeout(() => document.getElementById('edit-dial-modal').classList.add('show'), 10);
@@ -1041,29 +1001,22 @@
       closeModal('edit-dial-modal');
     }
 
-    function openAddDialModal() {
-      document.getElementById('dial-title').value = '';
-      document.getElementById('dial-url').value = '';
-      document.getElementById('dial-folder').value = '';
-      document.getElementById('dial-img').value = '';
-      document.getElementById('add-icon-search-input').value = '';
-      document.getElementById('add-icon-results').style.display = 'none';
-      
-      document.getElementById('dial-modal').style.display = 'flex';
-      setTimeout(() => document.getElementById('dial-modal').classList.add('show'), 10);
-    }
-
     function saveNewDial() {
-      let name = document.getElementById('dial-title').value.trim(); 
-      let url = document.getElementById('dial-url').value.trim();
-      let folder = document.getElementById('dial-folder').value.trim(); 
-      let img = document.getElementById('dial-img').value.trim();
-      
+      let name = document.getElementById('dial-title').value.trim(); let url = document.getElementById('dial-url').value.trim();
+      let folder = document.getElementById('dial-folder').value.trim(); let img = document.getElementById('dial-img').value.trim();
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
       if (openAccordionFolder && !folder) folder = openAccordionFolder;
       state.dials.push({ name, url, img, folder }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
+    }
+
+    function getFinalIconSrc(dial) {
+        if (dial.img && dial.img.trim()) {
+            return getBrandIconUrl(dial.img);
+        }
+        let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
+        return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
     }
 
     // ===== RENDER DIALS =====
@@ -1072,6 +1025,9 @@
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
       
+      if (rootSortable) rootSortable.destroy();
+      if (accordionSortable) accordionSortable.destroy();
+
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
 
@@ -1086,53 +1042,36 @@
       const renderedFolders = new Set();
       const allRenderNodes = [];
 
-      // Iterate sequential state array so folders don't jump positions
-      state.dials.forEach((dial, idx) => {
-        if (dial.folder) {
-           if (!renderedFolders.has(dial.folder)) {
-              renderedFolders.add(dial.folder);
-              const items = state.dials.filter(d => d.folder === dial.folder);
-              if (items.length === 0) return; // Clean up empty folders instantly
-              
-              const folderTile = document.createElement('div');
-              folderTile.className = 'dial-folder-tile draggable-wrapper';
-              folderTile.dataset.folderName = dial.folder;
-              folderTile.draggable = true;
-              folderTile.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-              folderTile.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-              folderTile.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-              folderTile.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
+      Object.keys(grouped).sort().forEach(folderName => {
+        if (folderName === '_root') return;
+        const items = grouped[folderName];
+        if (items.length === 0) return; // Clean up empty folders instantly
+        
+        const folderTile = document.createElement('div');
+        folderTile.className = 'dial-folder-tile draggable-wrapper';
+        folderTile.dataset.folderName = folderName;
 
-              let previewImgs = '';
-              for (let i = 0; i < Math.min(items.length, 4); i++) {
-                let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
-                let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
-                previewImgs += `<img src="${src}" alt="icon" draggable="false">`;
-              }
-
-              folderTile.innerHTML = `<div class="folder-merge-overlay"></div><div class="folder-preview-grid">${previewImgs}</div><span>${dial.folder}</span>`;
-              
-              folderTile.addEventListener('click', (e) => {
-                toggleAccordionFolder(dial.folder);
-              });
-
-              allRenderNodes.push({ type: 'folder', name: dial.folder, node: folderTile, items });
-           }
-        } else {
-           allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
+        let previewImgs = '';
+        for (let i = 0; i < Math.min(items.length, 4); i++) {
+          const src = getFinalIconSrc(items[i]);
+          previewImgs += `<img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="icon" draggable="false">`;
         }
+
+        folderTile.innerHTML = `<div class="folder-merge-overlay"></div><div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
+        folderTile.addEventListener('click', () => toggleAccordionFolder(folderName));
+        allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile });
       });
 
+      grouped._root.forEach(dial => { allRenderNodes.push({ type: 'dial', node: createDialElement(dial) }); });
+
       const addWrapper = document.createElement('div');
-      addWrapper.className = 'draggable-wrapper add-wrapper';
+      addWrapper.className = 'add-wrapper';
       addWrapper.innerHTML = `<div class="add-dial-tile" onclick="openAddDialModal()"><span>+</span><span>Add Tile</span></div>`;
-      addWrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-      addWrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
       allRenderNodes.push({ type: 'add', node: addWrapper });
 
       allRenderNodes.forEach(item => container.appendChild(item.node));
       
-      // Accurately calculate the end of the current row so the folder breaks below it
+      // Inject Accordion if open
       if (openAccordionFolder) {
         requestAnimationFrame(() => {
            const activeTile = document.querySelector(`.dial-folder-tile[data-folder-name="${openAccordionFolder}"]`);
@@ -1149,13 +1088,53 @@
                    if (gridChildren[i].offsetTop === folderTop) { insertAfterNode = gridChildren[i]; } else { break; }
                }
                insertAfterNode.insertAdjacentElement('afterend', accordion);
+
+               accordionSortable = new Sortable(accordion.querySelector('.expanded-folder-inner-grid'), {
+                   group: 'dials', // Allow dragging in and out of folder
+                   disabled: isEditMode, // Lock tile sorting if moving sections
+                   animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-dial-tile',
+                   ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+                   onEnd: syncDialStateFromDOM
+               });
            }
         });
       }
+
+      rootSortable = new Sortable(container, {
+          group: 'dials', // Shared group for cross-folder drag
+          disabled: isEditMode, // Lock tile sorting if moving sections
+          animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper, .expanded-folder-accordion',
+          ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+          onMove: function(evt, originalEvent) {
+              document.querySelectorAll('.drag-folder-hover').forEach(el => el.classList.remove('drag-folder-hover'));
+              if (evt.related.classList.contains('add-wrapper') || evt.related.classList.contains('expanded-folder-accordion')) return false;
+
+              const rect = evt.related.getBoundingClientRect();
+              const relX = originalEvent.clientX - rect.left;
+              const relY = originalEvent.clientY - rect.top;
+              
+              // Extended 70% Merge Zone (Only outer 15% edges trigger swap)
+              const marginX = rect.width * 0.15; 
+              const marginY = rect.height * 0.15;
+
+              if (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY) {
+                  evt.related.classList.add('drag-folder-hover');
+                  return false; // Prevent sorting, prep to merge
+              }
+          },
+          onEnd: function(evt) {
+              const target = document.querySelector('.drag-folder-hover');
+              if (target) {
+                  target.classList.remove('drag-folder-hover');
+                  handleSortableMerge(evt.item, target);
+              } else {
+                  syncDialStateFromDOM();
+              }
+          }
+      });
     }
 
     function toggleAccordionFolder(folderName) {
-      syncDialStateFromDOM(); // Sync layout strictly before toggling to stop it from jumping!
       if (openAccordionFolder === folderName) { openAccordionFolder = null; } 
       else { openAccordionFolder = folderName; }
       renderDials();
@@ -1170,27 +1149,19 @@
       items.forEach(dial => { innerHtml += createDialHTMLString(dial); });
       innerHtml += `</div>`;
       box.innerHTML = innerHtml;
-
-      box.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
-        wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-        wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-        wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-        wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
-      });
       return box;
     }
 
     function createDialHTMLString(dial) {
-      let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
-      let src = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+      const src = getFinalIconSrc(dial);
       let editBtnHtml = `<button class="card-edit-btn" title="Edit" onclick="event.stopPropagation(); event.preventDefault(); openEditDialModal(${dial._origIdx})">✎</button>`;
       let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); event.preventDefault(); removeDial(${dial._origIdx})">&times;</button>`;
 
       return `
-        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}" draggable="true">
+        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
           <div class="dial-merge-overlay"></div>
           <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener" draggable="false">
-             <img src="${src}" alt="${dial.name}" draggable="false" />
+             <img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="${dial.name}" draggable="false" />
              <span>${dial.name}</span>
           </a>
           ${editBtnHtml}${deleteBtnHtml}
@@ -1201,42 +1172,38 @@
     function createDialElement(dial) {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = createDialHTMLString(dial);
-      const wrapper = tempDiv.firstElementChild;
-      wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-      wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-      wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-      wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
-      return wrapper;
+      return tempDiv.firstElementChild;
     }
 
     // ===== RENDER SERVICES =====
     function renderServices() {
       const container = document.getElementById('services-container');
+      if (servicesSortable) servicesSortable.destroy();
       container.innerHTML = '';
       
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = true; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
-        wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'service')); 
-        wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'service')); 
-        wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'service'));
-        wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'service'));
-        
+        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
         let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>`;
         wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center; width:100%;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a>${deleteBtnHtml}`;
         container.appendChild(wrapper);
       });
 
       const addWrapper = document.createElement('div');
-      addWrapper.className = 'draggable-wrapper add-wrapper';
+      addWrapper.className = 'add-wrapper';
       addWrapper.innerHTML = `<div class="add-dial-tile add-service-tile" onclick="openAddServiceModal()"><span>+</span><span>Add Service</span></div>`;
-      addWrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'service'));
-      addWrapper.addEventListener('drop', (e) => handleTileDrop(e, 'service'));
       container.appendChild(addWrapper);
 
       pingServices();
+
+      servicesSortable = new Sortable(container, {
+          disabled: isEditMode, // Lock tile sorting if moving sections
+          animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
+          ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+          onEnd: syncServiceStateFromDOM
+      });
     }
-    
+
     function pingServices() {
       state.services.forEach((srv, idx) => {
         const dot = document.getElementById(`srv-dot-${idx}`); if (!dot) return;
@@ -1429,17 +1396,30 @@
     function renderBookmarks() {
       const container = document.getElementById('bookmarks-container'); const datalist = document.getElementById('bm-folder-list');
       if (state.bookmarks.length === 0) { container.innerHTML = '<li style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px;">No saved tabs yet.</li>'; datalist.innerHTML = ''; return; }
+      
       const folders = [...new Set(state.bookmarks.map(bm => bm.folder || 'General'))].sort();
       datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
+      
       const grouped = {};
       state.bookmarks.forEach((bm, idx) => { const f = bm.folder || 'General'; if (!grouped[f]) grouped[f] = []; grouped[f].push({ ...bm, originalIndex: idx }); });
+      
       let html = '';
       Object.keys(grouped).sort().forEach(folder => {
-        html += `<div class="bookmark-folder-header">${folder}</div>`;
-        grouped[folder].forEach(bm => { html += `<li class="bookmark-item"><a href="${bm.url}" target="_blank" rel="noopener">${bm.title}</a><button onclick="removeBookmark(${bm.originalIndex})">&times;</button></li>`; });
+        html += `<div class="bookmark-folder-header">📁 ${folder}</div>`;
+        grouped[folder].forEach(bm => { 
+          let domain = 'example.com'; try { domain = new URL(bm.url).hostname; } catch(e){}
+          let favSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+          html += `
+            <li class="bookmark-item">
+               <img src="${favSrc}" alt="icon">
+               <a href="${bm.url}" target="_blank" rel="noopener">${bm.title}</a>
+               <button title="Delete Bookmark" onclick="removeBookmark(${bm.originalIndex})">&times;</button>
+            </li>`; 
+        });
       });
       container.innerHTML = html;
     }
+    
     function addBookmark() {
       let title = document.getElementById('bm-title').value.trim(); let url = document.getElementById('bm-url').value.trim(); const folder = document.getElementById('bm-folder').value.trim() || 'General';
       if (!url) return;
@@ -1581,7 +1561,10 @@
       document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
       document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
       document.getElementById('section-news').style.display = state.modules.news ? 'flex' : 'none';
+      
+      // Built in Calendar is now linked directly to the clock toggle, so we only hide/show the nav button if needed
       document.getElementById('nav-btn-builtin-cal').style.display = state.modules.builtin_cal ? 'inline-block' : 'none';
+      
       const gcalBtn = document.getElementById('nav-btn-calendar'); gcalBtn.style.display = state.modules.gcal ? 'inline-block' : 'none';
       if (!state.modules.gcal) document.getElementById('calendar-drawer').classList.remove('open');
       const bmBtn = document.getElementById('nav-btn-bookmarks'); bmBtn.style.display = state.modules.bookmarks ? 'inline-block' : 'none';
