@@ -281,7 +281,8 @@
     .cal-event-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s; }
     .cal-event-card:hover { border-color: var(--accent); }
     .cal-event-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
-    .cal-event-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--accent); }
+    .cal-event-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--accent); gap: 8px; }
+    .cal-event-location { font-size: 11px; color: var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     
     /* Sleek Bookmarks Redesign */
     .bookmark-input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
@@ -296,6 +297,31 @@
     .bookmark-item button { opacity: 0; background: rgba(248,81,73,0.1); border: none; color: var(--danger); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; }
     .bookmark-item:hover button { opacity: 1; }
     .bookmark-item button:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+
+    /* --- Self-Hosted Services & Calendar polish --- */
+    .services-status-summary { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+    .service-icon-wrap { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); flex: 0 0 auto; overflow: hidden; }
+    .service-icon-wrap img { width: 24px; height: 24px; object-fit: contain; }
+    .service-icon-fallback { font-size: 20px; }
+    .service-card { position: relative; min-height: 92px; padding: 14px; }
+    .service-card-main { display:flex; align-items:center; gap:12px; width:100%; min-width:0; }
+    .service-card-copy { min-width:0; flex:1; }
+    .service-card-copy .name { margin-bottom:3px; }
+    .service-status-stack { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex:0 0 auto; }
+    .service-status-label { font-size:10px; font-weight:700; white-space:nowrap; }
+    .service-card .status-dot { width:9px; height:9px; }
+    .service-url-line { margin-top:8px; font-size:9px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; opacity:0.85; }
+    .service-card[data-status="checking"] { border-color: rgba(251,188,5,0.22); }
+    .service-card[data-status="online"] { border-color: rgba(63,185,80,0.22); }
+    .service-card[data-status="offline"] { border-color: rgba(248,81,73,0.22); }
+    .service-card[data-status="blocked"] { border-color: rgba(251,188,5,0.28); }
+    .calendar-hero-icon { width:48px; height:48px; border-radius:14px; display:grid; place-items:center; font-size:25px; background:rgba(88,166,255,0.12); border:1px solid rgba(88,166,255,0.25); }
+    .calendar-auth-hint { font-size:11px; color:var(--text-muted); line-height:1.45; max-width:360px; }
+    .calendar-connected-bar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; }
+    .calendar-error-box { padding:10px 12px; border-radius:10px; background:rgba(248,81,73,0.08); border:1px solid rgba(248,81,73,0.22); color:#fca5a5; font-size:11px; line-height:1.45; }
+    .oauth-help-box { margin-top:7px; display:flex; flex-direction:column; gap:5px; padding:10px 12px; border-radius:9px; background:rgba(88,166,255,0.06); border:1px solid rgba(88,166,255,0.14); color:var(--text-muted); font-size:10px; line-height:1.45; }
+    .oauth-help-box strong { color:var(--text-main); font-size:11px; }
+    .oauth-help-box code { color:var(--accent); font-size:10px; }
 
     /* Modals for Add/Edit Dial and Services */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 200; opacity: 0; transition: opacity 0.3s; }
@@ -411,17 +437,24 @@
         <button style="background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="toggleGcalDropdown()">&times;</button>
       </div>
       <div class="cal-auth-box" id="cal-auth-section">
-        <p style="color: var(--text-muted); font-size: 13px;">Sign in with your Google account to sync your schedule directly into this dashboard.</p>
-        <button class="nav-btn" style="background: var(--accent); color: #fff; padding: 10px 18px;" onclick="handleGoogleAuth()">Sign in with Google</button>
+        <div class="calendar-hero-icon">🗓</div>
+        <strong style="font-size: 15px;">Connect Google Calendar</strong>
+        <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5; max-width: 360px;">Connect read-only access to your upcoming Google Calendar events. Your access token stays in memory and is never saved in this dashboard.</p>
+        <button class="nav-btn" style="background: var(--accent); color: #fff; padding: 10px 18px;" onclick="handleGoogleAuth()">Connect Google Calendar</button>
+        <div id="calendar-auth-hint" class="calendar-auth-hint">Google OAuth Client ID is configured in Settings.</div>
       </div>
       <div class="events-container" id="cal-events-section" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <span style="font-size: 12px; color: var(--text-muted);">Upcoming Events</span>
+        <div class="calendar-connected-bar">
+          <div>
+            <span style="font-size: 12px; color: #3fb950; font-weight: 700;">● Connected</span>
+            <span id="calendar-last-sync" style="font-size: 11px; color: var(--text-muted); margin-left: 6px;"></span>
+          </div>
           <div style="display: flex; gap: 8px;">
-            <button class="badge-btn" onclick="fetchCalendarEvents()">Refresh</button>
-            <button class="badge-btn" style="color: var(--danger); border-color: rgba(248,81,73,0.3);" onclick="handleGoogleSignout()">Sign Out</button>
+            <button class="badge-btn" onclick="refreshCalendarEvents()">Refresh</button>
+            <button class="badge-btn" style="color: var(--danger); border-color: rgba(248,81,73,0.3);" onclick="handleGoogleSignout()">Disconnect</button>
           </div>
         </div>
+        <div id="calendar-error-box" class="calendar-error-box" style="display:none;"></div>
         <div id="calendar-event-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
     </div>
@@ -552,6 +585,11 @@
       <div class="form-group" style="margin-top: 10px;">
         <label>Google OAuth Client ID</label>
         <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
+        <div class="oauth-help-box">
+          <strong>Calendar setup</strong>
+          <span>Create a Google OAuth Web application client and add this dashboard's current browser origin to <em>Authorized JavaScript origins</em>. Local testing should use an HTTP localhost origin such as <code>http://localhost:8080</code>.</span>
+          <span id="oauth-origin-display"></span>
+        </div>
       </div>
 
       <div class="form-group" style="margin-top: 10px;">
@@ -598,8 +636,14 @@
 
     <div class="main-panel" id="section-services">
       <div class="panel-header">
-        <span class="panel-title">🖥 Self-Hosted Services</span>
-        <span class="layout-drag-handle" data-layout-handle title="Drag the services section">⠿ Move</span>
+        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+          <span class="panel-title">🖥 Self-Hosted Services</span>
+          <span id="services-status-summary" class="services-status-summary">Checking...</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="badge-btn" type="button" onclick="refreshServicesStatus()" title="Refresh service status">↻ Refresh</button>
+          <span class="layout-drag-handle" data-layout-handle title="Drag the services section">⠿ Move</span>
+        </div>
       </div>
       <div class="services-grid" id="services-container"></div>
     </div>
@@ -685,9 +729,11 @@
   <div class="modal" id="service-modal">
     <div class="modal-content">
       <h3>Add Service</h3>
-      <div class="form-group"><label>Service Name</label><input type="text" id="srv-name" placeholder="What service are you adding?" /></div>
-      <div class="form-group"><label>Description</label><input type="text" id="srv-desc" placeholder="Photo Storage, Media..." /></div>
+      <div class="form-group"><label>Service Name</label><input type="text" id="srv-name" placeholder="Portainer, Immich, Plex, Cockpit..." /></div>
+      <div class="form-group"><label>Description</label><input type="text" id="srv-desc" placeholder="Photo Storage, Media Server, Linux Admin..." /></div>
       <div class="form-group"><label>LAN or Tailscale URL</label><input type="url" id="srv-url" placeholder="http://192.168.1.50:2283" /></div>
+      <div class="form-group"><label>Status Check URL <span style="font-weight:400; color:var(--text-muted);">(optional)</span></label><input type="url" id="srv-health-url" placeholder="Leave blank for automatic service-aware checking" /></div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:-8px; line-height:1.5;">Automatic checks recognize common services and use a lightweight health/identity endpoint when available. Leave this blank unless your service needs a custom path.</div>
       <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('service-modal')">Cancel</button><button class="btn-primary" onclick="saveNewService()">Add Service</button></div>
     </div>
   </div>
@@ -972,7 +1018,7 @@
     let state = {
       wallpaper: localStorage.getItem('dash_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070',
       googleClientId: localStorage.getItem('dash_google_client_id') || '',
-      googleToken: localStorage.getItem('dash_google_token') || null,
+      googleToken: null,
       dials: JSON.parse(localStorage.getItem('dash_dials')) || [], 
       bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
       services: JSON.parse(localStorage.getItem('dash_services')) || [], 
@@ -1479,16 +1525,94 @@
     }
 
     // ===== RENDER SERVICES =====
+    function normalizeService(service) {
+      return {
+        name: String(service.name || generateSmartLabel(service.url || '')).trim(),
+        desc: String(service.desc || 'Self-hosted service').trim(),
+        url: String(service.url || '').trim(),
+        healthUrl: String(service.healthUrl || '').trim(),
+        checkMode: service.checkMode || 'auto'
+      };
+    }
+
+    function getServiceMeta(service) {
+      const name = `${service.name || ''} ${service.url || ''}`.toLowerCase();
+      if (/immich|(^|\s)image(\s|$)/.test(name)) return { icon: 'simple-icons:immich', emoji: '🖼️', healthPath: '/api/server/ping' };
+      if (/plex/.test(name)) return { icon: 'simple-icons:plex', emoji: '▶️', healthPath: '/identity' };
+      if (/portainer/.test(name)) return { icon: 'simple-icons:portainer', emoji: '🐳', healthPath: '/' };
+      if (/cockpit/.test(name)) return { icon: 'mdi:server-security', emoji: '🛠️', healthPath: '/' };
+      if (/caddy/.test(name)) return { icon: 'simple-icons:caddy', emoji: '🔒', healthPath: '/' };
+      return { icon: 'mdi:server-network', emoji: '🖥️', healthPath: '/' };
+    }
+
+    function getServiceIconUrl(service) {
+      const meta = getServiceMeta(service);
+      return `https://api.iconify.design/${meta.icon}.svg?color=%23c9d1d9`;
+    }
+
+    function getServiceHealthUrl(service) {
+      const base = new URL(service.url);
+      if (service.checkMode === 'none') return null;
+      if (service.healthUrl) return new URL(service.healthUrl, base.href).href;
+      const meta = getServiceMeta(service);
+      return new URL(meta.healthPath, base.origin).href;
+    }
+
+    function serviceCardStatusText(status) {
+      return ({ checking: 'Checking', online: 'Online', offline: 'Offline', blocked: 'Browser blocked', disabled: 'Not checked' })[status] || 'Unknown';
+    }
+
+    function setServiceStatus(idx, status, detail = '') {
+      const card = document.querySelector(`[data-service-index="${idx}"] .service-card`);
+      const dot = document.getElementById(`srv-dot-${idx}`);
+      const label = document.getElementById(`srv-status-${idx}`);
+      if (!card || !dot || !label) return;
+      card.dataset.status = status;
+      label.textContent = serviceCardStatusText(status);
+      label.title = detail || serviceCardStatusText(status);
+      if (status === 'online') {
+        dot.style.background = '#3fb950'; dot.style.boxShadow = '0 0 7px #3fb950';
+        label.style.color = '#3fb950';
+      } else if (status === 'offline') {
+        dot.style.background = 'var(--danger)'; dot.style.boxShadow = '0 0 7px var(--danger)';
+        label.style.color = 'var(--danger)';
+      } else if (status === 'blocked') {
+        dot.style.background = '#fbbc05'; dot.style.boxShadow = '0 0 7px #fbbc05';
+        label.style.color = '#fbbc05';
+      } else if (status === 'disabled') {
+        dot.style.background = 'var(--text-muted)'; dot.style.boxShadow = 'none';
+        label.style.color = 'var(--text-muted)';
+      } else {
+        dot.style.background = '#fbbc05'; dot.style.boxShadow = '0 0 7px #fbbc05';
+        label.style.color = '#fbbc05';
+      }
+    }
+
     function renderServices() {
       const container = document.getElementById('services-container');
       if (servicesSortable) servicesSortable.destroy();
       container.innerHTML = '';
-      
+      state.services = state.services.map(normalizeService);
+
       state.services.forEach((srv, idx) => {
-        srv._origIdx = idx;
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
-        let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>`;
-        wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center; width:100%;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a>${deleteBtnHtml}`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'draggable-wrapper';
+        wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
+        wrapper.dataset.serviceIndex = String(idx);
+        const deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>`;
+        const meta = getServiceMeta(srv);
+        const fallback = meta.emoji;
+        wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener" data-status="checking" title="Open ${srv.name}">
+          <div class="service-card-main">
+            <div class="service-icon-wrap"><img src="${getServiceIconUrl(srv)}" alt="" onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<span class=\"service-icon-fallback\">${fallback}</span>')"></div>
+            <div class="service-card-copy">
+              <span class="name">${srv.name}</span>
+              <span class="desc">${srv.desc}</span>
+              <div class="service-url-line">${srv.url}</div>
+            </div>
+            <div class="service-status-stack"><span class="status-dot" id="srv-dot-${idx}"></span><span class="service-status-label" id="srv-status-${idx}">Checking</span></div>
+          </div>
+        </a>${deleteBtnHtml}`;
         container.appendChild(wrapper);
       });
 
@@ -1497,33 +1621,81 @@
       addWrapper.innerHTML = `<div class="add-dial-tile add-service-tile" onclick="openAddServiceModal()"><span>+</span><span>Add Service</span></div>`;
       container.appendChild(addWrapper);
 
-      pingServices();
-
       servicesSortable = new Sortable(container, {
-          disabled: false,
-          animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
-          ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
-          onEnd: syncServiceStateFromDOM
+        disabled: false,
+        animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
+        ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+        onEnd: syncServiceStateFromDOM
       });
+      refreshServicesStatus();
     }
 
-    function pingServices() {
-      state.services.forEach((srv, idx) => {
-        const dot = document.getElementById(`srv-dot-${idx}`); if (!dot) return;
+    async function checkService(srv) {
+      if (srv.checkMode === 'none') return { status: 'disabled', detail: 'Status checking disabled.' };
+      let target;
+      try { target = getServiceHealthUrl(srv); } catch (e) { return { status: 'offline', detail: 'Invalid service URL.' }; }
+
+      try {
+        const currentProtocol = window.location.protocol;
+        const targetUrl = new URL(target);
+        if (currentProtocol === 'https:' && targetUrl.protocol === 'http:') {
+          return { status: 'blocked', detail: 'The dashboard is HTTPS, but this service uses HTTP. The browser may block the health request as mixed content.' };
+        }
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        fetch(srv.url, { mode: 'no-cors', cache: 'no-store', signal: controller.signal })
-          .then(() => { clearTimeout(timeoutId); dot.style.background = '#3fb950'; dot.style.boxShadow = '0 0 6px #3fb950'; })
-          .catch(() => { clearTimeout(timeoutId); dot.style.background = 'var(--danger)'; dot.style.boxShadow = '0 0 6px var(--danger)'; });
-      });
+        const timeoutId = setTimeout(() => controller.abort(), 4500);
+        try {
+          await fetch(targetUrl.href, { method: 'GET', mode: 'no-cors', cache: 'no-store', redirect: 'follow', signal: controller.signal });
+          clearTimeout(timeoutId);
+          return { status: 'online', detail: `Reachable: ${targetUrl.href}` };
+        } catch (err) {
+          clearTimeout(timeoutId);
+          return { status: 'offline', detail: `No browser response from ${targetUrl.href}` };
+        }
+      } catch (err) {
+        return { status: 'offline', detail: 'Could not build the service health URL.' };
+      }
     }
+
+    async function refreshServicesStatus() {
+      const summary = document.getElementById('services-status-summary');
+      if (summary) summary.textContent = 'Checking...';
+      const normalized = state.services.map(normalizeService);
+      let online = 0, offline = 0, blocked = 0, disabled = 0;
+      await Promise.all(normalized.map(async (srv, idx) => {
+        setServiceStatus(idx, 'checking');
+        const result = await checkService(srv);
+        if (result.status === 'online') online++;
+        else if (result.status === 'offline') offline++;
+        else if (result.status === 'blocked') blocked++;
+        else if (result.status === 'disabled') disabled++;
+        setServiceStatus(idx, result.status, result.detail);
+      }));
+      if (summary) {
+        const parts = [`${online} online`];
+        if (offline) parts.push(`${offline} offline`);
+        if (blocked) parts.push(`${blocked} blocked`);
+        if (disabled) parts.push(`${disabled} unchecked`);
+        summary.textContent = parts.join(' · ');
+      }
+    }
+
+    function pingServices() { refreshServicesStatus(); }
     function removeService(idx) { state.services.splice(idx, 1); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); }
     function saveNewService() {
-      let name = document.getElementById('srv-name').value.trim(); const desc = document.getElementById('srv-desc').value.trim(); let url = document.getElementById('srv-url').value.trim();
+      let name = document.getElementById('srv-name').value.trim();
+      const desc = document.getElementById('srv-desc').value.trim();
+      let url = document.getElementById('srv-url').value.trim();
+      const healthUrl = document.getElementById('srv-health-url').value.trim();
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
-      state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
+      state.services.push({ name, desc, url, healthUrl, checkMode: healthUrl ? 'custom' : 'auto' });
+      localStorage.setItem('dash_services', JSON.stringify(state.services));
+      document.getElementById('srv-name').value = '';
+      document.getElementById('srv-desc').value = '';
+      document.getElementById('srv-url').value = '';
+      document.getElementById('srv-health-url').value = '';
+      renderServices(); closeModal('service-modal');
     }
 
     // ===== RESILIENT RSS / NEWS ENGINE =====
@@ -2066,34 +2238,186 @@
     function removeBookmark(idx) { state.bookmarks.splice(idx, 1); localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks)); renderBookmarks(); }
 
     // ===== GOOGLE CALENDAR OAUTH =====
-    function initGoogleAuth() {
-      if (typeof google === 'undefined' || !state.googleClientId) return;
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: state.googleClientId, scope: 'https://www.googleapis.com/auth/calendar.events.readonly',
-        callback: (res) => { if (res && res.access_token) { state.googleToken = res.access_token; localStorage.setItem('dash_google_token', state.googleToken); fetchCalendarEvents(); } },
-      });
-      if (state.googleToken) { fetchCalendarEvents(); }
+    const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events.readonly';
+    let googleTokenExpiresAt = 0;
+    let googleAuthClientId = '';
+
+    function clearCalendarToken() {
+      state.googleToken = null;
+      googleTokenExpiresAt = 0;
+      localStorage.removeItem('dash_google_token');
     }
-    function handleGoogleAuth() { if (!state.googleClientId) { alert('Please add your Google OAuth Client ID in Settings first.'); toggleSettingsDropdown(); return; } if (!tokenClient) initGoogleAuth(); if (tokenClient) { tokenClient.requestAccessToken({ prompt: '' }); } }
-    function handleGoogleSignout() { if (state.googleToken) { google.accounts.oauth2.revoke(state.googleToken, () => { state.googleToken = null; localStorage.removeItem('dash_google_token'); document.getElementById('cal-auth-section').style.display = 'flex'; document.getElementById('cal-events-section').style.display = 'none'; }); } }
+
+    function setCalendarAuthHint(message, error = false) {
+      const el = document.getElementById('calendar-auth-hint');
+      if (!el) return;
+      el.textContent = message;
+      el.style.color = error ? 'var(--danger)' : 'var(--text-muted)';
+    }
+
+    function showCalendarError(message) {
+      const box = document.getElementById('calendar-error-box');
+      if (!box) return;
+      box.style.display = 'block';
+      box.textContent = message;
+    }
+
+    function clearCalendarError() {
+      const box = document.getElementById('calendar-error-box');
+      if (!box) return;
+      box.style.display = 'none';
+      box.textContent = '';
+    }
+
+    function initGoogleAuth() {
+      if (!state.googleClientId) {
+        tokenClient = null;
+        googleAuthClientId = '';
+        setCalendarAuthHint('Add a Google OAuth Web Client ID in Settings to enable Calendar sync.');
+        return false;
+      }
+      if (window.location.protocol === 'file:') {
+        tokenClient = null;
+        googleAuthClientId = '';
+        setCalendarAuthHint('Calendar sync needs an HTTP(S) web origin. Run this page from localhost or a hosted HTTPS address before connecting Google Calendar.', true);
+        showCalendarError('Google OAuth cannot authorize a raw file:// page. Serve the dashboard from localhost or an HTTPS web address, then add that origin to your Google OAuth client.');
+        return false;
+      }
+      if (!window.google?.accounts?.oauth2) {
+        setCalendarAuthHint('Google Identity Services is still loading. Try again in a moment.');
+        return false;
+      }
+      if (tokenClient && googleAuthClientId === state.googleClientId) return true;
+
+      googleAuthClientId = state.googleClientId;
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: state.googleClientId,
+        scope: GOOGLE_CALENDAR_SCOPE,
+        include_granted_scopes: true,
+        callback: handleGoogleTokenResponse
+      });
+      setCalendarAuthHint(`Ready for ${window.location.origin || 'this browser origin'}.`);
+      return true;
+    }
+
+    function handleGoogleTokenResponse(res) {
+      if (!res) return;
+      if (res.error) {
+        clearCalendarToken();
+        const detail = res.error_description || res.error;
+        setCalendarAuthHint(`Google authorization failed: ${detail}`, true);
+        showCalendarError(`Google Calendar authorization failed: ${detail}. Check your OAuth client ID and Authorized JavaScript origins in Google Cloud.`);
+        return;
+      }
+      if (!res.access_token) return;
+      state.googleToken = res.access_token;
+      googleTokenExpiresAt = Date.now() + Math.max(60, (Number(res.expires_in) || 3600) - 60) * 1000;
+      clearCalendarError();
+      fetchCalendarEvents();
+    }
+
+    function requestGoogleCalendarAccess(forceConsent = false) {
+      if (!state.googleClientId) {
+        toggleSettingsDropdown();
+        alert('Add your Google OAuth Client ID in Settings first.');
+        return;
+      }
+      if (!initGoogleAuth()) return;
+      const override = { prompt: forceConsent ? 'consent' : '' };
+      tokenClient.requestAccessToken(override);
+    }
+
+    function handleGoogleAuth() { requestGoogleCalendarAccess(false); }
+
+    function handleGoogleSignout() {
+      const token = state.googleToken;
+      const finish = () => {
+        clearCalendarToken();
+        document.getElementById('cal-auth-section').style.display = 'flex';
+        document.getElementById('cal-events-section').style.display = 'none';
+        setCalendarAuthHint('Disconnected. Connect Google Calendar when you are ready.');
+      };
+      if (token && window.google?.accounts?.oauth2?.revoke) {
+        google.accounts.oauth2.revoke(token, finish);
+      } else {
+        finish();
+      }
+    }
+
     async function fetchCalendarEvents() {
       if (!state.googleToken) return;
+      if (googleTokenExpiresAt && Date.now() >= googleTokenExpiresAt) {
+        clearCalendarToken();
+        document.getElementById('cal-auth-section').style.display = 'flex';
+        document.getElementById('cal-events-section').style.display = 'none';
+        setCalendarAuthHint('Your Google access session expired. Reconnect to refresh it.');
+        return;
+      }
+      clearCalendarError();
       try {
-        const timeMin = new Date().toISOString(); const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&maxResults=20&singleEvents=true&orderBy=startTime`;
+        const timeMin = new Date().toISOString();
+        const timeMax = new Date(Date.now() + 1000 * 60 * 60 * 24 * 31).toISOString();
+        const params = new URLSearchParams({ timeMin, timeMax, maxResults: '25', singleEvents: 'true', orderBy: 'startTime' });
+        const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params.toString()}`;
         const res = await fetch(url, { headers: { Authorization: `Bearer ${state.googleToken}` } });
-        if (res.status === 401) { handleGoogleSignout(); return; } const data = await res.json(); renderCalendarEvents(data.items || []);
-      } catch (err) { console.error('Error fetching events:', err); }
+        if (res.status === 401) {
+          clearCalendarToken();
+          document.getElementById('cal-auth-section').style.display = 'flex';
+          document.getElementById('cal-events-section').style.display = 'none';
+          setCalendarAuthHint('Google rejected the current access session. Reconnect to continue.');
+          return;
+        }
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`Calendar API returned ${res.status}${text ? `: ${text.slice(0, 120)}` : ''}`);
+        }
+        const data = await res.json();
+        renderCalendarEvents(data.items || []);
+      } catch (err) {
+        console.error('Calendar fetch error:', err);
+        document.getElementById('cal-auth-section').style.display = 'none';
+        document.getElementById('cal-events-section').style.display = 'flex';
+        showCalendarError(`Could not load Google Calendar. ${err.message || 'Unknown error'}`);
+      }
     }
+
+    function refreshCalendarEvents() {
+      if (!state.googleToken || (googleTokenExpiresAt && Date.now() >= googleTokenExpiresAt)) {
+        requestGoogleCalendarAccess(false);
+        return;
+      }
+      fetchCalendarEvents();
+    }
+
     function renderCalendarEvents(events) {
       const container = document.getElementById('calendar-event-list');
-      document.getElementById('cal-auth-section').style.display = 'none'; document.getElementById('cal-events-section').style.display = 'flex';
-      if (events.length === 0) { container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No upcoming events.</div>'; return; }
+      document.getElementById('cal-auth-section').style.display = 'none';
+      document.getElementById('cal-events-section').style.display = 'flex';
+      clearCalendarError();
+      const sync = document.getElementById('calendar-last-sync');
+      if (sync) sync.textContent = `Updated ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+      if (events.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No upcoming events in the next 31 days.</div>';
+        return;
+      }
       container.innerHTML = events.map(evt => {
-        const start = evt.start.dateTime ? new Date(evt.start.dateTime) : new Date(evt.start.date);
+        const start = evt.start?.dateTime ? new Date(evt.start.dateTime) : new Date(evt.start?.date);
+        const end = evt.end?.dateTime ? new Date(evt.end.dateTime) : (evt.end?.date ? new Date(evt.end.date) : null);
         const dateStr = start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-        const timeStr = evt.start.dateTime ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'All Day';
-        return `<div class="cal-event-card"><span class="cal-event-title">${evt.summary || 'Untitled Event'}</span><div class="cal-event-meta"><span>${dateStr}</span><span>${timeStr}</span></div></div>`;
+        const timeStr = evt.start?.dateTime ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'All Day';
+        const endStr = evt.end?.dateTime && end ? ` – ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '';
+        const location = evt.location ? `<div class="cal-event-location">📍 ${escapeHTML(evt.location)}</div>` : '';
+        return `<div class="cal-event-card"><span class="cal-event-title">${escapeHTML(evt.summary || 'Untitled Event')}</span><div class="cal-event-meta"><span>${dateStr}</span><span>${timeStr}${endStr}</span></div>${location}</div>`;
       }).join('');
+    }
+
+    function waitForGoogleIdentity(attempt = 0) {
+      if (window.google?.accounts?.oauth2) { initGoogleAuth(); return; }
+      if (attempt < 40) setTimeout(() => waitForGoogleIdentity(attempt + 1), 250);
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[ch]));
     }
 
     // ===== TOP NAV DROPDOWN MANAGER =====
@@ -2190,6 +2514,8 @@
       if (!wrapper.classList.contains('open')) {
           document.getElementById('settings-wallpaper').value = state.wallpaper; 
           document.getElementById('settings-client-id').value = state.googleClientId;
+          const originDisplay = document.getElementById('oauth-origin-display');
+          if (originDisplay) originDisplay.textContent = `Current origin: ${window.location.origin || 'file:// (not a web origin)'}`;
           
           let savedShape = localStorage.getItem('dash_shape') || '20px|none|1 / 1';
           if (savedShape.split('|').length < 3) savedShape = `${savedShape}|1 / 1`;
@@ -2261,6 +2587,7 @@
       const opacityVal = document.getElementById('settings-opacity-num').value;
 
       if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
+      if (state.googleClientId !== cid) { clearCalendarToken(); tokenClient = null; googleAuthClientId = ''; }
       state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
       
       localStorage.setItem('dash_shape', shapeVal);
@@ -2347,7 +2674,8 @@
       applyModuleVisibility();
       if (state.modules.news) fetchRSS();
       setInterval(() => { if (state.modules.news && !document.hidden) fetchRSS(); }, 10 * 60 * 1000);
-      setTimeout(initGoogleAuth, 500);
+      localStorage.removeItem('dash_google_token');
+      waitForGoogleIdentity();
     });
   </script>
 </body>
