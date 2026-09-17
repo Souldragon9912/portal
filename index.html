@@ -179,10 +179,10 @@
     /* --- Opera/Brave Micro Folders --- */
     .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
     .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; }
-    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2); pointer-events: none; }
+    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
 
-    /* In-Grid Row Breakdown Accordion (Headerless) */
+    /* In-Grid Row Breakdown Accordion (Headerless & Borderless) */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
       background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: none !important; box-shadow: none !important;
@@ -492,10 +492,62 @@
         <div class="se-settings-list" id="custom-engines-list"></div>
       </div>
 
+      <!-- Visual RSS Feed Manager -->
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Manage News Feeds (Auto-Discovery)</label>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Paste any website URL (e.g., https://theverge.com) and the feed will auto-discover.</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+          <input type="url" id="newRssInput" placeholder="https://theverge.com or direct feed URL" style="flex: 1;" />
+          <button class="badge-btn" onclick="addRSSFeed()">Add</button>
+        </div>
+        <div id="rssManagerGrid" class="rss-manager-grid"></div>
+      </div>
+
       <!-- Google OAuth Client ID -->
       <div class="form-group">
         <label>Google OAuth Client ID</label>
         <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
+      </div>
+
+      <!-- Visible Modules Toggles -->
+      <div class="form-group">
+        <label>Visible Modules & Sections</label>
+        <div class="modules-toggle-list">
+          <div class="toggle-row">
+            <span>⚡ Speed Dials Grid</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-dials"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>🖥 Self-Hosted Services</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-services"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>📰 News Feed Deck</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-news"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>📅 Built-in Calendar (Calendar View)</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-builtin-cal"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>🗓 Google Calendar (G-Cal Sync)</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-gcal"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>📑 Bookmarks Drawer</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-bookmarks"><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backup & Sync Settings -->
+      <div class="form-group" style="margin-top: 6px; border-top: 1px solid var(--border-glass); padding-top: 14px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Backup & Sync Configuration</label>
+        <div style="display: flex; gap: 8px;">
+          <button class="badge-btn" onclick="exportConfig()" style="padding: 8px 12px;">Export Config</button>
+          <button class="badge-btn" onclick="document.getElementById('import-file').click()" style="padding: 8px 12px;">Import Config</button>
+          <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importConfig(event)" />
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -520,12 +572,9 @@
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <label style="color: var(--text-main); font-weight: 500;">Custom Icon / Image</label>
-          
-          <!-- JAVASCRIPT VAR ICON_SEARCH_SITE WILL OPEN HERE -->
-          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons</button>
-          
+          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons8</button>
         </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from the icon site.</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from Icons8.</p>
         <div style="display: flex; gap: 8px; align-items: center;">
           <input type="text" id="dial-img" placeholder="App name or https://...png" style="flex: 1;" oninput="previewIcon('add')" />
         </div>
@@ -554,9 +603,9 @@
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <label style="color: var(--text-main); font-weight: 500;">Custom Icon / Image</label>
-          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons</button>
+          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons8</button>
         </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from the icon site.</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from Icons8.</p>
         <div style="display: flex; gap: 8px; align-items: center;">
           <input type="text" id="edit-dial-img" placeholder="App name or https://...png" style="flex: 1;" oninput="previewIcon('edit')" />
         </div>
@@ -588,7 +637,7 @@
   <!-- ========================================== -->
   <script>
     // ===== CONFIGURATION =====
-    const ICON_SEARCH_SITE = "https://icons8.com/icons/all"; // <--- PASTE YOUR SITE URL HERE
+    const ICON_SEARCH_SITE = "https://icons8.com/icons/all"; 
 
     // ===== LIVE CLOCK =====
     function updateClock() {
@@ -674,7 +723,6 @@
         closeModal('settings-modal');
         document.body.classList.add('edit-mode');
         
-        // Lock Sortable while manipulating massive sections
         if(rootSortable) rootSortable.option("disabled", true);
         if(accordionSortable) accordionSortable.option("disabled", true);
         if(servicesSortable) servicesSortable.option("disabled", true);
@@ -689,14 +737,13 @@
         newsSection.setAttribute('draggable', 'false'); newsSection.classList.remove('edit-mode-container');
         document.body.classList.remove('edit-mode');
 
-        // Re-enable Sortable tiles
         if(rootSortable) rootSortable.option("disabled", false);
         if(accordionSortable) accordionSortable.option("disabled", false);
         if(servicesSortable) servicesSortable.option("disabled", false);
       }
     }
 
-    // Fix corrupted image data upon load
+    // Fix corrupted unencoded SVG image data upon load
     function sanitizeDials(dials) {
         return dials.map(d => {
             if (d.img && d.img.includes('<svg')) {
@@ -718,7 +765,6 @@
     });
 
     // ===== OFFICIAL BRAND ICON FETCH ENGINE =====
-    // Safely URL-encoded globe SVG for fallback so it never breaks DOM
     const GLOBE_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/%3E%3C/svg%3E";
 
     function getBrandIconUrl(inputStr) {
@@ -837,7 +883,7 @@
                 activeDial.folder = newFolder.trim();
                 tDial.folder = newFolder.trim();
             } else {
-                return renderDials(); // canceled
+                return renderDials(); 
             }
         }
         localStorage.setItem('dash_dials', JSON.stringify(state.dials));
@@ -1145,6 +1191,22 @@
     }
 
     // ===== MULTI-PROXY BULLETPROOF RSS ENGINE =====
+    const rssDirectFeeds = {
+      'theverge.com': 'https://www.theverge.com/rss/index.xml',
+      '9to5google.com': 'https://9to5google.com/feed/',
+      'linustechtips.com': 'https://linustechtips.com/rss/',
+      'bleepingcomputer.com': 'https://www.bleepingcomputer.com/feed/',
+      'arstechnica.com': 'https://feeds.arstechnica.com/arstechnica/index',
+      'hackernews.com': 'https://news.ycombinator.com/rss'
+    };
+
+    function resolveRssUrl(userUrl) {
+      let hostname;
+      try { hostname = new URL(userUrl).hostname.replace(/^www\./, ''); } catch(e) { return userUrl; }
+      if (rssDirectFeeds[hostname]) return rssDirectFeeds[hostname];
+      return userUrl; 
+    }
+
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
@@ -1161,8 +1223,10 @@
 
       const feedPromises = urls.map(async (rawUrl) => {
         try {
+          const feedUrl = resolveRssUrl(rawUrl);
+
           try {
-             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rawUrl)}`);
+             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
              const data = await r2j.json();
              if (data.status === 'ok') {
                return data.items.map(item => ({
@@ -1174,7 +1238,7 @@
              }
           } catch(e) {}
 
-          const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rawUrl)}`);
+          const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
           const proxyData = await proxyRes.json();
           if (proxyData && proxyData.contents) {
              let parser = new DOMParser();
@@ -1394,7 +1458,85 @@
       renderRSSManager();
       document.getElementById('settings-modal').style.display = 'flex'; setTimeout(() => document.getElementById('settings-modal').classList.add('show'), 10);
     }
-    
+    function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('show'); setTimeout(() => { modal.style.display = 'none'; }, 300); }
+
+    // ===== BACKUP & SYNC ENGINE =====
+    function exportConfig() {
+      const backupState = { ...state }; delete backupState.googleToken;
+      const blob = new Blob([JSON.stringify(backupState, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'command-center-backup.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+    function importConfig(event) {
+      const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedState = JSON.parse(e.target.result);
+          if (importedState.wallpaper) localStorage.setItem('dash_wallpaper', importedState.wallpaper);
+          if (importedState.googleClientId) localStorage.setItem('dash_google_client_id', importedState.googleClientId);
+          if (importedState.dials) localStorage.setItem('dash_dials', JSON.stringify(importedState.dials));
+          if (importedState.bookmarks) localStorage.setItem('dash_bookmarks', JSON.stringify(importedState.bookmarks));
+          if (importedState.services) localStorage.setItem('dash_services', JSON.stringify(importedState.services));
+          if (importedState.rssFeeds) localStorage.setItem('dash_rss_feeds', JSON.stringify(importedState.rssFeeds));
+          if (importedState.modules) localStorage.setItem('dash_modules', JSON.stringify(importedState.modules));
+          if (importedState.searchEngines) localStorage.setItem('dash_search_engines', JSON.stringify(importedState.searchEngines));
+          if (importedState.activeEngineId) localStorage.setItem('dash_active_engine', importedState.activeEngineId);
+          alert("Configuration imported successfully! The dashboard will now reload."); window.location.reload();
+        } catch (err) { alert("Invalid configuration file. Please select a valid JSON backup."); }
+      }; reader.readAsText(file);
+    }
+
+    // ===== SAVE CONFIGURATION =====
+    function saveSettings() {
+      const wp = document.getElementById('settings-wallpaper').value.trim();
+      const cid = document.getElementById('settings-client-id').value.trim();
+      const shapeVal = document.getElementById('settings-shape').value;
+      const sizeVal = document.getElementById('settings-size').value;
+      const gridColsVal = document.getElementById('settings-grid-cols').value;
+      const blurVal = document.getElementById('settings-blur-num').value;
+      const opacityVal = document.getElementById('settings-opacity-num').value;
+
+      if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
+      state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
+      
+      localStorage.setItem('dash_shape', shapeVal);
+      localStorage.setItem('dash_min_width', sizeVal);
+      localStorage.setItem('dash_grid_cols', gridColsVal);
+      localStorage.setItem('dash_blur', blurVal);
+      localStorage.setItem('dash_opacity', opacityVal);
+      applyGlassPreferences();
+
+      state.modules = { dials: document.getElementById('toggle-mod-dials').checked, services: document.getElementById('toggle-mod-services').checked, news: document.getElementById('toggle-mod-news').checked, builtin_cal: document.getElementById('toggle-mod-builtin-cal').checked, gcal: document.getElementById('toggle-mod-gcal').checked, bookmarks: document.getElementById('toggle-mod-bookmarks').checked };
+      localStorage.setItem('dash_modules', JSON.stringify(state.modules));
+      applyModuleVisibility(); initGoogleAuth(); closeModal('settings-modal');
+    }
+
+    function applyModuleVisibility() {
+      document.getElementById('section-dials').style.display = state.modules.dials ? 'flex' : 'none';
+      document.getElementById('section-services').style.display = state.modules.services ? 'flex' : 'none';
+      document.getElementById('section-news').style.display = state.modules.news ? 'flex' : 'none';
+      document.getElementById('nav-btn-builtin-cal').style.display = state.modules.builtin_cal ? 'inline-block' : 'none';
+      const gcalBtn = document.getElementById('nav-btn-calendar'); gcalBtn.style.display = state.modules.gcal ? 'inline-block' : 'none';
+      if (!state.modules.gcal) document.getElementById('calendar-drawer').classList.remove('open');
+      const bmBtn = document.getElementById('nav-btn-bookmarks'); bmBtn.style.display = state.modules.bookmarks ? 'inline-block' : 'none';
+      if (!state.modules.bookmarks) document.getElementById('bookmarks-drawer').classList.remove('open');
+    }
+
+    // ===== ADD SEARCH ENGINE =====
+    function addSearchEngine() {
+      const name = document.getElementById('new-se-name').value.trim(); const url = document.getElementById('new-se-url').value.trim(); const color = document.getElementById('new-se-color').value;
+      if (!name || !url) return;
+      const customColors = [color, '#12161c', color, '#12161c'];
+      state.searchEngines.push({ id: 'se_custom_' + Date.now(), name: name, url: url, colors: customColors, isCustom: true });
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
+      document.getElementById('new-se-name').value = ''; document.getElementById('new-se-url').value = ''; openSettingsModal(); renderEngineDropdown();
+    }
+    function removeSearchEngine(id) {
+      state.searchEngines = state.searchEngines.filter(e => e.id !== id);
+      if (state.activeEngineId === id) state.activeEngineId = 'se_google';
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines)); openSettingsModal(); renderEngineDropdown();
+    }
+
     // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
