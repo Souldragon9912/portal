@@ -922,6 +922,7 @@
 
     let rootSortable = null;
     let accordionSortable = null;
+    let accordionRenderFrame = null;
     let servicesSortable = null;
 
     // ===== SEARCH ENGINE LOGIC =====
@@ -944,12 +945,83 @@
       searchInput.value = '';
     });
 
-    // ===== SORTABLE.JS FOLDER MERGING LOGIC =====
+    // ===== SORTABLE.JS FOLDER MERGING + LAYOUT ORDER =====
+    function dialStableKey(dial) {
+      return `dial:${encodeURIComponent(dial.url || '')}|${encodeURIComponent(dial.name || '')}`;
+    }
+
+    function folderStableKey(folderName) {
+      return `folder:${encodeURIComponent(folderName)}`;
+    }
+
+    function reconcileDialLayout() {
+      const rootDials = state.dials.filter(d => !d.folder);
+      const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))];
+      const currentKeys = new Set([
+        ...rootDials.map(dialStableKey),
+        ...folders.map(folderStableKey)
+      ]);
+
+      let saved = [];
+      try {
+        saved = JSON.parse(localStorage.getItem('dash_dial_layout') || '[]');
+        if (!Array.isArray(saved)) saved = [];
+      } catch (err) {
+        saved = [];
+      }
+
+      const layout = [];
+      const seen = new Set();
+      saved.forEach(key => {
+        if (currentKeys.has(key) && !seen.has(key)) {
+          seen.add(key);
+          layout.push(key);
+        }
+      });
+      currentKeys.forEach(key => {
+        if (!seen.has(key)) {
+          seen.add(key);
+          layout.push(key);
+        }
+      });
+
+      localStorage.setItem('dash_dial_layout', JSON.stringify(layout));
+      return layout;
+    }
+
+    function saveDialLayoutFromDOM() {
+      const container = document.getElementById('speed-dials-container');
+      if (!container) return;
+      const layout = [];
+      const seen = new Set();
+
+      Array.from(container.children).forEach(node => {
+        let key = null;
+        if (node.classList.contains('dial-folder-tile') && node.dataset.folderName) {
+          key = folderStableKey(node.dataset.folderName);
+        } else if (node.classList.contains('draggable-wrapper') && node.dataset.dialData) {
+          try {
+            const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+            if (!data.folder) key = dialStableKey(data);
+          } catch (err) {}
+        }
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          layout.push(key);
+        }
+      });
+
+      if (layout.length) localStorage.setItem('dash_dial_layout', JSON.stringify(layout));
+    }
+
     function handleSortableMerge(draggedEl, targetEl) {
-        if (draggedEl.dataset.folderName) { renderDials(); return; } // Prevent folder-into-folder nesting
+        // Folders are sortable containers/items, not merge sources. Never re-render
+        // in the middle of a folder drag because that invalidates Sortable's DOM state.
+        if (draggedEl?.dataset?.folderName) return;
 
         const draggedData = JSON.parse(decodeURIComponent(draggedEl.dataset.dialData));
         const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
+        if (!activeDial) return;
         
         const targetFolderStr = targetEl.dataset.folderName;
         if (targetFolderStr) {
@@ -957,56 +1029,104 @@
         } else {
             const targetData = JSON.parse(decodeURIComponent(targetEl.dataset.dialData));
             const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
+            if (!tDial) return;
             const newFolder = prompt("Name your new folder:", "New Folder");
             if (newFolder && newFolder.trim()) {
                 activeDial.folder = newFolder.trim();
                 tDial.folder = newFolder.trim();
             } else {
-                return renderDials(); // canceled
+                renderDials(); // canceled
+                return;
             }
         }
         localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+        reconcileDialLayout();
         renderDials();
     }
 
-    // Recursively build the state array exactly based on the visual DOM sequence
+    // Rebuild the flat dial state plus the separate visual root-layout order.
+    // Folder members remain grouped, while folders themselves can move freely.
     function syncDialStateFromDOM() {
+      const container = document.getElementById('speed-dials-container');
+      if (!container) return;
+
       const newDials = [];
-      
-      Array.from(document.getElementById('speed-dials-container').children).forEach(node => {
-         if (node.classList.contains('draggable-wrapper') && node.dataset.dialData) {
-             const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-             data.folder = ''; 
-             newDials.push(data);
-         } else if (node.classList.contains('dial-folder-tile') && node.dataset.folderName) {
+      const newLayout = [];
+      const seenDials = new Set();
+      const seenLayout = new Set();
+      const accordion = document.querySelector('.expanded-folder-accordion');
+
+      Array.from(container.children).forEach(node => {
+         if (node.classList.contains('dial-folder-tile') && node.dataset.folderName) {
              const fname = node.dataset.folderName;
-             if (fname === openAccordionFolder) {
-                 const accordion = document.querySelector('.expanded-folder-accordion');
-                 if (accordion) {
-                     accordion.querySelectorAll('.draggable-wrapper').forEach(innerNode => {
-                         if(innerNode.dataset.dialData) {
-                             const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
-                             data.folder = fname; 
-                             newDials.push(data);
-                         }
-                     });
-                 }
-             } else {
-                 newDials.push(...state.dials.filter(d => d.folder === fname));
+             const folderKey = folderStableKey(fname);
+             if (!seenLayout.has(folderKey)) {
+               seenLayout.add(folderKey);
+               newLayout.push(folderKey);
              }
+
+             if (fname === openAccordionFolder && accordion) {
+                 accordion.querySelectorAll('.draggable-wrapper[data-dial-data]').forEach(innerNode => {
+                     try {
+                       const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
+                       data.folder = fname;
+                       const key = dialStableKey(data);
+                       if (!seenDials.has(key)) {
+                         seenDials.add(key);
+                         newDials.push(data);
+                       }
+                     } catch (err) {}
+                 });
+             } else {
+                 state.dials.filter(d => d.folder === fname).forEach(data => {
+                     const key = dialStableKey(data);
+                     if (!seenDials.has(key)) {
+                       seenDials.add(key);
+                       newDials.push({ ...data, folder: fname });
+                     }
+                 });
+             }
+         } else if (node.classList.contains('draggable-wrapper') && node.dataset.dialData) {
+             try {
+               const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+               data.folder = '';
+               const key = dialStableKey(data);
+               if (!seenDials.has(key)) {
+                 seenDials.add(key);
+                 newDials.push(data);
+               }
+               if (!seenLayout.has(key)) {
+                 seenLayout.add(key);
+                 newLayout.push(key);
+               }
+             } catch (err) {}
          }
       });
 
-      // Filter duplicates that may exist from cross-dragging
-      const uniqueDials = []; const map = new Map();
-      for (const item of newDials) {
-         const key = item.url + '|' + item.name;
-         if(!map.has(key)){ map.set(key, true); uniqueDials.push(item); }
-      }
-      
-      state.dials = uniqueDials; 
-      localStorage.setItem('dash_dials', JSON.stringify(state.dials)); 
-      renderDials(); // Rerender instantly deletes empty folders visually
+      // Keep anything not represented in the DOM rather than accidentally deleting it.
+      state.dials.forEach(data => {
+        const key = dialStableKey(data);
+        if (!seenDials.has(key)) {
+          seenDials.add(key);
+          newDials.push({ ...data });
+        }
+        if (!data.folder && !seenLayout.has(key)) {
+          seenLayout.add(key);
+          newLayout.push(key);
+        }
+        if (data.folder) {
+          const folderKey = folderStableKey(data.folder);
+          if (!seenLayout.has(folderKey)) {
+            seenLayout.add(folderKey);
+            newLayout.push(folderKey);
+          }
+        }
+      });
+
+      state.dials = newDials;
+      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+      if (newLayout.length) localStorage.setItem('dash_dial_layout', JSON.stringify(newLayout));
+      renderDials();
     }
 
     function syncServiceStateFromDOM() {
@@ -1080,28 +1200,41 @@
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
       
-      if (rootSortable) rootSortable.destroy();
-      if (accordionSortable) accordionSortable.destroy();
+      // Cancel any deferred accordion build from a previous render. Without this,
+      // rapid drag/rerender cycles can attach multiple Sortable instances to the
+      // same folder grid and make subsequent tile drags appear to stop working.
+      if (accordionRenderFrame !== null) {
+        cancelAnimationFrame(accordionRenderFrame);
+        accordionRenderFrame = null;
+      }
+      if (rootSortable) { rootSortable.destroy(); rootSortable = null; }
+      if (accordionSortable) { accordionSortable.destroy(); accordionSortable = null; }
 
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
 
       const grouped = { _root: [] };
+      const rootByKey = new Map();
       state.dials.forEach((dial, idx) => {
         dial._origIdx = idx; 
-        if (dial.folder) { if (!grouped[dial.folder]) grouped[dial.folder] = []; grouped[dial.folder].push(dial); } 
-        else { grouped._root.push(dial); }
+        if (dial.folder) {
+          if (!grouped[dial.folder]) grouped[dial.folder] = [];
+          grouped[dial.folder].push(dial);
+        } else {
+          grouped._root.push(dial);
+          rootByKey.set(dialStableKey(dial), dial);
+        }
       });
 
       container.innerHTML = '';
-      const renderedFolders = new Set();
       const allRenderNodes = [];
+      const layout = reconcileDialLayout();
 
-      Object.keys(grouped).sort().forEach(folderName => {
-        if (folderName === '_root') return;
-        const items = grouped[folderName];
-        if (items.length === 0) return; // Clean up empty folders instantly
-        
+      const folderNames = new Set(Object.keys(grouped).filter(name => name !== '_root' && grouped[name]?.length));
+      const renderedKeys = new Set();
+
+      function makeFolderTile(folderName) {
+        const items = grouped[folderName] || [];
         const folderTile = document.createElement('div');
         folderTile.className = 'dial-folder-tile draggable-wrapper';
         folderTile.dataset.folderName = folderName;
@@ -1114,17 +1247,44 @@
         }
 
         folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
-        
-        folderTile.addEventListener('click', (e) => {
-          // If trying to drag layout, do not expand
+        folderTile.addEventListener('click', () => {
           if (isEditMode) return;
           toggleAccordionFolder(folderName);
         });
+        return folderTile;
+      }
 
-        allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile });
+      layout.forEach(key => {
+        if (key.startsWith('folder:')) {
+          const folderName = decodeURIComponent(key.slice('folder:'.length));
+          if (folderNames.has(folderName) && !renderedKeys.has(key)) {
+            renderedKeys.add(key);
+            allRenderNodes.push({ type: 'folder', name: folderName, node: makeFolderTile(folderName) });
+          }
+        } else if (key.startsWith('dial:')) {
+          const dial = rootByKey.get(key);
+          if (dial && !renderedKeys.has(key)) {
+            renderedKeys.add(key);
+            allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
+          }
+        }
       });
 
-      grouped._root.forEach(dial => { allRenderNodes.push({ type: 'dial', node: createDialElement(dial) }); });
+      // Newly added items that don't yet exist in the saved layout get appended.
+      folderNames.forEach(folderName => {
+        const key = folderStableKey(folderName);
+        if (!renderedKeys.has(key)) {
+          renderedKeys.add(key);
+          allRenderNodes.push({ type: 'folder', name: folderName, node: makeFolderTile(folderName) });
+        }
+      });
+      grouped._root.forEach(dial => {
+        const key = dialStableKey(dial);
+        if (!renderedKeys.has(key)) {
+          renderedKeys.add(key);
+          allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
+        }
+      });
 
       const addWrapper = document.createElement('div');
       addWrapper.className = 'add-wrapper draggable-wrapper';
@@ -1135,7 +1295,8 @@
       
       // Inject Accordion if open
       if (openAccordionFolder) {
-        requestAnimationFrame(() => {
+        accordionRenderFrame = requestAnimationFrame(() => {
+           accordionRenderFrame = null;
            const activeTile = document.querySelector(`.dial-folder-tile[data-folder-name="${openAccordionFolder}"]`);
            if (activeTile) {
                const folderItems = grouped[openAccordionFolder] || [];
@@ -1174,6 +1335,10 @@
               if (!evt.related) return true;
               if (evt.related.classList.contains('add-wrapper') || evt.related.classList.contains('expanded-folder-accordion')) return false;
 
+              // A folder is a movable root item, not a merge source. Let it sort
+              // freely without triggering the tile-to-folder merge animation.
+              if (evt.item?.dataset?.folderName) return true;
+
               const rect = evt.related.getBoundingClientRect();
               const relX = originalEvent.clientX - rect.left;
               const relY = originalEvent.clientY - rect.top;
@@ -1189,10 +1354,11 @@
           },
           onEnd: function(evt) {
               const target = document.querySelector('.drag-folder-hover');
-              if (target) {
+              if (target && !evt.item?.dataset?.folderName) {
                   target.classList.remove('drag-folder-hover');
                   handleSortableMerge(evt.item, target);
               } else {
+                  if (target) target.classList.remove('drag-folder-hover');
                   syncDialStateFromDOM();
               }
           }
