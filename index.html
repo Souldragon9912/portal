@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Speed Dial</title>
+  <!-- Fixed layout/editor + resilient news-feed build -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -76,14 +77,15 @@
 
     /* --- Combined Top Nav & Dropdown Menus --- */
     .top-widget-container {
-      position: absolute; top: 20px; left: 20px; z-index: 50;
+      position: absolute; top: 20px; left: 20px; z-index: 80;
       display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
-      transition: transform 0.3s;
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
     .top-widget-container.edit-unlocked { cursor: grab; }
     .top-widget-container.edit-unlocked:active { cursor: grabbing; }
 
     .top-nav-bar {
+      position: relative;
       display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 10px 16px;
       background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border-glass); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); 
@@ -137,13 +139,13 @@
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
-    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 40; transition: border 0.3s; }
+    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 60; transition: border 0.3s, box-shadow 0.2s; }
     .search-box-wrapper.edit-unlocked { cursor: grab; border: 2px dashed var(--accent); }
     .search-box-wrapper.edit-unlocked:active { cursor: grabbing; }
     .search-box-wrapper::before { content: ""; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%; background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1)); transform: translate(-50%, -50%) rotate(0deg); animation: spin-border 4s linear infinite; z-index: 0; }
     .search-box { position: relative; z-index: 1; width: 100%; display: flex; gap: 10px; background: rgba(18, 22, 28, 0.95); padding: 8px; border-radius: 14px; }
     .search-box select, .search-box input { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-glass); padding: 10px 14px; border-radius: 10px; outline: none; transition: background 0.2s; }
-    .search-box input { flex: 1; font-size: 15px; }
+    .search-box input { flex: 1; font-size: 15px; padding-right: 74px; }
     .search-box input:focus { background: rgba(255, 255, 255, 0.1); }
 
     /* --- Movable Layout Sections --- */
@@ -151,8 +153,26 @@
     #section-services { background: var(--bg-glass) !important; backdrop-filter: blur(16px) !important; border: 1px solid var(--border-glass) !important; border-radius: 18px !important; padding: 24px !important; position: absolute; top: 420px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px; }
     #section-news { background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important; position: absolute; top: 680px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px; }
 
-    .main-panel.edit-mode-container { border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; cursor: grab; }
-    .main-panel.edit-mode-container:active { cursor: grabbing; }
+    .main-panel.edit-mode-container { border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; }
+    .layout-drag-handle {
+      display: none; align-items: center; justify-content: center; gap: 4px;
+      min-height: 24px; padding: 4px 8px; border-radius: 7px;
+      border: 1px solid rgba(88,166,255,0.35); background: rgba(88,166,255,0.12);
+      color: var(--accent); font-size: 11px; font-weight: 600;
+      cursor: grab; user-select: none; touch-action: none;
+    }
+    body.edit-mode .layout-drag-handle { display: inline-flex; }
+    .layout-drag-handle:active { cursor: grabbing; }
+    .top-nav-bar .layout-drag-handle { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); }
+    body.edit-mode .top-nav-bar { padding-left: 76px; }
+    .search-box-wrapper .layout-drag-handle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 4; }
+    .section-drag-grip { position: absolute; top: -32px; right: 0; }
+    #section-dials, #section-services, #section-news { position: absolute; }
+    .panel-header, .news-floating-header { position: relative; }
+    .panel-header .layout-drag-handle { margin-left: auto; }
+    .news-floating-header .layout-drag-handle { margin-left: auto; margin-right: 8px; }
+    .layout-dragging { z-index: 250 !important; cursor: grabbing !important; user-select: none !important; }
+    .layout-dragging .layout-drag-handle { cursor: grabbing; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
 
@@ -225,6 +245,9 @@
     .news-floating-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
     .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
     .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+    .rss-status { grid-column: 1 / -1; color: var(--text-muted); font-size: 12px; padding: 8px 2px; }
+    .rss-error-card { grid-column: 1 / -1; background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.22); border-radius: 12px; padding: 12px 14px; color: var(--text-muted); font-size: 12px; }
+    .rss-error-card strong { color: var(--danger); }
     .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
     .rss-item:hover { background: rgba(33, 38, 45, 0.95); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
     .rss-image { width: 100%; height: 150px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
@@ -321,8 +344,9 @@
   <!-- ========================================== -->
   <!--    MOVABLE TOP NAVIGATION & DROPDOWNS      -->
   <!-- ========================================== -->
-  <div class="top-widget-container" id="topNavWidget" draggable="false">
+  <div class="top-widget-container" id="topNavWidget">
     <div class="top-nav-bar">
+      <span id="topNavDragHandle" class="layout-drag-handle" title="Drag the control panel">⠿ Move</span>
       <div class="widget-toggles">
         <button class="nav-btn" id="nav-btn-calendar" onclick="toggleGcalDropdown()">🗓 G-Cal</button>
         <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleBookmarksDropdown()">📑 Bookmarks</button>
@@ -497,27 +521,31 @@
   <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock Sections</button>
 
   <main class="hero-container">
-    <div class="search-box-wrapper" id="searchWidget" draggable="false">
+    <div class="search-box-wrapper" id="searchWidget">
+      <span id="searchDragHandle" class="layout-drag-handle" title="Drag the search bar">⠿ Move</span>
       <form class="search-box" id="search-form">
         <select id="engine-select" onchange="changeActiveEngine(this.value)"></select>
         <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
       </form>
     </div>
 
-    <div class="main-panel" id="section-dials" draggable="false">
+    <div class="main-panel" id="section-dials">
+      <span class="layout-drag-handle section-drag-grip" data-layout-handle title="Drag the speed-dial section">⠿ Move</span>
       <div class="speed-dial-grid" id="speed-dials-container"></div>
     </div>
 
-    <div class="main-panel" id="section-services" draggable="false">
+    <div class="main-panel" id="section-services">
       <div class="panel-header">
         <span class="panel-title">🖥 Self-Hosted Services</span>
+        <span class="layout-drag-handle" data-layout-handle title="Drag the services section">⠿ Move</span>
       </div>
       <div class="services-grid" id="services-container"></div>
     </div>
 
-    <div class="main-panel" id="section-news" draggable="false" style="display: none;">
+    <div class="main-panel" id="section-news" style="display: none;">
       <div class="news-floating-header">
         <span class="news-title-clean" id="rssHeaderTitle">📡 Aggregated News Stream</span>
+        <span class="layout-drag-handle" data-layout-handle title="Drag the news section">⠿ Move</span>
         <button class="badge-btn" onclick="fetchRSS()">Refresh</button>
       </div>
       <div class="rss-feed-list" id="rssFeedList">
@@ -611,7 +639,7 @@
     // ===== APPLY USER FROSTED GLASS & SHAPE SETTINGS =====
     function applyGlassPreferences() {
       const shapeStr = localStorage.getItem('dash_shape') || '20px|none';
-      const [radius, clip] = shapeStr.split('|');
+      const [radius = '20px', clip = 'none'] = shapeStr.split('|');
       const blur = (localStorage.getItem('dash_blur') || '16') + 'px';
       const opacity = localStorage.getItem('dash_opacity') || '55';
       const minWidth = localStorage.getItem('dash_min_width') || '130px';
@@ -629,38 +657,128 @@
     }
     applyGlassPreferences();
 
-    // ===== DRAGGABLE WIDGET & SECTION POSITIONS (EDIT MODE ONLY) =====
-    function initDraggableWidget(widgetId, storageKey) {
+    // ===== MOVABLE WIDGET & SECTION POSITIONS =====
+    const layoutDragConfigs = [
+      { id: 'topNavWidget', key: 'dash_pos_topNavWidget', mode: 'whole', ignore: 'button, input, select, a, .dropdown-panel, [contenteditable="true"]' },
+      { id: 'searchWidget', key: 'dash_pos_searchWidget', mode: 'whole', ignore: 'button, input, select, a, [contenteditable="true"]' },
+      { id: 'section-dials', key: 'dash_pos_section_dials', handle: '.section-drag-grip' },
+      { id: 'section-services', key: 'dash_pos_section_services', handle: '[data-layout-handle]' },
+      { id: 'section-news', key: 'dash_pos_section_news', handle: '[data-layout-handle]' }
+    ];
+
+    function readSavedPosition(storageKey) {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!Number.isFinite(parsed?.x) || !Number.isFinite(parsed?.y)) return null;
+        return { x: parsed.x, y: parsed.y };
+      } catch (err) {
+        localStorage.removeItem(storageKey);
+        return null;
+      }
+    }
+
+    function saveWidgetPosition(storageKey, x, y) {
+      localStorage.setItem(storageKey, JSON.stringify({ x: Math.round(x), y: Math.round(y) }));
+    }
+
+    function restoreWidgetPosition(widget, storageKey) {
+      if (window.innerWidth <= 768) return;
+      const saved = readSavedPosition(storageKey);
+      if (!saved) return;
+      widget.style.transform = 'none';
+      widget.style.left = `${saved.x}px`;
+      widget.style.top = `${saved.y}px`;
+    }
+
+    function initDraggableWidget(widgetId, storageKey, options = {}) {
       const widget = document.getElementById(widgetId);
       if (!widget) return;
 
-      const savedPos = JSON.parse(localStorage.getItem(storageKey));
-      if (savedPos) {
-        widget.style.left = savedPos.x + 'px';
-        widget.style.top = savedPos.y + 'px';
-        widget.style.transform = 'none';
-      }
+      restoreWidgetPosition(widget, storageKey);
+      const handleSelector = options.handle || null;
+      const ignoreSelector = options.ignore || '';
+      let drag = null;
 
-      let offsetX, offsetY;
+      const shouldStart = (event) => {
+        if (!isEditMode || window.innerWidth <= 768 || event.button !== 0) return false;
+        if (handleSelector && !event.target.closest(handleSelector)) return false;
+        if (ignoreSelector && event.target.closest(ignoreSelector)) return false;
+        return true;
+      };
 
-      widget.addEventListener('dragstart', (e) => {
-        if (!isEditMode) { e.preventDefault(); return; }
+      widget.addEventListener('pointerdown', (event) => {
+        if (!shouldStart(event)) return;
         const rect = widget.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-      });
-
-      window.addEventListener('dragover', (e) => { e.preventDefault(); });
-
-      widget.addEventListener('dragend', (e) => {
-        if (!isEditMode) return;
-        const x = e.clientX - offsetX;
-        const y = e.clientY - offsetY;
-        widget.style.left = x + 'px';
-        widget.style.top = y + 'px';
+        const startLeft = rect.left + window.scrollX;
+        const startTop = rect.top + window.scrollY;
+        widget.style.position = 'absolute';
         widget.style.transform = 'none';
-        localStorage.setItem(storageKey, JSON.stringify({ x, y }));
+        widget.style.left = `${startLeft}px`;
+        widget.style.top = `${startTop}px`;
+        drag = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startLeft,
+          startTop,
+          width: rect.width,
+          height: rect.height
+        };
+        widget.classList.add('layout-dragging');
+        try { widget.setPointerCapture(event.pointerId); } catch (err) {}
+        event.preventDefault();
       });
+
+      widget.addEventListener('pointermove', (event) => {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const dx = event.clientX - drag.startX;
+        const dy = event.clientY - drag.startY;
+        const maxX = Math.max(0, document.documentElement.scrollWidth - drag.width);
+        const maxY = Math.max(0, document.documentElement.scrollHeight - drag.height);
+        const x = Math.min(Math.max(0, drag.startLeft + dx), maxX);
+        const y = Math.min(Math.max(0, drag.startTop + dy), maxY);
+        widget.style.left = `${x}px`;
+        widget.style.top = `${y}px`;
+      });
+
+      const finishDrag = (event) => {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const x = parseFloat(widget.style.left) || 0;
+        const y = parseFloat(widget.style.top) || 0;
+        saveWidgetPosition(storageKey, x, y);
+        widget.classList.remove('layout-dragging');
+        try { widget.releasePointerCapture(event.pointerId); } catch (err) {}
+        drag = null;
+      };
+
+      widget.addEventListener('pointerup', finishDrag);
+      widget.addEventListener('pointercancel', finishDrag);
+      window.addEventListener('resize', () => {
+        if (!isEditMode || window.innerWidth <= 768) return;
+        const saved = readSavedPosition(storageKey);
+        if (!saved) return;
+        const rect = widget.getBoundingClientRect();
+        const maxX = Math.max(0, document.documentElement.scrollWidth - rect.width);
+        const maxY = Math.max(0, document.documentElement.scrollHeight - rect.height);
+        const x = Math.min(saved.x, maxX);
+        const y = Math.min(saved.y, maxY);
+        widget.style.left = `${x}px`;
+        widget.style.top = `${y}px`;
+        saveWidgetPosition(storageKey, x, y);
+      });
+    }
+
+    function resetLayoutPositions() {
+      [
+        'dash_pos_topNavWidget',
+        'dash_pos_searchWidget',
+        'dash_pos_section_dials',
+        'dash_pos_section_services',
+        'dash_pos_section_news'
+      ].forEach(key => localStorage.removeItem(key));
+      window.location.reload();
     }
 
     let isEditMode = false;
@@ -668,45 +786,35 @@
       isEditMode = !isEditMode;
       const btn = document.getElementById('editModeBtn');
       const floatBtn = document.getElementById('floatingLockBtn');
-      const topNav = document.getElementById('topNavWidget');
-      const searchWidget = document.getElementById('searchWidget');
-      const dialsSection = document.getElementById('section-dials');
-      const servicesSection = document.getElementById('section-services');
-      const newsSection = document.getElementById('section-news');
-      
-      if (isEditMode) {
-        if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Sections'; }
-        if (floatBtn) floatBtn.classList.add('show');
-        
-        topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
-        searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
-        dialsSection.setAttribute('draggable', 'true'); dialsSection.classList.add('edit-mode-container');
-        servicesSection.setAttribute('draggable', 'true'); servicesSection.classList.add('edit-mode-container');
-        newsSection.setAttribute('draggable', 'true'); newsSection.classList.add('edit-mode-container');
-        
-        closeAllDropdownsExcept(''); 
-        document.body.classList.add('edit-mode');
-        
-        // Lock Sortable while dragging massive layout blocks
-        if(rootSortable) rootSortable.option("disabled", true);
-        if(accordionSortable) accordionSortable.option("disabled", true);
-        if(servicesSortable) servicesSortable.option("disabled", true);
+      const targets = [
+        document.getElementById('topNavWidget'),
+        document.getElementById('searchWidget'),
+        document.getElementById('section-dials'),
+        document.getElementById('section-services'),
+        document.getElementById('section-news')
+      ].filter(Boolean);
 
+      if (isEditMode) {
+        if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Layout'; }
+        if (floatBtn) { floatBtn.classList.add('show'); floatBtn.innerText = '🔒 Lock Layout'; }
+        targets.forEach(el => el.classList.add('edit-unlocked'));
+        targets.filter(el => el.classList.contains('main-panel')).forEach(el => el.classList.add('edit-mode-container'));
+        closeAllDropdownsExcept('');
+        document.body.classList.add('edit-mode');
+        // Tile sorting remains available. The major-section mover is independent from SortableJS.
+        if (rootSortable) rootSortable.option('disabled', false);
+        if (accordionSortable) accordionSortable.option('disabled', false);
+        if (servicesSortable) servicesSortable.option('disabled', false);
       } else {
         if (btn) { btn.classList.remove('active-edit'); btn.style.background = '#333'; btn.innerText = '✏ Unlock Layout'; }
-        if (floatBtn) floatBtn.classList.remove('show');
-        
-        topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
-        searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
-        dialsSection.setAttribute('draggable', 'false'); dialsSection.classList.remove('edit-mode-container');
-        servicesSection.setAttribute('draggable', 'false'); servicesSection.classList.remove('edit-mode-container');
-        newsSection.setAttribute('draggable', 'false'); newsSection.classList.remove('edit-mode-container');
+        if (floatBtn) { floatBtn.classList.remove('show'); floatBtn.innerText = '🔒 Lock Layout'; }
+        targets.forEach(el => {
+          el.classList.remove('edit-unlocked', 'edit-mode-container', 'layout-dragging');
+        });
         document.body.classList.remove('edit-mode');
-
-        // Re-enable native Sortable tile dragging
-        if(rootSortable) rootSortable.option("disabled", false);
-        if(accordionSortable) accordionSortable.option("disabled", false);
-        if(servicesSortable) servicesSortable.option("disabled", false);
+        if (rootSortable) rootSortable.option('disabled', false);
+        if (accordionSortable) accordionSortable.option('disabled', false);
+        if (servicesSortable) servicesSortable.option('disabled', false);
       }
     }
 
@@ -977,7 +1085,7 @@
         for (let i = 0; i < Math.min(items.length, 4); i++) {
           let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
           let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
-          previewImgs += `<img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="icon" draggable="false">`;
+          previewImgs += `<img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="icon">`;
         }
 
         folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
@@ -1021,7 +1129,7 @@
                // PERFECT SORTABLE ACCORDION BINDING
                accordionSortable = new Sortable(accordion.querySelector('.expanded-folder-inner-grid'), {
                    group: 'dials', // Allow dragging in and out of folder
-                   disabled: isEditMode, // Lock tile sorting if moving sections
+                   disabled: false,
                    animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-dial-tile',
                    ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                    onEnd: syncDialStateFromDOM
@@ -1033,11 +1141,12 @@
       // PERFECT SORTABLE ROOT BINDING
       rootSortable = new Sortable(container, {
           group: 'dials', // Shared group for cross-folder drag
-          disabled: isEditMode, // Lock tile sorting if moving sections
+          disabled: false,
           animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper, .expanded-folder-accordion',
           ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
           onMove: function(evt, originalEvent) {
               document.querySelectorAll('.drag-folder-hover').forEach(el => el.classList.remove('drag-folder-hover'));
+              if (!evt.related) return true;
               if (evt.related.classList.contains('add-wrapper') || evt.related.classList.contains('expanded-folder-accordion')) return false;
 
               const rect = evt.related.getBoundingClientRect();
@@ -1091,8 +1200,8 @@
 
       return `
         <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
-          <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener" draggable="false">
-             <img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="${dial.name}" draggable="false" />
+          <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener">
+             <img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="${dial.name}" />
              <span>${dial.name}</span>
           </a>
           ${editBtnHtml}${deleteBtnHtml}
@@ -1128,7 +1237,7 @@
       pingServices();
 
       servicesSortable = new Sortable(container, {
-          disabled: isEditMode, // Lock tile sorting if moving sections
+          disabled: false,
           animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
           ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
           onEnd: syncServiceStateFromDOM
@@ -1154,161 +1263,327 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== MULTI-PROXY BULLETPROOF RSS ENGINE =====
+    // ===== RESILIENT RSS / NEWS ENGINE =====
     const rssDirectFeeds = {
       'theverge.com': 'https://www.theverge.com/rss/index.xml',
       '9to5google.com': 'https://9to5google.com/feed/',
       'linustechtips.com': 'https://linustechtips.com/rss/',
       'bleepingcomputer.com': 'https://www.bleepingcomputer.com/feed/',
       'arstechnica.com': 'https://feeds.arstechnica.com/arstechnica/index',
-      'hackernews.com': 'https://news.ycombinator.com/rss'
+      'hackernews.com': 'https://news.ycombinator.com/rss',
+      'news.ycombinator.com': 'https://news.ycombinator.com/rss'
     };
 
-    function resolveRssUrl(userUrl) {
-      let hostname;
-      try { hostname = new URL(userUrl).hostname.replace(/^www\./, ''); } catch(e) { return userUrl; }
-      if (rssDirectFeeds[hostname]) return rssDirectFeeds[hostname];
-      return userUrl; 
+    const FEED_TIMEOUT = 8500;
+    const MAX_ITEMS_PER_SOURCE = 12;
+    const MAX_TOTAL_ITEMS = 30;
+
+    function normalizeFeedInput(inputUrl) {
+      let url = inputUrl.trim();
+      if (!url) return null;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      try {
+        return new URL(url).href;
+      } catch (err) {
+        return null;
+      }
     }
 
-    const fetchRSS = async () => {
+    function resolveFeedCandidates(userUrl) {
+      const normalized = normalizeFeedInput(userUrl);
+      if (!normalized) return [];
+      const url = new URL(normalized);
+      const hostname = url.hostname.replace(/^www\./, '');
+      const candidates = [];
+      const push = value => { if (value && !candidates.includes(value)) candidates.push(value); };
+      if (rssDirectFeeds[hostname]) push(rssDirectFeeds[hostname]);
+
+      const path = url.pathname.toLowerCase();
+      const looksLikeFeed = /\.(xml|rss|atom)(?:$|\?)/i.test(path) || /\/feed(?:\/|$)/i.test(path) || /\/rss(?:\/|$)/i.test(path) || /\/atom(?:\.xml)?(?:\/|$)/i.test(path);
+      if (looksLikeFeed) push(url.href);
+
+      const origin = url.origin;
+      ['/feed', '/feed/', '/rss', '/rss/', '/rss.xml', '/feed.xml', '/atom.xml', '/index.xml'].forEach(pathName => push(origin + pathName));
+      push(url.href);
+      return candidates.slice(0, 10);
+    }
+
+    function withTimeout(promiseFactory, timeout = FEED_TIMEOUT) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Request timed out')), timeout);
+        Promise.resolve().then(promiseFactory).then(value => { clearTimeout(timer); resolve(value); }).catch(err => { clearTimeout(timer); reject(err); });
+      });
+    }
+
+    async function requestText(url) {
+      return withTimeout(async () => {
+        const response = await fetch(url, { cache: 'no-store', headers: { 'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, text/plain, */*' } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.text();
+      });
+    }
+
+    async function fetchViaAllOrigins(feedUrl) {
+      return withTimeout(async () => {
+        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`AllOrigins HTTP ${response.status}`);
+        return await response.text();
+      });
+    }
+
+    async function fetchViaCorsProxy(feedUrl) {
+      return withTimeout(async () => {
+        const response = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(feedUrl)}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`CorsProxy HTTP ${response.status}`);
+        return await response.text();
+      });
+    }
+
+    async function fetchViaRss2Json(feedUrl) {
+      return withTimeout(async () => {
+        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`RSS2JSON HTTP ${response.status}`);
+        const data = await response.json();
+        if (data.status !== 'ok') throw new Error(data.message || 'RSS2JSON returned an error');
+        return data;
+      });
+    }
+
+    function absoluteUrl(candidate, baseUrl) {
+      if (!candidate) return '';
+      try { return new URL(candidate, baseUrl).href; } catch (err) { return candidate; }
+    }
+
+    function extractImageFromNode(item, baseUrl) {
+      const mediaContent = item.getElementsByTagNameNS('*', 'content')[0];
+      const mediaThumb = item.getElementsByTagNameNS('*', 'thumbnail')[0];
+      const enclosure = item.getElementsByTagName('enclosure')[0];
+      const fromNode = mediaContent?.getAttribute('url') || mediaThumb?.getAttribute('url') || enclosure?.getAttribute('url') || '';
+      if (fromNode) return absoluteUrl(fromNode, baseUrl);
+
+      const htmlNode = item.getElementsByTagName('content:encoded')[0] || item.getElementsByTagName('description')[0] || item.getElementsByTagName('content')[0];
+      if (htmlNode?.textContent) {
+        try {
+          const doc = new DOMParser().parseFromString(htmlNode.textContent, 'text/html');
+          const image = doc.querySelector('img[src]');
+          if (image) return absoluteUrl(image.getAttribute('src'), baseUrl);
+        } catch (err) {}
+      }
+      return '';
+    }
+
+    function parseXmlFeed(xmlText, feedUrl, fallbackName) {
+      const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+      if (xmlDoc.querySelector('parsererror')) throw new Error('Invalid XML feed');
+      const channelTitle = xmlDoc.getElementsByTagName('channel')[0]?.getElementsByTagName('title')[0]?.textContent || xmlDoc.getElementsByTagName('feed')[0]?.getElementsByTagName('title')[0]?.textContent || fallbackName;
+      const items = [
+        ...Array.from(xmlDoc.getElementsByTagName('item')),
+        ...Array.from(xmlDoc.getElementsByTagName('entry'))
+      ];
+      if (!items.length) throw new Error('No RSS/Atom items found');
+      const articles = items.slice(0, MAX_ITEMS_PER_SOURCE).map(item => {
+        const title = item.getElementsByTagName('title')[0]?.textContent?.trim() || 'Untitled Article';
+        const linkNode = item.getElementsByTagName('link')[0];
+        const link = absoluteUrl(linkNode?.getAttribute('href') || linkNode?.textContent?.trim() || '#', feedUrl);
+        const dateNode = item.getElementsByTagName('pubDate')[0] || item.getElementsByTagName('updated')[0] || item.getElementsByTagName('published')[0] || item.getElementsByTagName('dc:date')[0];
+        const parsedTimestamp = dateNode ? Date.parse(dateNode.textContent.trim()) : NaN;
+        return {
+          title,
+          link,
+          timestamp: Number.isFinite(parsedTimestamp) ? parsedTimestamp : 0,
+          sourceName: channelTitle,
+          imgUrl: extractImageFromNode(item, feedUrl)
+        };
+      });
+      return { sourceName: channelTitle, articles };
+    }
+
+    function normalizeRss2Json(data, rawUrl) {
+      const sourceName = data.feed?.title || new URL(rawUrl).hostname.replace(/^www\./, '');
+      const articles = (data.items || []).slice(0, MAX_ITEMS_PER_SOURCE).map(item => ({
+        title: (item.title || 'Untitled Article').trim(),
+        link: absoluteUrl(item.link || '#', rawUrl),
+        timestamp: Number.isFinite(Date.parse(item.pubDate || item.isoDate || '')) ? Date.parse(item.pubDate || item.isoDate) : 0,
+        sourceName,
+        imgUrl: absoluteUrl(item.thumbnail || item.enclosure?.link || '', rawUrl)
+      }));
+      return { sourceName, articles };
+    }
+
+    async function fetchOneFeed(rawUrl) {
+      const candidates = resolveFeedCandidates(rawUrl);
+      if (!candidates.length) throw new Error('Invalid feed/site URL');
+      const fallbackName = (() => { try { return new URL(rawUrl).hostname.replace(/^www\./, ''); } catch (e) { return rawUrl; } })();
+      const errors = [];
+
+      for (const feedUrl of candidates) {
+        try {
+          const data = await fetchViaRss2Json(feedUrl);
+          const normalized = normalizeRss2Json(data, rawUrl);
+          if (normalized.articles.length) return normalized;
+        } catch (err) { errors.push(err.message); }
+      }
+
+      for (const feedUrl of candidates) {
+        const attempts = [
+          () => requestText(feedUrl),
+          () => fetchViaAllOrigins(feedUrl),
+          () => fetchViaCorsProxy(feedUrl)
+        ];
+        for (const attempt of attempts) {
+          try {
+            const xmlText = await attempt();
+            const parsed = parseXmlFeed(xmlText, feedUrl, fallbackName);
+            if (parsed.articles.length) return parsed;
+          } catch (err) { errors.push(err.message); }
+        }
+      }
+
+      throw new Error(errors.slice(-3).join(' • ') || 'No compatible RSS/Atom feed found');
+    }
+
+    function dedupeArticles(articles) {
+      const seen = new Set();
+      const output = [];
+      for (const article of articles) {
+        const key = article.link && article.link !== '#' ? article.link : `${article.sourceName}|${article.title}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        output.push(article);
+      }
+      return output;
+    }
+
+    async function fetchRSS() {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
       if (!el) return;
-      const urls = state.rssFeeds;
+      const urls = [...state.rssFeeds];
 
-      if (urls.length === 0) {
-        el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">No active feeds. Open settings to add your favorite news sites.</div>';
-        if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
+      if (!urls.length) {
+        el.innerHTML = '<div class="rss-status">No active feeds. Open Settings → Manage News Feeds to add a site or RSS URL.</div>';
+        if (titleEl) titleEl.textContent = '📡 Aggregated News Stream';
         return;
       }
 
-      el.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; padding: 10px;">Synchronizing aggregated news nodes...</div>';
-
-      const feedPromises = urls.map(async (rawUrl) => {
+      el.innerHTML = '<div class="rss-status">Synchronizing news sources…</div>';
+      const results = await Promise.all(urls.map(async rawUrl => {
         try {
-          const feedUrl = resolveRssUrl(rawUrl);
+          const result = await fetchOneFeed(rawUrl);
+          return { ok: true, rawUrl, ...result };
+        } catch (error) {
+          console.error('News feed failed:', rawUrl, error);
+          return { ok: false, rawUrl, error: error.message || 'Feed unavailable' };
+        }
+      }));
 
-          try {
-             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
-             const data = await r2j.json();
-             if (data.status === 'ok') {
-               return data.items.map(item => ({
-                 title: item.title, link: item.link,
-                 timestamp: new Date(item.pubDate).getTime(),
-                 sourceName: data.feed.title || new URL(rawUrl).hostname,
-                 imgUrl: item.thumbnail || item.enclosure?.link || ''
-               }));
-             }
-          } catch(e) {}
-
-          const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
-          const proxyData = await proxyRes.json();
-          if (proxyData && proxyData.contents) {
-             let parser = new DOMParser();
-             let xmlDoc = parser.parseFromString(proxyData.contents, "text/xml");
-             const channelTitleEl = xmlDoc.getElementsByTagName("channel")[0] || xmlDoc.getElementsByTagName("feed")[0];
-             const sourceName = channelTitleEl?.getElementsByTagName("title")[0]?.textContent || new URL(rawUrl).hostname;
-             let items = Array.from(xmlDoc.getElementsByTagName("item")).concat(Array.from(xmlDoc.getElementsByTagName("entry")));
-             
-             return items.map(item => {
-                const title = item.getElementsByTagName("title")[0]?.textContent || "Untitled Article";
-                let link = "#"; const linkEl = item.getElementsByTagName("link")[0];
-                if (linkEl) link = linkEl.getAttribute("href") || linkEl.textContent || "#";
-
-                const dateEl = item.getElementsByTagName("pubDate")[0] || item.getElementsByTagName("updated")[0] || item.getElementsByTagName("published")[0];
-                const timestamp = dateEl ? new Date(dateEl.textContent).getTime() : 0;
-                
-                let imgUrl = '';
-                const enclosure = item.getElementsByTagName("enclosure")[0];
-                if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
-                if (!imgUrl) {
-                  const descNode = item.getElementsByTagName("description")[0] || item.getElementsByTagName("content")[0];
-                  const imgMatch = descNode ? descNode.textContent.match(/<img[^>]+src="([^">]+)"/i) : null;
-                  if (imgMatch && imgMatch[1]) imgUrl = imgMatch[1];
-                }
-                return { title, link, timestamp, sourceName, imgUrl };
-             });
-          }
-          return [];
-        } catch (err) { console.error(err); return []; }
-      });
-
-      const sourceDecks = await Promise.all(feedPromises);
-      
-      let masterArticleDeck = [];
-      let maxLength = Math.max(...sourceDecks.map(deck => deck.length), 0);
-
-      for (let i = 0; i < maxLength; i++) {
-        sourceDecks.forEach(deck => {
-          if (deck[i]) masterArticleDeck.push(deck[i]);
-        });
-      }
+      const articles = dedupeArticles(results.filter(r => r.ok).flatMap(r => r.articles || []))
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+        .slice(0, MAX_TOTAL_ITEMS);
+      const failures = results.filter(r => !r.ok);
 
       el.innerHTML = '';
-      if (titleEl) titleEl.innerText = '📡 Aggregated News Stream';
-      if (masterArticleDeck.length === 0) {
-        el.innerHTML = '<div style="color: var(--danger); font-size: 0.9rem; padding: 10px;">⚠️ Failed to parse feeds. Ensure URLs point directly to RSS or use compatible sites.</div>';
-        return;
+      if (titleEl) titleEl.textContent = `📡 News Stream · ${results.filter(r => r.ok).length}/${results.length} sources`;
+
+      if (!articles.length) {
+        const status = document.createElement('div');
+        status.className = 'rss-error-card';
+        status.textContent = 'No articles could be loaded. Check the feed/site URLs or try Refresh again.';
+        el.appendChild(status);
       }
 
-      const maxDisplayCount = Math.min(masterArticleDeck.length, 24);
-      for (let i = 0; i < maxDisplayCount; i++) {
-        const art = masterArticleDeck[i];
-        let formattedDate = art.timestamp ? new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : "Recent";
-        
+      for (const failure of failures) {
+        const card = document.createElement('div');
+        card.className = 'rss-error-card';
+        const strong = document.createElement('strong');
+        strong.textContent = 'Feed unavailable: ';
+        card.append(strong, document.createTextNode(`${failure.rawUrl} — ${failure.error}`));
+        el.appendChild(card);
+      }
+
+      for (const art of articles) {
+        if (!/^https?:\/\//i.test(art.link)) continue;
         const card = document.createElement('a');
         card.className = 'rss-item';
         card.href = art.link;
         card.target = '_blank';
-        card.rel = 'noopener';
-        const imgHtml = art.imgUrl ? `<img src="${art.imgUrl}" class="rss-image" alt="Cover">` : `<div class="rss-image"></div>`;
-        card.innerHTML = `
-          ${imgHtml}
-          <div class="rss-meta-block">
-            <div class="rss-title">${art.title}</div>
-            <div class="rss-source-date">
-              <span class="rss-source-tag">${art.sourceName}</span>
-              <span class="rss-date">${formattedDate}</span>
-            </div>
-          </div>
-        `;
+        card.rel = 'noopener noreferrer';
+
+        if (art.imgUrl && /^https?:\/\//i.test(art.imgUrl)) {
+          const img = document.createElement('img');
+          img.className = 'rss-image';
+          img.src = art.imgUrl;
+          img.alt = '';
+          img.loading = 'lazy';
+          img.referrerPolicy = 'no-referrer';
+          img.addEventListener('error', () => img.remove());
+          card.appendChild(img);
+        } else {
+          const placeholder = document.createElement('div');
+          placeholder.className = 'rss-image';
+          card.appendChild(placeholder);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'rss-meta-block';
+        const title = document.createElement('div');
+        title.className = 'rss-title';
+        title.textContent = art.title;
+        const sourceDate = document.createElement('div');
+        sourceDate.className = 'rss-source-date';
+        const source = document.createElement('span');
+        source.className = 'rss-source-tag';
+        source.textContent = art.sourceName || 'News';
+        const date = document.createElement('span');
+        date.className = 'rss-date';
+        date.textContent = art.timestamp ? new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recent';
+        sourceDate.append(source, date);
+        meta.append(title, sourceDate);
+        card.appendChild(meta);
         el.appendChild(card);
       }
-    };
+
+      localStorage.setItem('dash_rss_last_fetch', String(Date.now()));
+    }
 
     const renderRSSManager = () => {
       const grid = document.getElementById('rssManagerGrid');
       if (!grid) return;
       grid.innerHTML = '';
       if (state.rssFeeds.length === 0) {
-        grid.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; padding: 6px; grid-column: 1 / -1;">No feeds active. Paste a URL above to add one.</div>';
+        grid.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; padding: 6px; grid-column: 1 / -1;">No feeds active. Paste a website or RSS URL above to add one.</div>';
         return;
       }
       state.rssFeeds.forEach((url, index) => {
         const item = document.createElement('div');
         item.className = 'rss-manager-item';
         item.title = url;
-        let iconSrc = "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/svg%3E";
+        let iconSrc = GLOBE_SVG;
         try {
           const d = new URL(url).hostname;
-          iconSrc = `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+          iconSrc = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=64`;
         } catch (e) {}
-        item.innerHTML = `
-          <button class="rss-delete-btn" onclick="removeRSSFeed(${index})">&times;</button>
-          <img src="${iconSrc}" onerror="this.style.display='none'" alt="site-icon">
-        `;
+        const button = document.createElement('button');
+        button.className = 'rss-delete-btn';
+        button.type = 'button';
+        button.title = `Remove ${url}`;
+        button.textContent = '×';
+        button.addEventListener('click', () => removeRSSFeed(index));
+        const img = document.createElement('img');
+        img.src = iconSrc;
+        img.onerror = () => { img.src = GLOBE_SVG; };
+        img.alt = 'site icon';
+        item.append(button, img);
         grid.appendChild(item);
       });
     };
 
     const addRSSFeed = () => {
       const input = document.getElementById('newRssInput');
-      let url = input.value.trim();
-      if (!url) return;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
-      if (!state.rssFeeds.includes(url)) {
-        state.rssFeeds.push(url);
+      const normalized = normalizeFeedInput(input.value);
+      if (!normalized) return alert('Please enter a valid website or RSS URL.');
+      if (!state.rssFeeds.includes(normalized)) {
+        state.rssFeeds.push(normalized);
         localStorage.setItem('dash_rss_feeds', JSON.stringify(state.rssFeeds));
         renderRSSManager();
         fetchRSS();
@@ -1603,12 +1878,20 @@
     // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
+      initDraggableWidget('topNavWidget', 'dash_pos_topNavWidget', { mode: 'whole', ignore: 'button, input, select, a, .dropdown-panel, [contenteditable="true"]' });
+      initDraggableWidget('searchWidget', 'dash_pos_searchWidget', { mode: 'whole', ignore: 'button, input, select, a, [contenteditable="true"]' });
+      initDraggableWidget('section-dials', 'dash_pos_section_dials', { handle: '.section-drag-grip' });
+      initDraggableWidget('section-services', 'dash_pos_section_services', { handle: '[data-layout-handle]' });
+      initDraggableWidget('section-news', 'dash_pos_section_news', { handle: '[data-layout-handle]' });
+
       renderEngineDropdown(); 
       renderDials(); 
       renderServices(); 
       renderBookmarks(); 
+      renderRSSManager();
       applyModuleVisibility();
       if (state.modules.news) fetchRSS();
+      setInterval(() => { if (state.modules.news && !document.hidden) fetchRSS(); }, 10 * 60 * 1000);
       setTimeout(initGoogleAuth, 500);
     });
   </script>
