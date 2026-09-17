@@ -53,14 +53,20 @@
       position: relative;
     }
 
-    @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes smoothSlideDown {
+      from { opacity: 0; transform: scaleY(0.9) translateY(-20px); }
+      to { opacity: 1; transform: scaleY(1) translateY(0); }
     }
     @keyframes spin-border {
       0% { transform: translate(-50%, -50%) rotate(0deg); }
       100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* THE FLASHING BLUE FOLDER MERGE ANIMATION */
     @keyframes folderMergePulse {
       0% { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); background-color: rgba(88, 166, 255, 0.15); }
       50% { box-shadow: 0 0 0 4px var(--accent) inset, 0 0 35px rgba(88, 166, 255, 0.9); background-color: rgba(88, 166, 255, 0.4); }
@@ -97,6 +103,7 @@
     }
     .dropdown-calendar.open { max-height: 400px; opacity: 1; pointer-events: auto; padding: 20px; border-color: var(--border-glass); }
     
+    .generic-calendar { display: flex; flex-direction: column; gap: 6px; width: 100%; }
     .cal-week-row {
       display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; width: 100%; text-align: center;
       opacity: 0; transform: translateY(-10px); transition: all 0.3s ease;
@@ -104,10 +111,20 @@
     .dropdown-calendar.open .cal-week-row { opacity: 1; transform: translateY(0); }
     
     .cal-day-header { font-size: 11px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; }
-    .cal-day { display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; padding: 8px 0; margin-bottom: 6px; }
+    .cal-day { display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; padding: 8px 0; }
     .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.1); }
     .cal-day.empty { background: transparent; }
     .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
+
+    /* --- Floating Bottom-Right Lock & Save Button --- */
+    .floating-lock-btn {
+      position: fixed; bottom: 30px; right: 30px; background: #ff9500; color: white; padding: 14px 24px;
+      border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+      cursor: pointer; z-index: 300; border: none; display: none; align-items: center; gap: 8px;
+      transition: transform 0.2s, background 0.2s; animation: fadeInSlide 0.3s ease-out;
+    }
+    .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
+    .floating-lock-btn.show { display: flex; }
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
@@ -127,24 +144,11 @@
 
     .main-panel.edit-mode-container { border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; cursor: grab; }
     .main-panel.edit-mode-container:active { cursor: grabbing; }
-
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
-    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
-    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; justify-content: center; position: relative; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); justify-content: center; gap: 14px; width: 100%; }
-
-    /* --- Floating Lock & Save Button --- */
-    .floating-lock-btn {
-      position: fixed; bottom: 30px; right: 30px; background: #ff9500; color: white; padding: 14px 24px;
-      border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,0.6);
-      cursor: pointer; z-index: 300; border: none; display: none; align-items: center; gap: 8px;
-      transition: transform 0.2s, background 0.2s; animation: fadeInSlide 0.3s ease-out;
-    }
-    .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
-    .floating-lock-btn.show { display: flex; }
 
     /* --- PURE NATIVE DRAGGABLE TILE PHYSICS --- */
     .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -191,12 +195,12 @@
     .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
 
-    /* In-Grid Row Breakdown Accordion */
+    /* In-Grid Row Breakdown Accordion (Headerless) */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
       background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: none !important; box-shadow: none !important;
       padding: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column;
-      transform-origin: top center; animation: smoothSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; overflow: hidden;
+      transform-origin: top center; animation: smoothSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; overflow: hidden;
     }
     .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); justify-content: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
     
@@ -226,13 +230,6 @@
     .rss-date { font-family: monospace; font-size: 11px; }
 
     /* --- Modals & Drawers --- */
-    .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
-    .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-    .rss-manager-item:hover { transform: scale(1.05); }
-    .rss-manager-item img { width: 26px; height: 26px; border-radius: 6px; }
-    .rss-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; border: none; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: background 0.2s; }
-    .rss-delete-btn:hover { background: #dc2626; }
-    
     .drawer { position: fixed; top: 0; bottom: 0; width: 440px; max-width: 90vw; background: rgba(13, 17, 23, 0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border-glass); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     .drawer-right { right: 0; transform: translateX(100%); }
     .drawer-right.open { transform: translateX(0); }
@@ -299,7 +296,7 @@
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
       #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
-      
+      .inline-calendar-wrapper { display: none !important; }
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
       .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
       .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
@@ -307,7 +304,6 @@
       .service-card .desc { display: none; }
       .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
       .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 10px; }
-
       #section-news { margin-top: 20px; }
       .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
     }
@@ -325,6 +321,7 @@
         <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
       </div>
       <div style="display: flex; align-items: center; margin-left: 10px;">
+        <!-- Clock toggles the built-in calendar -->
         <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
         <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
       </div>
@@ -332,7 +329,7 @@
     
     <!-- The Cascading Built-in Calendar -->
     <div class="dropdown-calendar" id="inline-calendar-wrapper">
-      <!-- Calendar dynamically injected here -->
+      <div class="generic-calendar" id="generic-calendar-grid"></div>
     </div>
   </div>
 
@@ -583,20 +580,18 @@
       <div class="form-group"><label>Folder (Optional)</label><input type="text" id="dial-folder" placeholder="e.g. Social, Work..." list="dial-folder-list" /></div>
       <datalist id="dial-folder-list"></datalist>
       
-      <!-- Icon Setup Form -->
+      <!-- Icon Search -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <label style="color: var(--text-main); font-weight: 500;">Custom Icon / Image</label>
-          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons8</button>
-        </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from Icons8.</p>
+        <label style="color: var(--text-main); font-weight: 500;">Search Official Icons (Powered by Iconify)</label>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Search for an app name (e.g. ubuntu, plex) to select an icon, or paste a URL below.</p>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="dial-img" placeholder="App name or https://...png" style="flex: 1;" oninput="previewIcon('add')" />
+          <input type="text" id="add-icon-search-input" placeholder="e.g. portainer" style="flex: 1;" onkeyup="if(event.key==='Enter') searchIcons('add')" />
+          <button class="badge-btn" type="button" onclick="searchIcons('add')">Search</button>
         </div>
-        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
-          <img id="add-icon-img" src="" style="width: 32px; height: 32px; border-radius: 6px; display: none; object-fit: cover;" />
-          <span id="add-icon-status" style="font-size: 12px; color: var(--text-muted);"></span>
-        </div>
+        <div id="add-icon-results" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-top: 8px; display: none;"></div>
+        
+        <label style="margin-top: 10px;">Or Custom Image URL</label>
+        <input type="text" id="dial-img" placeholder="https://..." />
       </div>
 
       <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('dial-modal')">Cancel</button><button class="btn-primary" onclick="saveNewDial()">Add Link</button></div>
@@ -614,20 +609,18 @@
       <div class="form-group"><label>URL</label><input type="url" id="edit-dial-url" /></div>
       <div class="form-group"><label>Folder (Optional)</label><input type="text" id="edit-dial-folder" list="dial-folder-list" /></div>
       
-      <!-- Icon Setup Form -->
+      <!-- Icon Search -->
       <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <label style="color: var(--text-main); font-weight: 500;">Custom Icon / Image</label>
-          <button class="badge-btn" type="button" onclick="window.open(ICON_SEARCH_SITE, '_blank')">🔍 Search Icons8</button>
-        </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type an app name to auto-fetch, or paste a direct PNG link from Icons8.</p>
+        <label style="color: var(--text-main); font-weight: 500;">Search Official Icons (Powered by Iconify)</label>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Search for an app name (e.g. ubuntu, plex) to select an icon, or paste a URL below.</p>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="edit-dial-img" placeholder="App name or https://...png" style="flex: 1;" oninput="previewIcon('edit')" />
+          <input type="text" id="edit-icon-search-input" placeholder="e.g. netflix" style="flex: 1;" onkeyup="if(event.key==='Enter') searchIcons('edit')" />
+          <button class="badge-btn" type="button" onclick="searchIcons('edit')">Search</button>
         </div>
-        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
-          <img id="edit-icon-img" src="" style="width: 32px; height: 32px; border-radius: 6px; display: none; object-fit: cover;" />
-          <span id="edit-icon-status" style="font-size: 12px; color: var(--text-muted);"></span>
-        </div>
+        <div id="edit-icon-results" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-top: 8px; display: none;"></div>
+        
+        <label style="margin-top: 10px;">Or Custom Image URL</label>
+        <input type="text" id="edit-dial-img" placeholder="https://..." />
       </div>
 
       <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('edit-dial-modal')">Cancel</button><button class="btn-primary" onclick="saveEditedDial()">Save Changes</button></div>
@@ -651,9 +644,6 @@
   <!--             JAVASCRIPT ENGINE              -->
   <!-- ========================================== -->
   <script>
-    // ===== CONFIGURATION =====
-    const ICON_SEARCH_SITE = "https://icons8.com/icons/all"; 
-
     // ===== LIVE CLOCK =====
     function updateClock() {
       const now = new Date();
@@ -691,7 +681,6 @@
       if (savedPos) {
         widget.style.left = savedPos.x + 'px';
         widget.style.top = savedPos.y + 'px';
-        widget.style.right = 'auto'; // Prevent conflicts with default CSS placements
         widget.style.transform = 'none';
       }
 
@@ -712,7 +701,6 @@
         const y = e.clientY - offsetY;
         widget.style.left = x + 'px';
         widget.style.top = y + 'px';
-        widget.style.right = 'auto';
         widget.style.transform = 'none';
         localStorage.setItem(storageKey, JSON.stringify({ x, y }));
       });
@@ -753,90 +741,53 @@
       }
     }
 
-    // Fix corrupted unencoded SVG image data upon load
-    function sanitizeDials(dials) {
-        return dials.map(d => {
-            if (d.img && d.img.includes('<svg')) { d.img = ''; }
-            return d;
-        });
-    }
-
     window.addEventListener('load', () => {
       initDraggableWidget('topNavWidget', 'pos_topNavWidget');
       initDraggableWidget('searchWidget', 'pos_searchWidget');
       initDraggableWidget('section-dials', 'pos_dialsSection');
       initDraggableWidget('section-services', 'pos_servicesSection');
       initDraggableWidget('section-news', 'pos_newsSection');
-      
-      state.dials = sanitizeDials(state.dials);
-      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
     });
 
-    // ===== OFFICIAL BRAND ICON FETCH ENGINE =====
-    // Safely URL-encoded globe SVG for fallback so it never breaks DOM
-    const GLOBE_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/%3E%3C/svg%3E";
-
-    function getBrandIconUrl(inputStr) {
-        inputStr = inputStr.trim();
-        if (!inputStr) return '';
-        if (inputStr.startsWith('http://') || inputStr.startsWith('https://') || inputStr.startsWith('data:image')) {
-            return inputStr;
-        }
-        const brand = inputStr.toLowerCase().replace(/\s+/g, '-');
-        return `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/${brand}.png`;
-    }
-
-    function previewIcon(mode) {
-        const prefix = mode === 'add' ? 'dial' : 'edit-dial';
-        const inputVal = document.getElementById(`${prefix}-img`).value.trim();
-        const imgEl = document.getElementById(`${mode}-icon-img`);
-        const statusEl = document.getElementById(`${mode}-icon-status`);
-        
-        if (!inputVal) {
-            imgEl.style.display = 'none';
-            statusEl.innerText = '';
-            return;
-        }
-
-        // If it's already a direct link, preview it instantly
-        if (inputVal.startsWith('http://') || inputVal.startsWith('https://') || inputVal.startsWith('data:image')) {
-            imgEl.src = inputVal;
-            imgEl.style.display = 'block';
-            statusEl.innerText = '✅ Valid URL Format Detected';
-            statusEl.style.color = '#34A853';
-            return;
-        }
-
-        // Otherwise, run the Icons8 Direct Search
-        const searchName = inputVal.toLowerCase().replace(/\s+/g, '-');
-        const icons8Url = `https://img.icons8.com/color/120/${searchName}.png`;
-        
-        const img = new Image();
-        img.onload = () => {
-            imgEl.src = icons8Url;
-            imgEl.style.display = 'block';
-            statusEl.innerText = '✅ Found match on Icons8!';
-            statusEl.style.color = '#34A853';
-        };
-        img.onerror = () => {
-            // Fallback to homelab repo
-            const fallbackUrl = `https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/${searchName}.png`;
-            const img2 = new Image();
-            img2.onload = () => {
-                imgEl.src = fallbackUrl;
-                imgEl.style.display = 'block';
-                statusEl.innerText = '✅ Found match in Homelab DB!';
-                statusEl.style.color = '#34A853';
-            };
-            img2.onerror = () => {
-                imgEl.src = GLOBE_SVG;
-                imgEl.style.display = 'block';
-                statusEl.innerText = '🌐 Defaulting to Globe fallback';
-                statusEl.style.color = 'var(--text-muted)';
-            }
-            img2.src = fallbackUrl;
-        };
-        img.src = icons8Url;
+    // ===== ICON SEARCH ENGINE (ICONIFY API) =====
+    async function searchIcons(mode) {
+       const prefix = mode === 'add' ? 'add' : 'edit';
+       const query = document.getElementById(`${prefix}-icon-search-input`).value.trim();
+       const resultsContainer = document.getElementById(`${prefix}-icon-results`);
+       if (!query) return;
+       
+       resultsContainer.style.display = 'grid';
+       resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">Searching...</span>';
+       
+       try {
+           const res = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=30`);
+           const data = await res.json();
+           if (data.icons && data.icons.length > 0) {
+               resultsContainer.innerHTML = '';
+               data.icons.forEach(iconName => {
+                   const iconUrl = `https://api.iconify.design/${iconName}.svg`;
+                   const img = document.createElement('img');
+                   img.src = iconUrl;
+                   img.style.width = '100%';
+                   img.style.height = 'auto';
+                   img.style.cursor = 'pointer';
+                   img.style.background = 'rgba(255,255,255,0.1)';
+                   img.style.padding = '4px';
+                   img.style.borderRadius = '6px';
+                   img.title = iconName;
+                   img.onclick = () => {
+                       document.getElementById(mode === 'add' ? 'dial-img' : 'edit-dial-img').value = iconUrl;
+                       resultsContainer.querySelectorAll('img').forEach(i => i.style.border = 'none');
+                       img.style.border = '2px solid var(--accent)';
+                   };
+                   resultsContainer.appendChild(img);
+               });
+           } else {
+               resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">No icons found. Try another term.</span>';
+           }
+       } catch (e) {
+           resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--danger); grid-column:1/-1;">Search failed.</span>';
+       }
     }
 
     function generateSmartLabel(urlStr) {
@@ -925,9 +876,9 @@
       const relX = e.clientX - rect.left;
       const relY = e.clientY - rect.top;
 
-      // 40% inner bounding box for Merge Zone (Hover to Merge)
-      const marginX = rect.width * 0.3;
-      const marginY = rect.height * 0.3;
+      // 60% inner bounding box for Merge Zone (Hover to Merge) - slightly expanded for easier access
+      const marginX = rect.width * 0.20;
+      const marginY = rect.height * 0.20;
       const isMergeZone = (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY);
 
       if (isMergeZone && type === 'dial' && !draggedNode.classList.contains('dial-folder-tile') && targetNode !== document.querySelector('.add-wrapper')) {
@@ -1092,10 +1043,9 @@
       document.getElementById('edit-dial-url').value = dial.url || '';
       document.getElementById('edit-dial-folder').value = dial.folder || '';
       
-      if (dial.img && dial.img.includes('<svg')) { document.getElementById('edit-dial-img').value = ''; } 
-      else { document.getElementById('edit-dial-img').value = dial.img || ''; }
-      
-      previewIcon('edit');
+      document.getElementById('edit-dial-img').value = dial.img || '';
+      document.getElementById('edit-icon-search-input').value = '';
+      document.getElementById('edit-icon-results').style.display = 'none';
 
       document.getElementById('edit-dial-modal').style.display = 'flex';
       setTimeout(() => document.getElementById('edit-dial-modal').classList.add('show'), 10);
@@ -1106,12 +1056,7 @@
       const name = document.getElementById('edit-dial-title').value.trim();
       const url = document.getElementById('edit-dial-url').value.trim();
       const folder = document.getElementById('edit-dial-folder').value.trim();
-      
-      let img = document.getElementById('edit-dial-img').value.trim();
-      if (img && !img.startsWith('http') && !img.startsWith('data:')) {
-          img = document.getElementById('edit-icon-img').src; 
-      }
-
+      const img = document.getElementById('edit-dial-img').value.trim();
       if (!url) return alert('URL required');
       
       state.dials[idx] = { ...state.dials[idx], name: name || generateSmartLabel(url), url, folder, img };
@@ -1125,8 +1070,8 @@
       document.getElementById('dial-url').value = '';
       document.getElementById('dial-folder').value = '';
       document.getElementById('dial-img').value = '';
-      document.getElementById('add-icon-img').style.display = 'none';
-      document.getElementById('add-icon-status').innerText = '';
+      document.getElementById('add-icon-search-input').value = '';
+      document.getElementById('add-icon-results').style.display = 'none';
       
       document.getElementById('dial-modal').style.display = 'flex';
       setTimeout(() => document.getElementById('dial-modal').classList.add('show'), 10);
@@ -1137,22 +1082,12 @@
       let url = document.getElementById('dial-url').value.trim();
       let folder = document.getElementById('dial-folder').value.trim(); 
       let img = document.getElementById('dial-img').value.trim();
-      
-      if (img && !img.startsWith('http') && !img.startsWith('data:')) {
-          img = document.getElementById('add-icon-img').src; 
-      }
 
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
       if (openAccordionFolder && !folder) folder = openAccordionFolder;
       state.dials.push({ name, url, img, folder }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
-    }
-
-    function getFinalIconSrc(dial) {
-        if (dial.img && dial.img.trim()) { return dial.img; }
-        let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
-        return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
     }
 
     // ===== RENDER DIALS =====
@@ -1194,15 +1129,14 @@
 
               let previewImgs = '';
               for (let i = 0; i < Math.min(items.length, 4); i++) {
-                const src = getFinalIconSrc(items[i]);
-                previewImgs += `<img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="icon" draggable="false">`;
+                let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
+                let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+                previewImgs += `<img src="${src}" alt="icon" draggable="false">`;
               }
 
               folderTile.innerHTML = `<div class="folder-merge-overlay"></div><div class="folder-preview-grid">${previewImgs}</div><span>${dial.folder}</span>`;
               
               folderTile.addEventListener('click', (e) => {
-                // Prevent opening if the user is in Edit Mode
-                if(isEditMode) return;
                 toggleAccordionFolder(dial.folder);
               });
 
@@ -1271,7 +1205,8 @@
     }
 
     function createDialHTMLString(dial) {
-      const src = getFinalIconSrc(dial);
+      let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
+      let src = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
       let editBtnHtml = `<button class="card-edit-btn" title="Edit" onclick="event.stopPropagation(); event.preventDefault(); openEditDialModal(${dial._origIdx})">✎</button>`;
       let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); event.preventDefault(); removeDial(${dial._origIdx})">&times;</button>`;
 
@@ -1325,6 +1260,7 @@
 
       pingServices();
     }
+    
     function pingServices() {
       state.services.forEach((srv, idx) => {
         const dot = document.getElementById(`srv-dot-${idx}`); if (!dot) return;
@@ -1580,63 +1516,6 @@
         const timeStr = evt.start.dateTime ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'All Day';
         return `<div class="cal-event-card"><span class="cal-event-title">${evt.summary || 'Untitled Event'}</span><div class="cal-event-meta"><span>${dateStr}</span><span>${timeStr}</span></div></div>`;
       }).join('');
-    }
-
-    // ===== INLINE CASCADING CALENDAR =====
-    function toggleInlineCalendar() {
-      const wrapper = document.getElementById('inline-calendar-wrapper');
-      
-      if (wrapper.classList.contains('open')) { 
-        wrapper.classList.remove('open'); 
-        const rows = wrapper.querySelectorAll('.cal-week-row');
-        rows.forEach((row, idx) => {
-           row.style.transitionDelay = `${(rows.length - idx) * 0.03}s`;
-           row.style.opacity = '0';
-           row.style.transform = 'translateY(-10px)';
-        });
-        return; 
-      }
-      
-      const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); const today = now.getDate();
-      const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      
-      let html = `<h3 style="margin-bottom: 12px; font-size: 16px;">${monthNames[month]} ${year}</h3>`;
-      html += '<div class="cal-week-row"><div class="cal-day-header">Su</div><div class="cal-day-header">Mo</div><div class="cal-day-header">Tu</div><div class="cal-day-header">We</div><div class="cal-day-header">Th</div><div class="cal-day-header">Fr</div><div class="cal-day-header">Sa</div></div>';
-      
-      let currentWeek = '<div class="cal-week-row">';
-      for (let i = 0; i < firstDay; i++) { currentWeek += '<div class="cal-day empty"></div>'; }
-      
-      let dayOfWeek = firstDay;
-      for (let i = 1; i <= daysInMonth; i++) { 
-         const isToday = (i === today) ? 'today' : ''; 
-         currentWeek += `<div class="cal-day ${isToday}">${i}</div>`;
-         dayOfWeek++;
-         if (dayOfWeek > 6) {
-            currentWeek += '</div>';
-            html += currentWeek;
-            currentWeek = '<div class="cal-week-row">';
-            dayOfWeek = 0;
-         }
-      }
-      if (dayOfWeek > 0) {
-         while (dayOfWeek <= 6) { currentWeek += '<div class="cal-day empty"></div>'; dayOfWeek++; }
-         currentWeek += '</div>';
-         html += currentWeek;
-      }
-      
-      document.getElementById('generic-calendar-grid').innerHTML = html; 
-      wrapper.classList.add('open');
-
-      // Staggered cascade open animation
-      setTimeout(() => {
-         const rows = wrapper.querySelectorAll('.cal-week-row');
-         rows.forEach((row, idx) => {
-            row.style.transitionDelay = `${idx * 0.05}s`;
-            row.style.opacity = '1';
-            row.style.transform = 'translateY(0)';
-         });
-      }, 10);
     }
 
     // ===== MODALS & DRAWERS =====
