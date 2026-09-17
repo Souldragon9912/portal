@@ -6,7 +6,10 @@
   <title>Speed Dial</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Google Auth & Solid SortableJS Engine -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   
   <!-- ========================================== -->
   <!--                 CSS STYLES                 -->
@@ -73,48 +76,19 @@
       100% { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); background-color: rgba(88, 166, 255, 0.15); }
     }
 
-    /* --- Combined Top Nav & Dropping Calendar --- */
-    .top-widget-container {
-      position: absolute; top: 20px; left: 20px; z-index: 50;
-      display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
-      transition: transform 0.3s;
-    }
-    .top-widget-container.edit-unlocked { cursor: grab; }
-    .top-widget-container.edit-unlocked:active { cursor: grabbing; }
-    
+    /* --- Movable Top Navigation Bar --- */
     .top-nav-bar {
       display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 10px 16px;
       background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-glass); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      user-select: none; transition: border 0.3s, background 0.3s; width: max-content;
+      border: 1px solid var(--border-glass); border-radius: 12px; position: absolute; top: 20px; left: 20px;
+      z-index: 50; box-shadow: 0 4px 16px rgba(0,0,0,0.4); user-select: none; transition: border 0.3s, background 0.3s;
     }
-    .top-widget-container.edit-unlocked .top-nav-bar { border: 2px dashed var(--accent); background: rgba(22, 27, 34, 0.85); }
+    .top-nav-bar.edit-unlocked { cursor: grab; border: 2px dashed var(--accent); background: rgba(22, 27, 34, 0.85); }
+    .top-nav-bar.edit-unlocked:active { cursor: grabbing; }
 
     .widget-toggles { display: flex; gap: 10px; }
-    .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+    .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
-
-    /* The Cascading Calendar */
-    .dropdown-calendar {
-      max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; width: 100%; min-width: 320px;
-      background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; border: 1px solid transparent;
-      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-in-out, padding 0.3s;
-      padding: 0 20px; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    .dropdown-calendar.open { max-height: 400px; opacity: 1; pointer-events: auto; padding: 20px; border-color: var(--border-glass); }
-    
-    .generic-calendar { display: flex; flex-direction: column; gap: 6px; width: 100%; }
-    .cal-week-row {
-      display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; width: 100%; text-align: center;
-      opacity: 0; transform: translateY(-10px); transition: all 0.3s ease;
-    }
-    .dropdown-calendar.open .cal-week-row { opacity: 1; transform: translateY(0); }
-    
-    .cal-day-header { font-size: 11px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; }
-    .cal-day { display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; padding: 8px 0; }
-    .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.1); }
-    .cal-day.empty { background: transparent; }
-    .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
 
     /* --- Floating Bottom-Right Lock & Save Button --- */
     .floating-lock-btn {
@@ -125,6 +99,35 @@
     }
     .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
     .floating-lock-btn.show { display: flex; }
+
+    /* --- Floating & Resizable Built-in Calendar --- */
+    .inline-calendar-wrapper { 
+      position: absolute; 
+      top: 80px; left: 20px; /* Default placement */
+      background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
+      border-radius: 16px; border: 1px solid var(--border-glass); 
+      padding: 20px; 
+      display: flex; flex-direction: column; align-items: center; 
+      opacity: 0; pointer-events: none; transform: scale(0.95);
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 60; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      resize: both; overflow: hidden; /* Enables native dragging to resize */
+      min-width: 280px; min-height: 280px; 
+    }
+    .inline-calendar-wrapper.open, body.edit-mode .inline-calendar-wrapper { 
+      opacity: 1; pointer-events: auto; transform: scale(1); 
+    }
+    body.edit-mode .inline-calendar-wrapper { 
+      border: 2px dashed var(--accent) !important; background: rgba(0,0,0,0.6); cursor: grab; z-index: 999;
+    }
+    body.edit-mode .inline-calendar-wrapper:active { cursor: grabbing; }
+
+    .generic-calendar { flex-grow: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(6, 1fr); gap: 6px; text-align: center; width: 100%; height: 100%; }
+    .cal-day-header { font-size: 12px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; }
+    .cal-day { display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
+    .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
+    .cal-day.empty { background: transparent; }
+    .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
@@ -146,25 +149,27 @@
     .main-panel.edit-mode-container:active { cursor: grabbing; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
+    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
+    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; justify-content: center; position: relative; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); justify-content: center; gap: 14px; width: 100%; }
 
-    /* --- PURE NATIVE DRAGGABLE TILE PHYSICS --- */
-    .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    /* --- SORTABLE JS SPECIFIC PHYSICS & DRAG CLASSES --- */
+    .draggable-wrapper { position: relative; cursor: grab; }
     .draggable-wrapper:active { cursor: grabbing; }
     
-    /* When dragged, card stays completely invisible so only the crisp ghost image follows your mouse */
-    .draggable-wrapper.is-dragging { opacity: 0.01 !important; pointer-events: none; }
+    .sortable-ghost { opacity: 0 !important; }
+    .sortable-drag { opacity: 1 !important; transform: scale(1.05) !important; z-index: 1000 !important; box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important; cursor: grabbing !important; }
     
-    /* Hover-to-Merge Target Animation */
-    .draggable-wrapper.drag-folder-hover .dial-card, 
-    .draggable-wrapper.drag-folder-hover .dial-folder-tile { 
-      transform: scale(0.9) !important; 
-      border-color: var(--accent) !important;
-      animation: folderMergePulse 1s infinite !important;
+    /* Vivaldi/Opera Drag-to-Merge Pulsing Zone */
+    .drag-folder-hover .dial-card, .drag-folder-hover .dial-folder-tile { 
+      transform: scale(0.92) !important; 
+      box-shadow: 0 0 0 3px var(--accent) inset, 0 8px 30px rgba(88, 166, 255, 0.3) !important; 
+      opacity: 0.9; transition: all 0.2s; 
     }
 
+    /* Base Cards */
     .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { 
       background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); 
       border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--card-radius); clip-path: var(--card-clip);
@@ -191,8 +196,8 @@
 
     /* --- Opera/Brave Micro Folders --- */
     .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
-    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none; }
-    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
+    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none;}
+    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
 
     /* In-Grid Row Breakdown Accordion (Headerless) */
@@ -230,6 +235,13 @@
     .rss-date { font-family: monospace; font-size: 11px; }
 
     /* --- Modals & Drawers --- */
+    .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
+    .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .rss-manager-item:hover { transform: scale(1.05); }
+    .rss-manager-item img { width: 26px; height: 26px; border-radius: 6px; }
+    .rss-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; border: none; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: background 0.2s; }
+    .rss-delete-btn:hover { background: #dc2626; }
+    
     .drawer { position: fixed; top: 0; bottom: 0; width: 440px; max-width: 90vw; background: rgba(13, 17, 23, 0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border-glass); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     .drawer-right { right: 0; transform: translateX(100%); }
     .drawer-right.open { transform: translateX(0); }
@@ -287,8 +299,7 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      .top-widget-container { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; }
-      .top-nav-bar { justify-content: space-between; padding: 10px; flex-wrap: wrap; width: 100%; }
+      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: space-between; padding: 10px; flex-wrap: wrap; }
       .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
       .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
       .top-nav-bar > div:last-child { width: 100%; justify-content: center; margin-top: 4px; margin-left: 0 !important; }
@@ -297,6 +308,7 @@
       .hero-container { margin-top: 0; gap: 16px; }
       #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
       .inline-calendar-wrapper { display: none !important; }
+      
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
       .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
       .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
@@ -312,29 +324,31 @@
 <body class="">
 
   <!-- ========================================== -->
-  <!--    MOVABLE TOP NAVIGATION & CASCADING CAL  -->
+  <!--           MOVABLE TOP NAVIGATION           -->
   <!-- ========================================== -->
-  <div class="top-widget-container" id="topNavWidget" draggable="false">
-    <div class="top-nav-bar">
-      <div class="widget-toggles">
-        <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal</button>
-        <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
-      </div>
-      <div style="display: flex; align-items: center; margin-left: 10px;">
-        <!-- Clock toggles the built-in calendar -->
-        <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
-        <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
-      </div>
+  <div class="top-nav-bar" id="topNavWidget" draggable="false">
+    <div class="widget-toggles">
+      <!-- Calendar action bound to clock -->
+      <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal</button>
+      <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
     </div>
-    
-    <!-- The Cascading Built-in Calendar -->
-    <div class="dropdown-calendar" id="inline-calendar-wrapper">
-      <div class="generic-calendar" id="generic-calendar-grid"></div>
+    <div style="display: flex; align-items: center; margin-left: 10px;">
+      <!-- Clock toggles the built-in calendar -->
+      <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
+      <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
     </div>
   </div>
 
   <!-- Floating Lock & Save Button -->
   <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock Sections</button>
+
+  <!-- ========================================== -->
+  <!--           INLINE BUILT-IN CALENDAR         -->
+  <!-- ========================================== -->
+  <div class="inline-calendar-wrapper" id="inline-calendar-wrapper" draggable="false">
+    <h3 id="cal-month-title" style="margin-bottom: 12px; font-size: 18px;"></h3>
+    <div class="generic-calendar" id="generic-calendar-grid"></div>
+  </div>
 
   <!-- ========================================== -->
   <!--              MAIN DASHBOARD AREA           -->
@@ -542,6 +556,10 @@
             <label class="toggle-switch"><input type="checkbox" id="toggle-mod-news"><span class="slider"></span></label>
           </div>
           <div class="toggle-row">
+            <span>📅 Built-in Calendar (Toggle via Clock)</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-builtin-cal" checked disabled><span class="slider" style="background-color: var(--accent); opacity: 0.5; cursor: not-allowed;"></span></label>
+          </div>
+          <div class="toggle-row">
             <span>🗓 Google Calendar (G-Cal Sync)</span>
             <label class="toggle-switch"><input type="checkbox" id="toggle-mod-gcal"><span class="slider"></span></label>
           </div>
@@ -585,7 +603,7 @@
         <label style="color: var(--text-main); font-weight: 500;">Search Official Icons (Powered by Iconify)</label>
         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Search for an app name (e.g. ubuntu, plex) to select an icon, or paste a URL below.</p>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="add-icon-search-input" placeholder="e.g. portainer" style="flex: 1;" onkeyup="if(event.key==='Enter') searchIcons('add')" />
+          <input type="text" id="add-icon-search-input" placeholder="e.g. portainer" style="flex: 1;" onkeydown="if(event.key==='Enter') { searchIcons('add'); event.preventDefault(); }" />
           <button class="badge-btn" type="button" onclick="searchIcons('add')">Search</button>
         </div>
         <div id="add-icon-results" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-top: 8px; display: none;"></div>
@@ -614,7 +632,7 @@
         <label style="color: var(--text-main); font-weight: 500;">Search Official Icons (Powered by Iconify)</label>
         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Search for an app name (e.g. ubuntu, plex) to select an icon, or paste a URL below.</p>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="edit-icon-search-input" placeholder="e.g. netflix" style="flex: 1;" onkeyup="if(event.key==='Enter') searchIcons('edit')" />
+          <input type="text" id="edit-icon-search-input" placeholder="e.g. netflix" style="flex: 1;" onkeydown="if(event.key==='Enter') { searchIcons('edit'); event.preventDefault(); }" />
           <button class="badge-btn" type="button" onclick="searchIcons('edit')">Search</button>
         </div>
         <div id="edit-icon-results" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin-top: 8px; display: none;"></div>
@@ -716,40 +734,43 @@
       const dialsSection = document.getElementById('section-dials');
       const servicesSection = document.getElementById('section-services');
       const newsSection = document.getElementById('section-news');
+      const calWidget = document.getElementById('inline-calendar-wrapper');
       
       if (isEditMode) {
         if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Sections'; }
         if (floatBtn) floatBtn.classList.add('show');
-        
         topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
         searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
         dialsSection.setAttribute('draggable', 'true'); dialsSection.classList.add('edit-mode-container');
         servicesSection.setAttribute('draggable', 'true'); servicesSection.classList.add('edit-mode-container');
         newsSection.setAttribute('draggable', 'true'); newsSection.classList.add('edit-mode-container');
+        calWidget.setAttribute('draggable', 'true'); calWidget.classList.add('edit-mode-container');
+        
         closeModal('settings-modal');
         document.body.classList.add('edit-mode');
+        
+        if(rootSortable) rootSortable.option("disabled", true);
+        if(accordionSortable) accordionSortable.option("disabled", true);
+        if(servicesSortable) servicesSortable.option("disabled", true);
+
       } else {
         if (btn) { btn.classList.remove('active-edit'); btn.style.background = '#333'; btn.innerText = '✏ Unlock Layout'; }
         if (floatBtn) floatBtn.classList.remove('show');
-        
         topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
         searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
         dialsSection.setAttribute('draggable', 'false'); dialsSection.classList.remove('edit-mode-container');
         servicesSection.setAttribute('draggable', 'false'); servicesSection.classList.remove('edit-mode-container');
         newsSection.setAttribute('draggable', 'false'); newsSection.classList.remove('edit-mode-container');
+        calWidget.setAttribute('draggable', 'false'); calWidget.classList.remove('edit-mode-container');
         document.body.classList.remove('edit-mode');
+
+        if(rootSortable) rootSortable.option("disabled", false);
+        if(accordionSortable) accordionSortable.option("disabled", false);
+        if(servicesSortable) servicesSortable.option("disabled", false);
       }
     }
 
-    window.addEventListener('load', () => {
-      initDraggableWidget('topNavWidget', 'pos_topNavWidget');
-      initDraggableWidget('searchWidget', 'pos_searchWidget');
-      initDraggableWidget('section-dials', 'pos_dialsSection');
-      initDraggableWidget('section-services', 'pos_servicesSection');
-      initDraggableWidget('section-news', 'pos_newsSection');
-    });
-
-    // ===== ICON SEARCH ENGINE (ICONIFY API) =====
+    // ===== ICONIFY API SEARCH =====
     async function searchIcons(mode) {
        const prefix = mode === 'add' ? 'add' : 'edit';
        const query = document.getElementById(`${prefix}-icon-search-input`).value.trim();
@@ -783,13 +804,14 @@
                    resultsContainer.appendChild(img);
                });
            } else {
-               resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">No icons found. Try another term.</span>';
+               resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">No icons found.</span>';
            }
        } catch (e) {
            resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--danger); grid-column:1/-1;">Search failed.</span>';
        }
     }
 
+    // ===== SMART URL PARSER =====
     function generateSmartLabel(urlStr) {
       try {
         const url = new URL(urlStr);
@@ -825,6 +847,10 @@
     };
     let tokenClient = null;
 
+    let rootSortable = null;
+    let accordionSortable = null;
+    let servicesSortable = null;
+
     // ===== SEARCH ENGINE LOGIC =====
     function renderEngineDropdown() {
       const select = document.getElementById('engine-select');
@@ -845,177 +871,62 @@
       searchInput.value = '';
     });
 
-    // ===== PURE NATIVE HTML5 DRAG & DROP PHYSICS =====
-    let draggedNode = null;
-    let mergeTarget = null;
-    let dragType = null;
-    let lastSwapTime = 0; // Anti-Bounce Engine
+    // ===== SORTABLE.JS FOLDER MERGING LOGIC =====
+    function handleSortableMerge(draggedEl, targetEl) {
+        if (draggedEl.dataset.folderName) { renderDials(); return; } // Prevent folder-into-folder nesting
 
-    function handleTileDragStart(e, type) { 
-      e.stopPropagation(); 
-      if (isEditMode) return; 
-      
-      draggedNode = e.currentTarget; 
-      dragType = type;
-      e.dataTransfer.effectAllowed = 'move'; 
-      e.dataTransfer.setData('text/plain', draggedNode.dataset.dialData || draggedNode.dataset.folderName || ''); 
-      
-      document.body.classList.add('is-dragging-dial');
-      setTimeout(() => draggedNode.classList.add('is-dragging'), 0);
-    }
-
-    function handleTileDragOver(e, type) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (isEditMode || !draggedNode || dragType !== type) return;
-      
-      const targetNode = e.currentTarget.closest('.draggable-wrapper');
-      if (!targetNode || draggedNode === targetNode) return;
-
-      const rect = targetNode.getBoundingClientRect();
-      const relX = e.clientX - rect.left;
-      const relY = e.clientY - rect.top;
-
-      // 60% inner bounding box for Merge Zone (Hover to Merge) - slightly expanded for easier access
-      const marginX = rect.width * 0.20;
-      const marginY = rect.height * 0.20;
-      const isMergeZone = (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY);
-
-      if (isMergeZone && type === 'dial' && !draggedNode.classList.contains('dial-folder-tile') && targetNode !== document.querySelector('.add-wrapper')) {
-          if (mergeTarget !== targetNode) {
-              if(mergeTarget) mergeTarget.classList.remove('drag-folder-hover');
-              targetNode.classList.add('drag-folder-hover');
-              mergeTarget = targetNode;
-          }
-          return;
-      } else {
-          if (mergeTarget) {
-              mergeTarget.classList.remove('drag-folder-hover');
-              mergeTarget = null;
-          }
-
-          // Anti-bounce debounce: prevent rapid vibrating if hovering on edge
-          if (Date.now() - lastSwapTime < 150) return;
-
-          const parent = targetNode.parentNode;
-          const children = Array.from(parent.children);
-          const targetIdx = children.indexOf(targetNode);
-
-          // Allow cross-container dragging (e.g. out of a folder into root)
-          const isSameContainer = (draggedNode.parentNode === parent);
-          
-          const rects = new Map();
-          children.forEach(el => rects.set(el, el.getBoundingClientRect()));
-
-          if (isSameContainer) {
-              const draggedIdx = children.indexOf(draggedNode);
-              if (draggedIdx === targetIdx) return;
-              if (draggedIdx < targetIdx) { parent.insertBefore(draggedNode, targetNode.nextSibling); } 
-              else { parent.insertBefore(draggedNode, targetNode); }
-          } else {
-              parent.insertBefore(draggedNode, targetNode);
-          }
-
-          lastSwapTime = Date.now();
-
-          // FLIP Animation Execution
-          Array.from(parent.children).forEach(el => {
-            const oldRect = rects.get(el);
-            const newRect = el.getBoundingClientRect();
-            if (oldRect && (oldRect.left !== newRect.left || oldRect.top !== newRect.top)) {
-              const dx = oldRect.left - newRect.left;
-              const dy = oldRect.top - newRect.top;
-              el.style.transform = `translate(${dx}px, ${dy}px)`;
-              el.style.transition = 'none';
-              requestAnimationFrame(() => {
-                el.style.transform = '';
-                el.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-              });
+        const draggedData = JSON.parse(decodeURIComponent(draggedEl.dataset.dialData));
+        const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
+        
+        const targetFolderStr = targetEl.dataset.folderName;
+        if (targetFolderStr) {
+            activeDial.folder = targetFolderStr;
+        } else {
+            const targetData = JSON.parse(decodeURIComponent(targetEl.dataset.dialData));
+            const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
+            const newFolder = prompt("Name your new folder:", "New Folder");
+            if (newFolder && newFolder.trim()) {
+                activeDial.folder = newFolder.trim();
+                tDial.folder = newFolder.trim();
+            } else {
+                return renderDials(); // canceled
             }
-          });
-      }
-    }
-
-    function handleTileDrop(e, type) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (!draggedNode || isEditMode) return;
-
-      if (mergeTarget && type === 'dial') {
-        mergeTarget.classList.remove('drag-folder-hover');
-        const targetFolderStr = mergeTarget.dataset.folderName;
-        const targetDataStr = mergeTarget.dataset.dialData;
-        const draggedDataStr = draggedNode.dataset.dialData;
-
-        if (draggedDataStr) {
-            const draggedData = JSON.parse(decodeURIComponent(draggedDataStr));
-            const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
-
-            if (targetFolderStr) {
-               activeDial.folder = targetFolderStr;
-            } else if (targetDataStr) {
-               const targetData = JSON.parse(decodeURIComponent(targetDataStr));
-               const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
-               const newFolder = prompt("Name your new folder:", "New Folder");
-               if (newFolder && newFolder.trim()) {
-                   activeDial.folder = newFolder.trim();
-                   tDial.folder = newFolder.trim();
-               }
-            }
-            localStorage.setItem('dash_dials', JSON.stringify(state.dials));
-            renderDials();
         }
-      } else {
-        if (type === 'dial') syncDialStateFromDOM(); else syncServiceStateFromDOM();
-      }
-      
-      document.body.classList.remove('is-dragging-dial');
-      draggedNode.classList.remove('is-dragging');
-      draggedNode = null;
-      mergeTarget = null;
+        localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+        renderDials();
     }
 
-    function handleTileDragEnd(e, type) { 
-      document.body.classList.remove('is-dragging-dial');
-      if (draggedNode) draggedNode.classList.remove('is-dragging'); 
-      if (mergeTarget) mergeTarget.classList.remove('drag-folder-hover');
-      draggedNode = null; 
-      mergeTarget = null;
-    }
-
-    // Recursively build the state array exactly based on the visual DOM sequence
+    // Force array to exactly match current DOM elements
     function syncDialStateFromDOM() {
       const newDials = [];
-      const gridItems = Array.from(document.getElementById('speed-dials-container').children);
-
-      gridItems.forEach(node => {
+      
+      Array.from(document.getElementById('speed-dials-container').children).forEach(node => {
          if (node.classList.contains('draggable-wrapper') && node.dataset.dialData) {
-           const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-           data.folder = ''; 
-           newDials.push(data);
+             const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+             data.folder = ''; 
+             newDials.push(data);
          } else if (node.classList.contains('dial-folder-tile') && node.dataset.folderName) {
-           const fname = node.dataset.folderName;
-           if (fname === openAccordionFolder) {
-               const accordion = document.querySelector('.expanded-folder-accordion');
-               if (accordion) {
-                   accordion.querySelectorAll('.draggable-wrapper').forEach(innerNode => {
-                       if(innerNode.dataset.dialData) {
-                           const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
-                           data.folder = fname; 
-                           newDials.push(data);
-                       }
-                   });
-               }
-           } else {
-               newDials.push(...state.dials.filter(d => d.folder === fname));
-           }
+             const fname = node.dataset.folderName;
+             if (fname === openAccordionFolder) {
+                 const accordion = document.querySelector('.expanded-folder-accordion');
+                 if (accordion) {
+                     accordion.querySelectorAll('.draggable-wrapper').forEach(innerNode => {
+                         if(innerNode.dataset.dialData) {
+                             const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
+                             data.folder = fname; 
+                             newDials.push(data);
+                         }
+                     });
+                 }
+             } else {
+                 newDials.push(...state.dials.filter(d => d.folder === fname));
+             }
          }
       });
 
-      // Filter duplicates
       const uniqueDials = []; const map = new Map();
       for (const item of newDials) {
-         const key = item.url + item.name;
+         const key = item.url + '|' + item.name;
          if(!map.has(key)){ map.set(key, true); uniqueDials.push(item); }
       }
       
@@ -1027,9 +938,7 @@
     function syncServiceStateFromDOM() {
       const newServices = [];
       document.querySelectorAll('#services-container > .draggable-wrapper').forEach(node => {
-         if (node.dataset.serviceData) {
-             newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
-         }
+         newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
       });
       state.services = newServices; localStorage.setItem('dash_services', JSON.stringify(state.services));
     }
@@ -1042,9 +951,8 @@
       document.getElementById('edit-dial-title').value = dial.name || '';
       document.getElementById('edit-dial-url').value = dial.url || '';
       document.getElementById('edit-dial-folder').value = dial.folder || '';
-      
       document.getElementById('edit-dial-img').value = dial.img || '';
-      document.getElementById('edit-icon-search-input').value = '';
+
       document.getElementById('edit-icon-results').style.display = 'none';
 
       document.getElementById('edit-dial-modal').style.display = 'flex';
@@ -1057,6 +965,7 @@
       const url = document.getElementById('edit-dial-url').value.trim();
       const folder = document.getElementById('edit-dial-folder').value.trim();
       const img = document.getElementById('edit-dial-img').value.trim();
+
       if (!url) return alert('URL required');
       
       state.dials[idx] = { ...state.dials[idx], name: name || generateSmartLabel(url), url, folder, img };
@@ -1070,7 +979,7 @@
       document.getElementById('dial-url').value = '';
       document.getElementById('dial-folder').value = '';
       document.getElementById('dial-img').value = '';
-      document.getElementById('add-icon-search-input').value = '';
+      
       document.getElementById('add-icon-results').style.display = 'none';
       
       document.getElementById('dial-modal').style.display = 'flex';
@@ -1096,6 +1005,9 @@
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
       
+      if (rootSortable) rootSortable.destroy();
+      if (accordionSortable) accordionSortable.destroy();
+
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
 
@@ -1110,53 +1022,35 @@
       const renderedFolders = new Set();
       const allRenderNodes = [];
 
-      // Iterate sequential state array so folders don't jump positions
-      state.dials.forEach((dial, idx) => {
-        if (dial.folder) {
-           if (!renderedFolders.has(dial.folder)) {
-              renderedFolders.add(dial.folder);
-              const items = state.dials.filter(d => d.folder === dial.folder);
-              if (items.length === 0) return; // Clean up empty folders instantly
-              
-              const folderTile = document.createElement('div');
-              folderTile.className = 'dial-folder-tile draggable-wrapper';
-              folderTile.dataset.folderName = dial.folder;
-              folderTile.draggable = true;
-              folderTile.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-              folderTile.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-              folderTile.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-              folderTile.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
+      Object.keys(grouped).sort().forEach(folderName => {
+        if (folderName === '_root') return;
+        const items = grouped[folderName];
+        if (items.length === 0) return; 
+        
+        const folderTile = document.createElement('div');
+        folderTile.className = 'dial-folder-tile draggable-wrapper';
+        folderTile.dataset.folderName = folderName;
 
-              let previewImgs = '';
-              for (let i = 0; i < Math.min(items.length, 4); i++) {
-                let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
-                let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
-                previewImgs += `<img src="${src}" alt="icon" draggable="false">`;
-              }
-
-              folderTile.innerHTML = `<div class="folder-merge-overlay"></div><div class="folder-preview-grid">${previewImgs}</div><span>${dial.folder}</span>`;
-              
-              folderTile.addEventListener('click', (e) => {
-                toggleAccordionFolder(dial.folder);
-              });
-
-              allRenderNodes.push({ type: 'folder', name: dial.folder, node: folderTile, items });
-           }
-        } else {
-           allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
+        let previewImgs = '';
+        for (let i = 0; i < Math.min(items.length, 4); i++) {
+          let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${new URL(items[i].url).hostname}&sz=64`;
+          previewImgs += `<img src="${src}" alt="icon" draggable="false">`;
         }
+
+        folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
+        folderTile.addEventListener('click', () => toggleAccordionFolder(folderName));
+        allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile });
       });
+
+      grouped._root.forEach(dial => { allRenderNodes.push({ type: 'dial', node: createDialElement(dial) }); });
 
       const addWrapper = document.createElement('div');
       addWrapper.className = 'draggable-wrapper add-wrapper';
       addWrapper.innerHTML = `<div class="add-dial-tile" onclick="openAddDialModal()"><span>+</span><span>Add Tile</span></div>`;
-      addWrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-      addWrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
       allRenderNodes.push({ type: 'add', node: addWrapper });
 
       allRenderNodes.forEach(item => container.appendChild(item.node));
       
-      // Accurately calculate the end of the current row so the folder breaks below it
       if (openAccordionFolder) {
         requestAnimationFrame(() => {
            const activeTile = document.querySelector(`.dial-folder-tile[data-folder-name="${openAccordionFolder}"]`);
@@ -1173,13 +1067,53 @@
                    if (gridChildren[i].offsetTop === folderTop) { insertAfterNode = gridChildren[i]; } else { break; }
                }
                insertAfterNode.insertAdjacentElement('afterend', accordion);
+
+               accordionSortable = new Sortable(accordion.querySelector('.expanded-folder-inner-grid'), {
+                   group: 'dials', 
+                   disabled: isEditMode, 
+                   animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-dial-tile',
+                   ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+                   onEnd: syncDialStateFromDOM
+               });
            }
         });
       }
+
+      rootSortable = new Sortable(container, {
+          group: 'dials', 
+          disabled: isEditMode, 
+          animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper, .expanded-folder-accordion',
+          ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+          onMove: function(evt, originalEvent) {
+              document.querySelectorAll('.drag-folder-hover').forEach(el => el.classList.remove('drag-folder-hover'));
+              if (evt.related.classList.contains('add-wrapper') || evt.related.classList.contains('expanded-folder-accordion')) return false;
+
+              const rect = evt.related.getBoundingClientRect();
+              const relX = originalEvent.clientX - rect.left;
+              const relY = originalEvent.clientY - rect.top;
+              
+              // 60% Merge Zone 
+              const marginX = rect.width * 0.2; 
+              const marginY = rect.height * 0.2;
+
+              if (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY) {
+                  evt.related.classList.add('drag-folder-hover');
+                  return false; 
+              }
+          },
+          onEnd: function(evt) {
+              const target = document.querySelector('.drag-folder-hover');
+              if (target) {
+                  target.classList.remove('drag-folder-hover');
+                  handleSortableMerge(evt.item, target);
+              } else {
+                  syncDialStateFromDOM();
+              }
+          }
+      });
     }
 
     function toggleAccordionFolder(folderName) {
-      syncDialStateFromDOM(); // Sync layout strictly before toggling to stop it from jumping!
       if (openAccordionFolder === folderName) { openAccordionFolder = null; } 
       else { openAccordionFolder = folderName; }
       renderDials();
@@ -1194,13 +1128,6 @@
       items.forEach(dial => { innerHtml += createDialHTMLString(dial); });
       innerHtml += `</div>`;
       box.innerHTML = innerHtml;
-
-      box.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
-        wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-        wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-        wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-        wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
-      });
       return box;
     }
 
@@ -1211,10 +1138,9 @@
       let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); event.preventDefault(); removeDial(${dial._origIdx})">&times;</button>`;
 
       return `
-        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}" draggable="true">
-          <div class="dial-merge-overlay"></div>
+        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
           <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener" draggable="false">
-             <img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="${dial.name}" draggable="false" />
+             <img src="${src}" alt="${dial.name}" draggable="false" />
              <span>${dial.name}</span>
           </a>
           ${editBtnHtml}${deleteBtnHtml}
@@ -1225,27 +1151,18 @@
     function createDialElement(dial) {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = createDialHTMLString(dial);
-      const wrapper = tempDiv.firstElementChild;
-      wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-      wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-      wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-      wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
-      return wrapper;
+      return tempDiv.firstElementChild;
     }
 
     // ===== RENDER SERVICES =====
     function renderServices() {
       const container = document.getElementById('services-container');
+      if (servicesSortable) servicesSortable.destroy();
       container.innerHTML = '';
       
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = true; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
-        wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'service')); 
-        wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'service')); 
-        wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'service'));
-        wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'service'));
-        
+        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
         let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>`;
         wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center; width:100%;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a>${deleteBtnHtml}`;
         container.appendChild(wrapper);
@@ -1254,13 +1171,18 @@
       const addWrapper = document.createElement('div');
       addWrapper.className = 'draggable-wrapper add-wrapper';
       addWrapper.innerHTML = `<div class="add-dial-tile add-service-tile" onclick="openAddServiceModal()"><span>+</span><span>Add Service</span></div>`;
-      addWrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'service'));
-      addWrapper.addEventListener('drop', (e) => handleTileDrop(e, 'service'));
       container.appendChild(addWrapper);
 
       pingServices();
+
+      servicesSortable = new Sortable(container, {
+          disabled: isEditMode, // Lock tile sorting if moving sections
+          animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
+          ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+          onEnd: syncServiceStateFromDOM
+      });
     }
-    
+
     function pingServices() {
       state.services.forEach((srv, idx) => {
         const dot = document.getElementById(`srv-dot-${idx}`); if (!dot) return;
@@ -1518,6 +1440,62 @@
       }).join('');
     }
 
+    // ===== INLINE CASCADING CALENDAR =====
+    function toggleInlineCalendar() {
+      const wrapper = document.getElementById('inline-calendar-wrapper');
+      
+      if (wrapper.classList.contains('open')) { 
+        wrapper.classList.remove('open'); 
+        const rows = wrapper.querySelectorAll('.cal-week-row');
+        rows.forEach((row, idx) => {
+           row.style.transitionDelay = `${(rows.length - idx) * 0.03}s`;
+           row.style.opacity = '0';
+           row.style.transform = 'translateY(-10px)';
+        });
+        return; 
+      }
+      
+      const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); const today = now.getDate();
+      const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      
+      let html = `<h3 style="margin-bottom: 12px; font-size: 16px;">${monthNames[month]} ${year}</h3>`;
+      html += '<div class="cal-week-row"><div class="cal-day-header">Su</div><div class="cal-day-header">Mo</div><div class="cal-day-header">Tu</div><div class="cal-day-header">We</div><div class="cal-day-header">Th</div><div class="cal-day-header">Fr</div><div class="cal-day-header">Sa</div></div>';
+      
+      let currentWeek = '<div class="cal-week-row">';
+      for (let i = 0; i < firstDay; i++) { currentWeek += '<div class="cal-day empty"></div>'; }
+      
+      let dayOfWeek = firstDay;
+      for (let i = 1; i <= daysInMonth; i++) { 
+         const isToday = (i === today) ? 'today' : ''; 
+         currentWeek += `<div class="cal-day ${isToday}">${i}</div>`;
+         dayOfWeek++;
+         if (dayOfWeek > 6) {
+            currentWeek += '</div>';
+            html += currentWeek;
+            currentWeek = '<div class="cal-week-row">';
+            dayOfWeek = 0;
+         }
+      }
+      if (dayOfWeek > 0) {
+         while (dayOfWeek <= 6) { currentWeek += '<div class="cal-day empty"></div>'; dayOfWeek++; }
+         currentWeek += '</div>';
+         html += currentWeek;
+      }
+      
+      document.getElementById('generic-calendar-grid').innerHTML = html; 
+      wrapper.classList.add('open');
+
+      setTimeout(() => {
+         const rows = wrapper.querySelectorAll('.cal-week-row');
+         rows.forEach((row, idx) => {
+            row.style.transitionDelay = `${idx * 0.05}s`;
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+         });
+      }, 10);
+    }
+
     // ===== MODALS & DRAWERS =====
     function toggleDrawer(drawerId) {
       const drawer = document.getElementById(drawerId);
@@ -1594,14 +1572,15 @@
       localStorage.setItem('dash_opacity', opacityVal);
       applyGlassPreferences();
 
-      // FIXED SETTINGS SAVE LOGIC (Safely target buttons)
+      const safeChecked = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
+
       state.modules = { 
-          dials: document.getElementById('toggle-mod-dials').checked, 
-          services: document.getElementById('toggle-mod-services').checked, 
-          news: document.getElementById('toggle-mod-news').checked, 
-          builtin_cal: true, // Tied to clock now
-          gcal: document.getElementById('toggle-mod-gcal').checked, 
-          bookmarks: document.getElementById('toggle-mod-bookmarks').checked 
+          dials: safeChecked('toggle-mod-dials'), 
+          services: safeChecked('toggle-mod-services'), 
+          news: safeChecked('toggle-mod-news'), 
+          builtin_cal: true, // Tied to clock
+          gcal: safeChecked('toggle-mod-gcal'), 
+          bookmarks: safeChecked('toggle-mod-bookmarks') 
       };
       localStorage.setItem('dash_modules', JSON.stringify(state.modules));
       applyModuleVisibility(); initGoogleAuth(); closeModal('settings-modal');
@@ -1617,8 +1596,14 @@
       safeSet('nav-btn-calendar', state.modules.gcal ? 'inline-block' : 'none');
       safeSet('nav-btn-bookmarks', state.modules.bookmarks ? 'inline-block' : 'none');
       
-      if (!state.modules.gcal) document.getElementById('calendar-drawer').classList.remove('open');
-      if (!state.modules.bookmarks) document.getElementById('bookmarks-drawer').classList.remove('open');
+      if (!state.modules.gcal) {
+         const gd = document.getElementById('calendar-drawer');
+         if(gd) gd.classList.remove('open');
+      }
+      if (!state.modules.bookmarks) {
+         const bd = document.getElementById('bookmarks-drawer');
+         if(bd) bd.classList.remove('open');
+      }
     }
 
     // ===== ADD SEARCH ENGINE =====
@@ -1639,10 +1624,35 @@
     // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
-      renderEngineDropdown(); renderDials(); renderServices(); renderBookmarks(); 
+      renderEngineDropdown(); 
+      renderDials(); 
+      renderServices(); 
+      renderBookmarks(); 
       applyModuleVisibility();
       if (state.modules.news) fetchRSS();
       setTimeout(initGoogleAuth, 500);
+      
+      initDraggableWidget('topNavWidget', 'pos_topNavWidget');
+      initDraggableWidget('searchWidget', 'pos_searchWidget');
+      initDraggableWidget('section-dials', 'pos_dialsSection');
+      initDraggableWidget('section-services', 'pos_servicesSection');
+      initDraggableWidget('section-news', 'pos_newsSection');
+      initDraggableWidget('inline-calendar-wrapper', 'pos_calendarWidget');
+      
+      // Auto-save calendar manual resizes
+      const calWrapper = document.getElementById('inline-calendar-wrapper');
+      const savedSize = JSON.parse(localStorage.getItem('size_calendarWidget'));
+      if (savedSize) {
+         calWrapper.style.width = savedSize.w + 'px';
+         calWrapper.style.height = savedSize.h + 'px';
+      }
+      const ro = new ResizeObserver(() => {
+         localStorage.setItem('size_calendarWidget', JSON.stringify({
+             w: calWrapper.offsetWidth,
+             h: calWrapper.offsetHeight
+         }));
+      });
+      ro.observe(calWrapper);
     });
   </script>
 </body>
