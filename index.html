@@ -48,7 +48,7 @@
       background: #0d1117 url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070') no-repeat center center fixed;
       background-size: cover;
       color: var(--text-main);
-      padding: 24px;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -735,8 +735,10 @@
         if (!drag || drag.pointerId !== event.pointerId) return;
         const dx = event.clientX - drag.startX;
         const dy = event.clientY - drag.startY;
-        const maxX = Math.max(0, document.documentElement.scrollWidth - drag.width);
-        const maxY = Math.max(0, document.documentElement.scrollHeight - drag.height);
+        const pageWidth = Math.max(document.documentElement.scrollWidth, window.innerWidth);
+        const pageHeight = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+        const maxX = Math.max(0, pageWidth - drag.width);
+        const maxY = Math.max(0, pageHeight - drag.height);
         const x = Math.min(Math.max(0, drag.startLeft + dx), maxX);
         const y = Math.min(Math.max(0, drag.startTop + dy), maxY);
         widget.style.left = `${x}px`;
@@ -760,8 +762,10 @@
         const saved = readSavedPosition(storageKey);
         if (!saved) return;
         const rect = widget.getBoundingClientRect();
-        const maxX = Math.max(0, document.documentElement.scrollWidth - rect.width);
-        const maxY = Math.max(0, document.documentElement.scrollHeight - rect.height);
+        const pageWidth = Math.max(document.documentElement.scrollWidth, window.innerWidth);
+        const pageHeight = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+        const maxX = Math.max(0, pageWidth - rect.width);
+        const maxY = Math.max(0, pageHeight - rect.height);
         const x = Math.min(saved.x, maxX);
         const y = Math.min(saved.y, maxY);
         widget.style.left = `${x}px`;
