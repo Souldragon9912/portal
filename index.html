@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   
   <!-- ========================================== -->
   <!--                 CSS STYLES                 -->
@@ -66,13 +65,24 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* THE FLASHING BLUE FOLDER MERGE ANIMATION */
     @keyframes folderMergePulse {
-      0% { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); background-color: rgba(88, 166, 255, 0.15); }
-      50% { box-shadow: 0 0 0 4px var(--accent) inset, 0 0 35px rgba(88, 166, 255, 0.9); background-color: rgba(88, 166, 255, 0.4); }
-      100% { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); background-color: rgba(88, 166, 255, 0.15); }
+      0% { 
+        box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); 
+        background-color: rgba(88, 166, 255, 0.15); 
+      }
+      50% { 
+        box-shadow: 0 0 0 4px var(--accent) inset, 0 0 35px rgba(88, 166, 255, 0.9); 
+        background-color: rgba(88, 166, 255, 0.4); 
+      }
+      100% { 
+        box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); 
+        background-color: rgba(88, 166, 255, 0.15); 
+      }
     }
 
-    /* --- Combined Top Nav & Encased Calendar --- */
+    /* --- Combined Top Nav & Dropdown Menus --- */
     .top-widget-container {
       position: absolute; top: 20px; left: 20px; z-index: 50;
       display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
@@ -80,20 +90,20 @@
     }
     .top-widget-container.edit-unlocked { cursor: grab; }
     .top-widget-container.edit-unlocked:active { cursor: grabbing; }
-    
+
     .top-nav-bar {
-      display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 15px; padding: 10px 16px;
+      display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 10px 16px;
       background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-glass); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      user-select: none; transition: border 0.3s, background 0.3s; width: max-content;
+      border: 1px solid var(--border-glass); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); 
+      user-select: none; transition: border 0.3s, background 0.3s;
     }
     .top-widget-container.edit-unlocked .top-nav-bar { border: 2px dashed var(--accent); background: rgba(22, 27, 34, 0.85); }
 
-    .widget-toggles { display: flex; gap: 10px; flex-direction: row; align-items: center; }
+    .widget-toggles { display: flex; gap: 10px; }
     .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
-    /* Cascading Encased Calendar */
+    /* The Cascading Calendar (Original untouched style) */
     .dropdown-calendar {
       max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; width: 100%; min-width: 320px;
       transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-in-out, padding 0.3s;
@@ -103,19 +113,36 @@
       padding: 0 20px; 
     }
     .dropdown-calendar.open { 
-      max-height: 450px; opacity: 1; pointer-events: auto; 
-      border-color: var(--border-glass); padding: 20px;
+      max-height: 450px; opacity: 1; pointer-events: auto; padding: 20px; border-color: var(--border-glass); 
     }
-    
     .generic-calendar { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 350px; }
     .cal-week-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; width: 100%; text-align: center; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; }
     .dropdown-calendar.open .cal-week-row { opacity: 1; transform: translateY(0); }
-    
     .cal-day-header { font-size: 11px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; }
-    .cal-day { font-size: 13px; height: 32px; width: 100%; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
-    .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.1); cursor: pointer; }
+    .cal-day { padding: 10px; font-size: 13px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
+    .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
     .cal-day.empty { background: transparent; }
     .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
+
+    /* The Universal Top-Nav Dropdown Panel (For Settings, Bookmarks, G-Cal) */
+    .dropdown-panel {
+      max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; width: 100%; min-width: 440px;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-in-out, padding 0.3s;
+      display: flex; flex-direction: column; align-items: stretch;
+      background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-radius: 16px; border: 1px solid transparent; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      padding: 0 20px; 
+    }
+    .dropdown-panel.open { 
+      max-height: 75vh; opacity: 1; pointer-events: auto; padding: 20px; border-color: var(--border-glass); 
+      overflow-y: auto;
+    }
+    
+    /* Scrollbar styling for panels */
+    .dropdown-panel::-webkit-scrollbar { width: 8px; }
+    .dropdown-panel::-webkit-scrollbar-track { background: transparent; }
+    .dropdown-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    .dropdown-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
     /* --- Floating Bottom-Right Lock & Save Button --- */
     .floating-lock-btn {
@@ -147,26 +174,27 @@
     .main-panel.edit-mode-container:active { cursor: grabbing; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
+    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
+    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; justify-content: center; position: relative; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); justify-content: center; gap: 14px; width: 100%; }
 
-    /* --- SortableJS Global Drag Classes --- */
-    .draggable-wrapper { position: relative; cursor: grab; }
+    /* --- Global Draggable Tile Physics & FLIP Animations --- */
+    .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
     .draggable-wrapper:active { cursor: grabbing; }
     
-    .sortable-ghost { opacity: 0 !important; }
-    .sortable-drag { opacity: 1 !important; transform: scale(1.05) !important; z-index: 1000 !important; box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important; cursor: grabbing !important; }
+    /* When dragged, card stays completely invisible so only the crisp ghost image follows your mouse */
+    .draggable-wrapper.is-dragging { opacity: 0.01 !important; pointer-events: none; }
     
-    /* Vivaldi/Opera Drag-to-Merge Pulsing Zone */
-    .drag-folder-hover .dial-card, .drag-folder-hover .dial-folder-tile { 
-      transform: scale(0.92) !important; 
-      box-shadow: 0 0 0 3px var(--accent) inset, 0 8px 30px rgba(88, 166, 255, 0.3) !important; 
-      opacity: 0.9; transition: all 0.2s; 
+    /* This class triggers the flashy blue pulsing folder-merge effect */
+    .draggable-wrapper.drag-folder-hover .dial-card, 
+    .draggable-wrapper.drag-folder-hover .dial-folder-tile { 
+      transform: scale(0.9) !important; 
+      border-color: var(--accent) !important;
       animation: folderMergePulse 1s infinite !important;
     }
 
-    /* Base Cards */
     .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { 
       background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); 
       border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--card-radius); clip-path: var(--card-clip);
@@ -193,11 +221,11 @@
 
     /* --- Opera/Brave Micro Folders --- */
     .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
-    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none; }
-    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
+    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; }
+    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
 
-    /* In-Grid Row Breakdown Accordion */
+    /* In-Grid Row Breakdown Accordion (Headerless) */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
       background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: none !important; box-shadow: none !important;
@@ -206,15 +234,10 @@
     }
     .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); justify-content: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
     
-    /* Strict Edit Mode Controls - Hidden universally unless body.edit-mode is active */
-    .card-delete-btn, .card-edit-btn { position: absolute; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 10; }
-    .card-delete-btn { top: 6px; right: 6px; font-size: 14px; }
+    /* Edit Controls */
+    .card-delete-btn, .card-edit-btn { position: absolute; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
     .card-edit-btn { top: 6px; left: 6px; font-size: 12px; }
-    
-    /* Only display the buttons when Unlock Layout is clicked */
-    body.edit-mode .draggable-wrapper:hover .card-delete-btn, 
-    body.edit-mode .draggable-wrapper:hover .card-edit-btn { display: flex; }
-    
+    body.edit-mode .draggable-wrapper:hover .card-delete-btn, body.edit-mode .draggable-wrapper:hover .card-edit-btn { display: flex; }
     .card-delete-btn:hover { color: var(--danger); background: rgba(248, 81, 73, 0.25); transform: scale(1.1); }
     .card-edit-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.25); transform: scale(1.1); }
 
@@ -231,21 +254,7 @@
     .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 8px; border-radius: 6px; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .rss-date { font-family: monospace; font-size: 11px; }
 
-    /* --- Modals & Drawers --- */
-    .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
-    .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-    .rss-manager-item:hover { transform: scale(1.05); }
-    .rss-manager-item img { width: 26px; height: 26px; border-radius: 6px; }
-    .rss-delete-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; border: none; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: background 0.2s; }
-    .rss-delete-btn:hover { background: #dc2626; }
-    
-    .drawer { position: fixed; top: 0; bottom: 0; width: 440px; max-width: 90vw; background: rgba(13, 17, 23, 0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border-glass); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.6); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
-    .drawer-right { right: 0; transform: translateX(100%); }
-    .drawer-right.open { transform: translateX(0); }
-    .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
-    .drawer-close { background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
-    .drawer-close:hover { color: var(--text-main); }
-    
+    /* Dropdown UI Content Components */
     .cal-auth-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 16px; background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; }
     .events-container { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-right: 4px; }
     .cal-event-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s; }
@@ -253,12 +262,10 @@
     .cal-event-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
     .cal-event-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--accent); }
     
-    /* Sleek Bookmarks Redesign */
     .bookmark-input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
     .bookmark-input-group input { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
     .bookmarks-list { list-style: none; display: flex; flex-direction: column; gap: 0; flex: 1; overflow-y: auto; padding-right: 4px; margin-top: 4px; }
     .bookmark-folder-header { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; margin-bottom: 6px; border-bottom: 1px solid rgba(88,166,255,0.2); padding-bottom: 4px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    
     .bookmark-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; transition: all 0.2s; }
     .bookmark-item:hover { background: rgba(88,166,255,0.08); border-color: rgba(88,166,255,0.3); transform: translateX(4px); }
     .bookmark-item img { width: 18px; height: 18px; border-radius: 4px; margin-right: 12px; }
@@ -267,10 +274,12 @@
     .bookmark-item:hover button { opacity: 1; }
     .bookmark-item button:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
 
+    /* Modals for Add/Edit Dial and Services */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 200; opacity: 0; transition: opacity 0.3s; }
     .modal.show { opacity: 1; }
     .modal-content { background: #161b22; border: 1px solid var(--border-glass); border-radius: 16px; width: 90%; max-width: 540px; padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     .modal.show .modal-content { transform: scale(1); }
+    
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 12px; color: var(--text-muted); }
     .form-group input, .form-group select { background: #0d1117; border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
@@ -305,7 +314,7 @@
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
       #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
-      .dropdown-calendar { display: none !important; }
+      .dropdown-calendar, .dropdown-panel { display: none !important; }
       
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
       .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
@@ -322,107 +331,69 @@
 <body class="">
 
   <!-- ========================================== -->
-  <!--    MOVABLE TOP NAVIGATION & CASCADING CAL  -->
+  <!--    MOVABLE TOP NAVIGATION & DROPDOWNS      -->
   <!-- ========================================== -->
   <div class="top-widget-container" id="topNavWidget" draggable="false">
     <div class="top-nav-bar">
       <div class="widget-toggles">
-        <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal</button>
-        <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
+        <button class="nav-btn" id="nav-btn-calendar" onclick="toggleGcalDropdown()">🗓 G-Cal</button>
+        <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleBookmarksDropdown()">📑 Bookmarks</button>
       </div>
       <div style="display: flex; align-items: center; margin-left: 10px;">
-        <!-- Clock toggles the built-in calendar -->
         <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
-        <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
+        <button class="nav-btn" onclick="toggleSettingsDropdown()">⚙ Settings</button>
       </div>
     </div>
     
-    <!-- The Cascading Built-in Calendar -->
+    <!-- Cascading Built-in Calendar -->
     <div class="dropdown-calendar" id="inline-calendar-wrapper">
       <div class="generic-calendar" id="generic-calendar-grid"></div>
     </div>
-  </div>
 
-  <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock Sections</button>
-
-  <main class="hero-container">
-    <div class="search-box-wrapper" id="searchWidget" draggable="false">
-      <form class="search-box" id="search-form">
-        <select id="engine-select" onchange="changeActiveEngine(this.value)"></select>
-        <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
-      </form>
-    </div>
-
-    <div class="main-panel" id="section-dials" draggable="false">
-      <div class="speed-dial-grid" id="speed-dials-container"></div>
-    </div>
-
-    <div class="main-panel" id="section-services" draggable="false">
-      <div class="panel-header">
-        <span class="panel-title">🖥 Self-Hosted Services</span>
+    <!-- Dropdown Bookmarks -->
+    <div class="dropdown-panel" id="bookmarks-dropdown">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+        <span style="font-weight: 600; font-size: 16px;">📑 Saved Tabs & Bookmarks</span>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="toggleBookmarksDropdown()">&times;</button>
       </div>
-      <div class="services-grid" id="services-container"></div>
+      <div class="bookmark-input-group">
+        <input type="text" id="bm-title" placeholder="Leave blank to auto-fetch from URL..." />
+        <input type="url" id="bm-url" placeholder="https://..." />
+        <input type="text" id="bm-folder" placeholder="Folder (e.g. Social, Weather)..." list="bm-folder-list" />
+        <datalist id="bm-folder-list"></datalist>
+        <button class="badge-btn" style="padding: 8px 12px; margin-top: 4px;" onclick="addBookmark()">Save Link</button>
+      </div>
+      <ul class="bookmarks-list" id="bookmarks-container"></ul>
     </div>
 
-    <div class="main-panel" id="section-news" draggable="false" style="display: none;">
-      <div class="news-floating-header">
-        <span class="news-title-clean" id="rssHeaderTitle">📡 Aggregated News Stream</span>
-        <button class="badge-btn" onclick="fetchRSS()">Refresh</button>
+    <!-- Dropdown Google Calendar -->
+    <div class="dropdown-panel" id="gcal-dropdown">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+        <span style="font-weight: 600; font-size: 16px;">📅 Google Calendar</span>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="toggleGcalDropdown()">&times;</button>
       </div>
-      <div class="rss-feed-list" id="rssFeedList">
-        <div style="color: var(--text-muted); font-size: 0.9rem; padding: 8px;">Synchronizing aggregated news nodes...</div>
+      <div class="cal-auth-box" id="cal-auth-section">
+        <p style="color: var(--text-muted); font-size: 13px;">Sign in with your Google account to sync your schedule directly into this dashboard.</p>
+        <button class="nav-btn" style="background: var(--accent); color: #fff; padding: 10px 18px;" onclick="handleGoogleAuth()">Sign in with Google</button>
       </div>
-    </div>
-  </main>
-
-  <!-- ========================================== -->
-  <!--             GOOGLE CALENDAR DRAWER         -->
-  <!-- ========================================== -->
-  <aside class="drawer drawer-right" id="calendar-drawer">
-    <div class="drawer-header">
-      <span class="panel-title">📅 Google Calendar</span>
-      <button class="drawer-close" onclick="toggleDrawer('calendar-drawer')">&times;</button>
-    </div>
-    <div class="cal-auth-box" id="cal-auth-section">
-      <p style="color: var(--text-muted); font-size: 13px;">Sign in with your Google account to sync your schedule directly into this dashboard.</p>
-      <button class="nav-btn" style="background: var(--accent); color: #fff; padding: 10px 18px;" onclick="handleGoogleAuth()">Sign in with Google</button>
-    </div>
-    <div class="events-container" id="cal-events-section" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-        <span style="font-size: 12px; color: var(--text-muted);">Upcoming Events</span>
-        <div style="display: flex; gap: 8px;">
-          <button class="badge-btn" onclick="fetchCalendarEvents()">Refresh</button>
-          <button class="badge-btn" style="color: var(--danger); border-color: rgba(248,81,73,0.3);" onclick="handleGoogleSignout()">Sign Out</button>
+      <div class="events-container" id="cal-events-section" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: var(--text-muted);">Upcoming Events</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="badge-btn" onclick="fetchCalendarEvents()">Refresh</button>
+            <button class="badge-btn" style="color: var(--danger); border-color: rgba(248,81,73,0.3);" onclick="handleGoogleSignout()">Sign Out</button>
+          </div>
         </div>
+        <div id="calendar-event-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
-      <div id="calendar-event-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
-  </aside>
 
-  <!-- ========================================== -->
-  <!--               BOOKMARKS DRAWER             -->
-  <!-- ========================================== -->
-  <aside class="drawer drawer-right" id="bookmarks-drawer">
-    <div class="drawer-header">
-      <span class="panel-title">📑 Saved Tabs & Bookmarks</span>
-      <button class="drawer-close" onclick="toggleDrawer('bookmarks-drawer')">&times;</button>
-    </div>
-    <div class="bookmark-input-group">
-      <input type="text" id="bm-title" placeholder="Leave blank to auto-fetch from URL..." />
-      <input type="url" id="bm-url" placeholder="https://..." />
-      <input type="text" id="bm-folder" placeholder="Folder (e.g. Social, Weather)..." list="bm-folder-list" />
-      <datalist id="bm-folder-list"></datalist>
-      <button class="badge-btn" style="padding: 8px 12px; margin-top: 4px;" onclick="addBookmark()">Save Link</button>
-    </div>
-    <ul class="bookmarks-list" id="bookmarks-container"></ul>
-  </aside>
-
-  <!-- ========================================== -->
-  <!--               SETTINGS MODAL               -->
-  <!-- ========================================== -->
-  <div class="modal" id="settings-modal">
-    <div class="modal-content">
-      <h3>Dashboard Settings</h3>
+    <!-- Dropdown Settings -->
+    <div class="dropdown-panel" id="settings-dropdown">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 16px;">Dashboard Settings</h3>
+        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="toggleSettingsDropdown()">&times;</button>
+      </div>
       
       <div class="form-group">
         <label>Custom Wallpaper (URL or Upload Image)</label>
@@ -433,7 +404,7 @@
         </div>
       </div>
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Appearance & Layout Control</label>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
@@ -482,7 +453,7 @@
         </div>
       </div>
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Search Engines</label>
         <div style="display: flex; gap: 6px;">
           <input type="text" id="new-se-name" placeholder="Name" style="flex: 1;" />
@@ -493,7 +464,7 @@
         <div class="se-settings-list" id="custom-engines-list"></div>
       </div>
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px;">
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Manage News Feeds</label>
         <div style="display: flex; gap: 8px; margin-bottom: 5px;">
           <input type="url" id="newRssInput" placeholder="https://theverge.com" style="flex: 1;" />
@@ -502,12 +473,12 @@
         <div id="rssManagerGrid" class="rss-manager-grid"></div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" style="margin-top: 10px;">
         <label>Google OAuth Client ID</label>
         <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
       </div>
 
-      <div class="form-group">
+      <div class="form-group" style="margin-top: 10px;">
         <label>Visible Modules & Sections</label>
         <div class="modules-toggle-list">
           <div class="toggle-row"><span>⚡ Speed Dials Grid</span><label class="toggle-switch"><input type="checkbox" id="toggle-mod-dials"><span class="slider"></span></label></div>
@@ -518,7 +489,7 @@
         </div>
       </div>
 
-      <div class="form-group" style="margin-top: 6px; border-top: 1px solid var(--border-glass); padding-top: 14px;">
+      <div class="form-group" style="margin-top: 10px; border-top: 1px solid var(--border-glass); padding-top: 14px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Backup & Sync Configuration</label>
         <div style="display: flex; gap: 8px;">
           <button class="badge-btn" onclick="exportConfig()" style="padding: 8px 12px;">Export Config</button>
@@ -528,11 +499,42 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
         <button class="btn-primary" onclick="saveSettings()">Save Configuration</button>
       </div>
     </div>
   </div>
+
+  <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock Sections</button>
+
+  <main class="hero-container">
+    <div class="search-box-wrapper" id="searchWidget" draggable="false">
+      <form class="search-box" id="search-form">
+        <select id="engine-select" onchange="changeActiveEngine(this.value)"></select>
+        <input type="text" id="search-input" placeholder="Search the web, paste a URL, or enter local IP..." autocomplete="off" />
+      </form>
+    </div>
+
+    <div class="main-panel" id="section-dials" draggable="false">
+      <div class="speed-dial-grid" id="speed-dials-container"></div>
+    </div>
+
+    <div class="main-panel" id="section-services" draggable="false">
+      <div class="panel-header">
+        <span class="panel-title">🖥 Self-Hosted Services</span>
+      </div>
+      <div class="services-grid" id="services-container"></div>
+    </div>
+
+    <div class="main-panel" id="section-news" draggable="false" style="display: none;">
+      <div class="news-floating-header">
+        <span class="news-title-clean" id="rssHeaderTitle">📡 Aggregated News Stream</span>
+        <button class="badge-btn" onclick="fetchRSS()">Refresh</button>
+      </div>
+      <div class="rss-feed-list" id="rssFeedList">
+        <div style="color: var(--text-muted); font-size: 0.9rem; padding: 8px;">Synchronizing aggregated news nodes...</div>
+      </div>
+    </div>
+  </main>
 
   <!-- ========================================== -->
   <!--            ADD SPEED DIAL MODAL            -->
@@ -685,43 +687,27 @@
       if (isEditMode) {
         if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Sections'; }
         if (floatBtn) floatBtn.classList.add('show');
+        
         topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
         searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
         dialsSection.setAttribute('draggable', 'true'); dialsSection.classList.add('edit-mode-container');
         servicesSection.setAttribute('draggable', 'true'); servicesSection.classList.add('edit-mode-container');
         newsSection.setAttribute('draggable', 'true'); newsSection.classList.add('edit-mode-container');
-        closeModal('settings-modal');
-        document.body.classList.add('edit-mode');
         
-        // Lock Sortable while manipulating massive sections
-        if(rootSortable) rootSortable.option("disabled", true);
-        if(accordionSortable) accordionSortable.option("disabled", true);
-        if(servicesSortable) servicesSortable.option("disabled", true);
-
+        closeAllDropdownsExcept(''); // Ensure all top-nav panels are closed when entering edit mode
+        document.body.classList.add('edit-mode');
       } else {
         if (btn) { btn.classList.remove('active-edit'); btn.style.background = '#333'; btn.innerText = '✏ Unlock Layout'; }
         if (floatBtn) floatBtn.classList.remove('show');
+        
         topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
         searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
         dialsSection.setAttribute('draggable', 'false'); dialsSection.classList.remove('edit-mode-container');
         servicesSection.setAttribute('draggable', 'false'); servicesSection.classList.remove('edit-mode-container');
         newsSection.setAttribute('draggable', 'false'); newsSection.classList.remove('edit-mode-container');
         document.body.classList.remove('edit-mode');
-
-        // Re-enable Sortable tiles
-        if(rootSortable) rootSortable.option("disabled", false);
-        if(accordionSortable) accordionSortable.option("disabled", false);
-        if(servicesSortable) servicesSortable.option("disabled", false);
       }
     }
-
-    window.addEventListener('load', () => {
-      initDraggableWidget('topNavWidget', 'pos_topNavWidget');
-      initDraggableWidget('searchWidget', 'pos_searchWidget');
-      initDraggableWidget('section-dials', 'pos_dialsSection');
-      initDraggableWidget('section-services', 'pos_servicesSection');
-      initDraggableWidget('section-news', 'pos_newsSection');
-    });
 
     // ===== ICONIFY API SEARCH =====
     async function searchIcons(mode) {
@@ -879,13 +865,13 @@
       // Filter duplicates that may exist from cross-dragging
       const uniqueDials = []; const map = new Map();
       for (const item of newDials) {
-         const key = item.url + item.name;
+         const key = item.url + '|' + item.name;
          if(!map.has(key)){ map.set(key, true); uniqueDials.push(item); }
       }
       
       state.dials = uniqueDials; 
       localStorage.setItem('dash_dials', JSON.stringify(state.dials)); 
-      renderDials(); 
+      renderDials(); // Rerender instantly deletes empty folders visually
     }
 
     function syncServiceStateFromDOM() {
@@ -1022,7 +1008,6 @@
 
                accordionSortable = new Sortable(accordion.querySelector('.expanded-folder-inner-grid'), {
                    group: 'dials', // Allow dragging in and out of folder
-                   disabled: isEditMode, // Lock tile sorting if moving sections
                    animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-dial-tile',
                    ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                    onEnd: syncDialStateFromDOM
@@ -1033,7 +1018,6 @@
 
       rootSortable = new Sortable(container, {
           group: 'dials', // Shared group for cross-folder drag
-          disabled: isEditMode, // Lock tile sorting if moving sections
           animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper, .expanded-folder-accordion',
           ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
           onMove: function(evt, originalEvent) {
@@ -1044,9 +1028,9 @@
               const relX = originalEvent.clientX - rect.left;
               const relY = originalEvent.clientY - rect.top;
               
-              // 70% Merge Zone (Outer 15% edge triggers swap)
-              const marginX = rect.width * 0.15; 
-              const marginY = rect.height * 0.15;
+              // Extended 50% Merge Zone (Only outer 25% edge triggers swap)
+              const marginX = rect.width * 0.25; 
+              const marginY = rect.height * 0.25;
 
               if (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY) {
                   evt.related.classList.add('drag-folder-hover');
@@ -1129,7 +1113,6 @@
       pingServices();
 
       servicesSortable = new Sortable(container, {
-          disabled: isEditMode, // Lock tile sorting if moving sections
           animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
           ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
           onEnd: syncServiceStateFromDOM
@@ -1156,6 +1139,22 @@
     }
 
     // ===== MULTI-PROXY BULLETPROOF RSS ENGINE =====
+    const rssDirectFeeds = {
+      'theverge.com': 'https://www.theverge.com/rss/index.xml',
+      '9to5google.com': 'https://9to5google.com/feed/',
+      'linustechtips.com': 'https://linustechtips.com/rss/',
+      'bleepingcomputer.com': 'https://www.bleepingcomputer.com/feed/',
+      'arstechnica.com': 'https://feeds.arstechnica.com/arstechnica/index',
+      'hackernews.com': 'https://news.ycombinator.com/rss'
+    };
+
+    function resolveRssUrl(userUrl) {
+      let hostname;
+      try { hostname = new URL(userUrl).hostname.replace(/^www\./, ''); } catch(e) { return userUrl; }
+      if (rssDirectFeeds[hostname]) return rssDirectFeeds[hostname];
+      return userUrl; 
+    }
+
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
@@ -1172,8 +1171,10 @@
 
       const feedPromises = urls.map(async (rawUrl) => {
         try {
+          const feedUrl = resolveRssUrl(rawUrl);
+
           try {
-             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rawUrl)}`);
+             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
              const data = await r2j.json();
              if (data.status === 'ok') {
                return data.items.map(item => ({
@@ -1185,7 +1186,7 @@
              }
           } catch(e) {}
 
-          const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rawUrl)}`);
+          const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
           const proxyData = await proxyRes.json();
           if (proxyData && proxyData.contents) {
              let parser = new DOMParser();
@@ -1353,7 +1354,7 @@
       });
       if (state.googleToken) { fetchCalendarEvents(); }
     }
-    function handleGoogleAuth() { if (!state.googleClientId) { alert('Please add your Google OAuth Client ID in Settings first.'); openSettingsModal(); return; } if (!tokenClient) initGoogleAuth(); if (tokenClient) { tokenClient.requestAccessToken({ prompt: '' }); } }
+    function handleGoogleAuth() { if (!state.googleClientId) { alert('Please add your Google OAuth Client ID in Settings first.'); toggleSettingsDropdown(); return; } if (!tokenClient) initGoogleAuth(); if (tokenClient) { tokenClient.requestAccessToken({ prompt: '' }); } }
     function handleGoogleSignout() { if (state.googleToken) { google.accounts.oauth2.revoke(state.googleToken, () => { state.googleToken = null; localStorage.removeItem('dash_google_token'); document.getElementById('cal-auth-section').style.display = 'flex'; document.getElementById('cal-events-section').style.display = 'none'; }); } }
     async function fetchCalendarEvents() {
       if (!state.googleToken) return;
@@ -1375,8 +1376,29 @@
       }).join('');
     }
 
-    // ===== INLINE CASCADING CALENDAR =====
+    // ===== TOP NAV DROPDOWN MANAGER =====
+    function closeAllDropdownsExcept(excludeId) {
+      const ids = ['inline-calendar-wrapper', 'bookmarks-dropdown', 'settings-dropdown', 'gcal-dropdown'];
+      ids.forEach(id => {
+        if (id !== excludeId) {
+          const el = document.getElementById(id);
+          if (el && el.classList.contains('open')) {
+            el.classList.remove('open');
+            if (id === 'inline-calendar-wrapper') {
+              const rows = el.querySelectorAll('.cal-week-row');
+              rows.forEach((row, idx) => {
+                 row.style.transitionDelay = `${(rows.length - idx) * 0.03}s`;
+                 row.style.opacity = '0';
+                 row.style.transform = 'translateY(-10px)';
+              });
+            }
+          }
+        }
+      });
+    }
+
     function toggleInlineCalendar() {
+      closeAllDropdownsExcept('inline-calendar-wrapper');
       const wrapper = document.getElementById('inline-calendar-wrapper');
       
       if (wrapper.classList.contains('open')) { 
@@ -1431,36 +1453,47 @@
       }, 10);
     }
 
-    // ===== MODALS & DRAWERS =====
-    function toggleDrawer(drawerId) {
-      const drawer = document.getElementById(drawerId);
-      document.querySelectorAll('.drawer').forEach(d => { if (d.id !== drawerId) d.classList.remove('open'); });
-      drawer.classList.toggle('open');
+    function toggleBookmarksDropdown() {
+      closeAllDropdownsExcept('bookmarks-dropdown');
+      document.getElementById('bookmarks-dropdown').classList.toggle('open');
     }
-    function openSettingsModal() {
-      document.getElementById('settings-wallpaper').value = state.wallpaper; document.getElementById('settings-client-id').value = state.googleClientId;
-      
-      const savedShape = localStorage.getItem('dash_shape') || '20px|none';
-      document.getElementById('settings-shape').value = savedShape;
-      document.getElementById('settings-size').value = localStorage.getItem('dash_min_width') || '130px';
-      document.getElementById('settings-grid-cols').value = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
-      document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
-      document.getElementById('settings-opacity-num').value = parseInt(localStorage.getItem('dash_opacity')) || 55;
 
-      const safeCheck = (id, defaultVal) => { const el = document.getElementById(id); if(el) {el.checked = defaultVal;} };
-      safeCheck('toggle-mod-dials', state.modules.dials);
-      safeCheck('toggle-mod-services', state.modules.services);
-      safeCheck('toggle-mod-news', state.modules.news);
-      safeCheck('toggle-mod-gcal', state.modules.gcal);
-      safeCheck('toggle-mod-bookmarks', state.modules.bookmarks);
-      
-      const customEngines = state.searchEngines.filter(e => e.isCustom); const listContainer = document.getElementById('custom-engines-list');
-      listContainer.innerHTML = customEngines.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>' : customEngines.map(e => `<div class="se-settings-item"><div style="display:flex; align-items:center;"><span class="se-color-dot" style="background: ${e.colors[0]}"></span><strong>${e.name}</strong></div><button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button></div>`).join('');
-      
-      renderRSSManager();
-      document.getElementById('settings-modal').style.display = 'flex'; setTimeout(() => document.getElementById('settings-modal').classList.add('show'), 10);
+    function toggleGcalDropdown() {
+      closeAllDropdownsExcept('gcal-dropdown');
+      document.getElementById('gcal-dropdown').classList.toggle('open');
     }
-    function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('show'); setTimeout(() => { modal.style.display = 'none'; }, 300); }
+
+    function toggleSettingsDropdown() {
+      closeAllDropdownsExcept('settings-dropdown');
+      const wrapper = document.getElementById('settings-dropdown');
+      
+      if (!wrapper.classList.contains('open')) {
+          document.getElementById('settings-wallpaper').value = state.wallpaper; 
+          document.getElementById('settings-client-id').value = state.googleClientId;
+          
+          const savedShape = localStorage.getItem('dash_shape') || '20px|none';
+          document.getElementById('settings-shape').value = savedShape;
+          document.getElementById('settings-size').value = localStorage.getItem('dash_min_width') || '130px';
+          document.getElementById('settings-grid-cols').value = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
+          document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
+          document.getElementById('settings-opacity-num').value = parseInt(localStorage.getItem('dash_opacity')) || 55;
+
+          const safeCheck = (id, defaultVal) => { const el = document.getElementById(id); if(el) {el.checked = defaultVal;} };
+          safeCheck('toggle-mod-dials', state.modules.dials);
+          safeCheck('toggle-mod-services', state.modules.services);
+          safeCheck('toggle-mod-news', state.modules.news);
+          safeCheck('toggle-mod-gcal', state.modules.gcal);
+          safeCheck('toggle-mod-bookmarks', state.modules.bookmarks);
+          
+          const customEngines = state.searchEngines.filter(e => e.isCustom); const listContainer = document.getElementById('custom-engines-list');
+          listContainer.innerHTML = customEngines.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>' : customEngines.map(e => `<div class="se-settings-item"><div style="display:flex; align-items:center;"><span class="se-color-dot" style="background: ${e.colors[0]}"></span><strong>${e.name}</strong></div><button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button></div>`).join('');
+          
+          renderRSSManager();
+          wrapper.classList.add('open');
+      } else {
+          wrapper.classList.remove('open');
+      }
+    }
 
     // ===== BACKUP & SYNC ENGINE =====
     function exportConfig() {
@@ -1514,12 +1547,12 @@
           dials: getCheck('toggle-mod-dials'), 
           services: getCheck('toggle-mod-services'), 
           news: getCheck('toggle-mod-news'), 
-          builtin_cal: true, // Always tied to clock now
+          builtin_cal: true, // Always tied to clock
           gcal: getCheck('toggle-mod-gcal'), 
           bookmarks: getCheck('toggle-mod-bookmarks') 
       };
       localStorage.setItem('dash_modules', JSON.stringify(state.modules));
-      applyModuleVisibility(); initGoogleAuth(); closeModal('settings-modal');
+      applyModuleVisibility(); initGoogleAuth(); toggleSettingsDropdown();
     }
 
     function applyModuleVisibility() {
@@ -1532,8 +1565,8 @@
       safeSet('nav-btn-calendar', state.modules.gcal ? 'inline-block' : 'none');
       safeSet('nav-btn-bookmarks', state.modules.bookmarks ? 'inline-block' : 'none');
       
-      if (!state.modules.gcal) { const gc = document.getElementById('calendar-drawer'); if(gc) gc.classList.remove('open'); }
-      if (!state.modules.bookmarks) { const bm = document.getElementById('bookmarks-drawer'); if(bm) bm.classList.remove('open'); }
+      if (!state.modules.gcal) { const gc = document.getElementById('gcal-dropdown'); if(gc) gc.classList.remove('open'); }
+      if (!state.modules.bookmarks) { const bm = document.getElementById('bookmarks-dropdown'); if(bm) bm.classList.remove('open'); }
     }
 
     // ===== ADD SEARCH ENGINE =====
@@ -1543,12 +1576,12 @@
       const customColors = [color, '#12161c', color, '#12161c'];
       state.searchEngines.push({ id: 'se_custom_' + Date.now(), name: name, url: url, colors: customColors, isCustom: true });
       localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
-      document.getElementById('new-se-name').value = ''; document.getElementById('new-se-url').value = ''; openSettingsModal(); renderEngineDropdown();
+      document.getElementById('new-se-name').value = ''; document.getElementById('new-se-url').value = ''; toggleSettingsDropdown(); toggleSettingsDropdown(); renderEngineDropdown();
     }
     function removeSearchEngine(id) {
       state.searchEngines = state.searchEngines.filter(e => e.id !== id);
       if (state.activeEngineId === id) state.activeEngineId = 'se_google';
-      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines)); openSettingsModal(); renderEngineDropdown();
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines)); toggleSettingsDropdown(); toggleSettingsDropdown(); renderEngineDropdown();
     }
 
     // ===== SYSTEM BOOT SEQUENCE =====
