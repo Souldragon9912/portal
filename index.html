@@ -156,18 +156,7 @@
     #section-dials { background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important; position: absolute; top: 160px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px; }
     #section-dials.grid-fixed { width: fit-content; max-width: none; }
     #section-services { background: var(--bg-glass) !important; backdrop-filter: blur(16px) !important; border: 1px solid var(--border-glass) !important; border-radius: 18px !important; padding: 24px !important; position: absolute; top: 420px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px; }
-   #section-news {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  border: none !important;
-  padding: 0 !important;
-  position: absolute;
-  top: 680px;
-  left: 70%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 1900px;
-}
+    #section-news { background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important; position: absolute; top: 680px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1180px; }
 
     .main-panel.edit-mode-container { border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; }
     .layout-drag-handle {
@@ -264,200 +253,28 @@
     .card-edit-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.25); transform: scale(1.1); }
 
     /* --- News Stream --- */
-.news-floating-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 0 4px;
-}
+    .news-floating-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
+    .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+    .rss-status { color: var(--text-muted); font-size: 12px; padding: 0 2px 10px; }
+    .rss-error-card { background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.22); border-radius: 12px; padding: 10px 12px; color: var(--text-muted); font-size: 12px; margin-bottom: 10px; }
+    .rss-error-card strong { color: var(--danger); }
+    .rss-carousel { display: grid; grid-template-columns: 42px minmax(0, 1fr) 42px; gap: 12px; align-items: stretch; }
+    .rss-carousel-arrow { align-self: center; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border-glass); background: rgba(22,27,34,0.78); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; line-height: 1; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform 0.2s, background 0.2s, opacity 0.2s, border-color 0.2s; box-shadow: 0 6px 20px rgba(0,0,0,0.35); z-index: 2; }
+    .rss-carousel-arrow:hover:not(:disabled) { transform: scale(1.08); background: rgba(88,166,255,0.18); border-color: rgba(88,166,255,0.45); }
+    .rss-carousel-arrow:disabled { opacity: 0.28; cursor: default; transform: none; }
+    .rss-carousel-viewport { min-width: 0; overflow: hidden; }
+    .rss-carousel-track { display: flex; width: 100%; transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
+    .rss-carousel-page { flex: 0 0 100%; min-width: 100%; display: grid; grid-template-columns: repeat(var(--news-columns-effective, 6), minmax(0, 1fr)); grid-template-rows: repeat(var(--news-rows, 1), minmax(0, 1fr)); gap: var(--news-gap, 16px); align-items: stretch; }
+    .rss-item { min-width: 0; min-height: var(--news-card-min-height, 280px); display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 18px; background: rgba(22, 27, 34, 0.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .rss-item:hover { background: rgba(33, 38, 45, 0.95); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+    .rss-image { width: 100%; height: var(--news-image-height, 150px); object-fit: cover; display: block; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+    .rss-meta-block { padding: 13px; display: flex; flex-direction: column; gap: 9px; flex-grow: 1; justify-content: space-between; }
+    .rss-title { font-size: 0.9rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .rss-source-date { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+    .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 3px 8px; border-radius: 7px; font-weight: 600; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rss-date { font-family: monospace; font-size: 10px; white-space: nowrap; }
+    .rss-carousel-empty { grid-column: 1 / -1; min-height: 180px; display: grid; place-items: center; color: var(--text-muted); font-size: 12px; border: 1px dashed var(--border-glass); border-radius: 14px; background: rgba(22,27,34,0.35); }
 
-.news-title-clean {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-main);
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-}
-
-.rss-status {
-  color: var(--text-muted);
-  font-size: 12px;
-  padding: 0 2px 10px;
-}
-
-.rss-error-card {
-  background: rgba(248,81,73,0.08);
-  border: 1px solid rgba(248,81,73,0.22);
-  border-radius: 12px;
-  padding: 10px 12px;
-  color: var(--text-muted);
-  font-size: 12px;
-  margin-bottom: 10px;
-}
-
-.rss-error-card strong {
-  color: var(--danger);
-}
-
-.rss-carousel {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 42px;
-  gap: 14px;
-  align-items: stretch;
-}
-
-.rss-carousel-arrow {
-  align-self: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 1px solid var(--border-glass);
-  background: rgba(22,27,34,0.78);
-  color: var(--text-main);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  line-height: 1;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition:
-    transform 0.2s,
-    background 0.2s,
-    opacity 0.2s,
-    border-color 0.2s;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-  z-index: 2;
-}
-
-.rss-carousel-arrow:hover:not(:disabled) {
-  transform: scale(1.08);
-  background: rgba(88,166,255,0.18);
-  border-color: rgba(88,166,255,0.45);
-}
-
-.rss-carousel-arrow:disabled {
-  opacity: 0.28;
-  cursor: default;
-  transform: none;
-}
-
-.rss-carousel-viewport {
-  min-width: 0;
-  overflow: hidden;
-}
-
-.rss-carousel-track {
-  display: flex;
-  width: 100%;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-}
-
-.rss-carousel-page {
-  flex: 0 0 100%;
-  min-width: 100%;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(200px, 1fr));
-  gap: 18px;
-}
-
-.rss-item {
-  min-width: 0;
-  min-height: 320px;
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  color: #e5e7eb;
-  border-radius: 20px;
-  background: rgba(22, 27, 34, 0.78);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  overflow: hidden;
-  transition:
-    transform 0.2s,
-    background 0.2s,
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.rss-item:hover {
-  background: rgba(33, 38, 45, 0.95);
-  color: #fff;
-  transform: translateY(-4px);
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-.rss-image {
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-  display: block;
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.rss-meta-block {
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex-grow: 1;
-  justify-content: space-between;
-}
-
-.rss-title {
-  font-size: 0.95rem;
-  font-weight: 500;
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.rss-source-date {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-.rss-source-tag {
-  background: rgba(88, 166, 255, 0.15);
-  color: var(--accent);
-  padding: 3px 8px;
-  border-radius: 7px;
-  font-weight: 600;
-  max-width: 130px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.rss-date {
-  font-family: monospace;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.rss-carousel-empty {
-  grid-column: 1 / -1;
-  min-height: 180px;
-  display: grid;
-  place-items: center;
-  color: var(--text-muted);
-  font-size: 12px;
-  border: 1px dashed var(--border-glass);
-  border-radius: 14px;
-  background: rgba(22,27,34,0.35);
-}
     /* Dropdown UI Content Components */
     .cal-auth-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 16px; background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; }
     .events-container { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-right: 4px; }
@@ -515,8 +332,6 @@
     input:checked + .slider:before { transform: translateX(18px); }
 
     @media (max-width: 1100px) and (min-width: 769px) {
-      .rss-carousel-page { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .rss-image { height: 150px; }
     }
 
     /* Mobile Minimalist Optimizations */
@@ -544,8 +359,7 @@
       #section-news { margin-top: 20px; }
       .rss-carousel { grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 6px; }
       .rss-carousel-arrow { width: 34px; height: 34px; font-size: 20px; }
-      .rss-carousel-page { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .rss-image { height: 130px; }
+      .rss-carousel-page { gap: 10px; }
     }
   </style>
 </head>
@@ -673,6 +487,40 @@
             <option value="repeat(5, var(--card-min-width))">5 Columns Fixed</option>
             <option value="repeat(8, var(--card-min-width))">8 Columns Fixed</option>
           </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="font-size: 11px;">News Feed Columns</label>
+            <select id="settings-news-columns" style="width:100%; margin-top:4px;">
+              <option value="2">2 Columns</option>
+              <option value="3">3 Columns</option>
+              <option value="4">4 Columns</option>
+              <option value="5">5 Columns</option>
+              <option value="6" selected>6 Columns</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11px;">News Feed Rows</label>
+            <select id="settings-news-rows" style="width:100%; margin-top:4px;">
+              <option value="1" selected>1 Row</option>
+              <option value="2">2 Rows</option>
+              <option value="3">3 Rows</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="font-size: 11px;">News Card Size</label>
+          <select id="settings-news-size" style="width:100%; margin-top:4px;">
+            <option value="compact">Compact</option>
+            <option value="standard" selected>Standard</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div style="font-size: 10px; color: var(--text-muted); margin: -2px 0 10px;">
+          Columns control how many stories fit across. Rows control how many appear on each page.
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1131,7 +979,16 @@
       rssFeeds: JSON.parse(localStorage.getItem('dash_rss_feeds')) || ['https://www.theverge.com', 'https://9to5google.com'],
       modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, news: true, builtin_cal: true, gcal: true, bookmarks: true },
       searchEngines: JSON.parse(localStorage.getItem('dash_search_engines')) || defaultSearchEngines,
-      activeEngineId: localStorage.getItem('dash_active_engine') || 'se_google'
+      activeEngineId: localStorage.getItem('dash_active_engine') || 'se_google',
+      newsLayout: (() => {
+        const defaults = { columns: 6, rows: 1, size: 'standard' };
+        try {
+          const saved = JSON.parse(localStorage.getItem('dash_news_layout') || 'null');
+          return { ...defaults, ...(saved && typeof saved === 'object' ? saved : {}) };
+        } catch (e) {
+          return defaults;
+        }
+      })()
     };
     let tokenClient = null;
 
@@ -1685,6 +1542,7 @@
     const MAX_TOTAL_ITEMS = 60;
     let rssCarouselPage = 0;
     let rssCarouselPageCount = 1;
+    let lastRSSArticles = [];
 
     function normalizeFeedInput(inputUrl) {
       let url = inputUrl.trim();
@@ -1927,6 +1785,50 @@
       return output;
     }
 
+    function normalizeNewsLayout(layout = {}) {
+      const columns = Math.min(6, Math.max(2, parseInt(layout.columns, 10) || 6));
+      const rows = Math.min(3, Math.max(1, parseInt(layout.rows, 10) || 1));
+      const size = ['compact', 'standard', 'large'].includes(layout.size) ? layout.size : 'standard';
+      return { columns, rows, size };
+    }
+
+    function getEffectiveNewsColumns() {
+      const configured = normalizeNewsLayout(state.newsLayout).columns;
+      const width = window.innerWidth || document.documentElement.clientWidth || 1200;
+      if (width <= 768) return Math.min(configured, 2);
+      if (width <= 1100) return Math.min(configured, 3);
+      return configured;
+    }
+
+    function getNewsPageSize() {
+      const layout = normalizeNewsLayout(state.newsLayout);
+      return getEffectiveNewsColumns() * layout.rows;
+    }
+
+    function applyNewsLayout() {
+      state.newsLayout = normalizeNewsLayout(state.newsLayout);
+      const root = document.documentElement;
+      const sizeMap = {
+        compact: { minHeight: '240px', imageHeight: '120px', titleSize: '0.88rem' },
+        standard: { minHeight: '280px', imageHeight: '150px', titleSize: '0.95rem' },
+        large: { minHeight: '330px', imageHeight: '180px', titleSize: '1rem' }
+      };
+      const size = sizeMap[state.newsLayout.size];
+      root.style.setProperty('--news-columns-effective', String(getEffectiveNewsColumns()));
+      root.style.setProperty('--news-rows', String(state.newsLayout.rows));
+      root.style.setProperty('--news-gap', window.innerWidth <= 768 ? '10px' : '16px');
+      root.style.setProperty('--news-card-min-height', size.minHeight);
+      root.style.setProperty('--news-image-height', size.imageHeight);
+      root.style.setProperty('--news-title-size', size.titleSize);
+    }
+
+    function updateNewsLayoutAndRender() {
+      applyNewsLayout();
+      rssCarouselPage = 0;
+      if (lastRSSArticles.length) renderRSSCarousel(lastRSSArticles);
+      else updateRSSCarouselButtons();
+    }
+
     function updateRSSCarouselButtons() {
       const prev = document.getElementById('rssPrevBtn');
       const next = document.getElementById('rssNextBtn');
@@ -2002,9 +1904,11 @@
     function renderRSSCarousel(articles) {
       const track = document.getElementById('rssFeedTrack');
       if (!track) return;
+      lastRSSArticles = Array.isArray(articles) ? articles.slice() : [];
+      applyNewsLayout();
       track.innerHTML = '';
 
-      const pageSize = 6;
+      const pageSize = getNewsPageSize();
       rssCarouselPageCount = Math.max(1, Math.ceil(articles.length / pageSize));
       rssCarouselPage = Math.min(rssCarouselPage, rssCarouselPageCount - 1);
 
@@ -2063,7 +1967,7 @@
       if (statusEl) {
         statusEl.textContent = failures.length
           ? `${articles.length} articles loaded · ${failures.length} source${failures.length === 1 ? '' : 's'} unavailable`
-          : `${articles.length} articles loaded · 6 shown at a time`;
+          : `${articles.length} articles loaded · ${getNewsPageSize()} shown per page`;
         statusEl.title = failures.length ? failures.map(f => `${f.rawUrl}: ${f.error}`).join(' | ') : '';
       }
 
@@ -2292,6 +2196,10 @@
           document.getElementById('settings-shape').value = savedShape;
           document.getElementById('settings-size').value = localStorage.getItem('dash_min_width') || '130px';
           document.getElementById('settings-grid-cols').value = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
+          state.newsLayout = normalizeNewsLayout(state.newsLayout);
+          document.getElementById('settings-news-columns').value = String(state.newsLayout.columns);
+          document.getElementById('settings-news-rows').value = String(state.newsLayout.rows);
+          document.getElementById('settings-news-size').value = state.newsLayout.size;
           document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
           document.getElementById('settings-opacity-num').value = parseInt(localStorage.getItem('dash_opacity')) || 55;
 
@@ -2333,6 +2241,7 @@
           if (importedState.modules) localStorage.setItem('dash_modules', JSON.stringify(importedState.modules));
           if (importedState.searchEngines) localStorage.setItem('dash_search_engines', JSON.stringify(importedState.searchEngines));
           if (importedState.activeEngineId) localStorage.setItem('dash_active_engine', importedState.activeEngineId);
+          if (importedState.newsLayout) localStorage.setItem('dash_news_layout', JSON.stringify(importedState.newsLayout));
           alert("Configuration imported successfully! The dashboard will now reload."); window.location.reload();
         } catch (err) { alert("Invalid configuration file. Please select a valid JSON backup."); }
       }; reader.readAsText(file);
@@ -2345,6 +2254,9 @@
       const shapeVal = document.getElementById('settings-shape').value;
       const sizeVal = document.getElementById('settings-size').value;
       const gridColsVal = document.getElementById('settings-grid-cols').value;
+      const newsColumnsVal = document.getElementById('settings-news-columns').value;
+      const newsRowsVal = document.getElementById('settings-news-rows').value;
+      const newsSizeVal = document.getElementById('settings-news-size').value;
       const blurVal = document.getElementById('settings-blur-num').value;
       const opacityVal = document.getElementById('settings-opacity-num').value;
 
@@ -2354,6 +2266,11 @@
       localStorage.setItem('dash_shape', shapeVal);
       localStorage.setItem('dash_min_width', sizeVal);
       localStorage.setItem('dash_grid_cols', gridColsVal);
+      state.newsLayout = normalizeNewsLayout({ columns: newsColumnsVal, rows: newsRowsVal, size: newsSizeVal });
+      localStorage.setItem('dash_news_layout', JSON.stringify(state.newsLayout));
+      applyNewsLayout();
+      rssCarouselPage = 0;
+      if (lastRSSArticles.length) renderRSSCarousel(lastRSSArticles);
       localStorage.setItem('dash_blur', blurVal);
       localStorage.setItem('dash_opacity', opacityVal);
       applyGlassPreferences();
@@ -2401,9 +2318,16 @@
       localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines)); toggleSettingsDropdown(); toggleSettingsDropdown(); renderEngineDropdown();
     }
 
+    let newsResizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(newsResizeTimer);
+      newsResizeTimer = setTimeout(() => updateNewsLayoutAndRender(), 120);
+    });
+
     // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
+      applyNewsLayout();
       // One-time migration: the repaired control bar now defaults to the top-right anchor.
       if (!localStorage.getItem('dash_layout_migration_v3')) {
         localStorage.removeItem('dash_pos_topNavWidget');
