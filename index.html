@@ -360,32 +360,81 @@
     @media (max-width: 1100px) and (min-width: 769px) {
     }
 
-    /* Mobile Minimalist Optimizations */
+    /* Mobile Optimizations */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .top-widget-container { position: relative; top: 0; right: auto; left: 0; width: 100%; margin-bottom: 12px; align-items: stretch; }
-      .top-nav-bar { justify-content: space-between; padding: 10px; flex-wrap: wrap; width: 100%; }
-      .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
-      .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
-      .top-nav-bar > div:last-child { width: 100%; justify-content: center; margin-top: 4px; margin-left: 0 !important; }
-      
+      .top-nav-bar { justify-content: space-between; padding: 10px; flex-wrap: wrap; width: 100%; gap: 8px; }
+      .widget-toggles { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; justify-content: stretch; width: 100%; }
+      .widget-toggles .nav-btn { font-size: 11px; padding: 8px 8px; min-height: 38px; }
+      .top-nav-bar > div:last-child { width: 100%; justify-content: space-between; margin-top: 0; margin-left: 0 !important; gap: 6px; }
+      #live-clock { flex: 1; text-align: center; margin-right: 0 !important; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+      .top-nav-bar > div:last-child .nav-btn { min-height: 38px; }
+
+      /* Dropdowns remain usable on mobile instead of being hidden. */
+      .dropdown-panel, .dropdown-panel.open {
+        position: fixed !important;
+        left: 8px !important;
+        right: 8px !important;
+        top: 72px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        max-height: calc(100vh - 88px) !important;
+        z-index: 500 !important;
+      }
+      .dropdown-panel { display: flex !important; opacity: 0; pointer-events: none; }
+      .dropdown-panel.open { opacity: 1; pointer-events: auto; }
+      .dropdown-panel { padding-left: 14px; padding-right: 14px; }
+      .dropdown-panel.open { padding: 14px; }
+
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
+      .search-box { flex-wrap: wrap; gap: 7px; }
+      .search-box select { flex: 0 0 100%; width: 100%; }
+      .search-box input { flex: 1 1 100%; min-width: 0; width: 100%; }
       .hero-container { margin-top: 0; gap: 16px; }
       #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
-      .dropdown-panel { display: none !important; position: static; width: 100%; min-width: 0; }
-      
-      .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+      /* Keep tiles touch-friendly without making the page feel cramped. */
+      .speed-dial-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+      #section-dials.grid-fixed .speed-dial-grid { width: 100%; max-width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
       .dial-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: var(--card-aspect); }
-      .service-card { padding: 10px 4px; gap: 6px; aspect-ratio: auto; }
+      .service-card { padding: 12px; gap: 6px; aspect-ratio: auto; min-height: 82px; }
       .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
-      .dial-card span, .service-card .name, .dial-folder-tile span { display: none; }
+      .dial-card span, .dial-folder-tile span { display: none; }
+      .service-card .name { display: -webkit-box; }
       .service-card .desc { display: none; }
       .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
       .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 10px; }
+
+      /* Touch users do not have hover, so edit/delete controls stay visible in edit mode. */
+      body.edit-mode .draggable-wrapper .card-delete-btn,
+      body.edit-mode .draggable-wrapper .card-edit-btn { display: flex; }
+      body.edit-mode .layout-drag-handle { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+
       #section-news { margin-top: 20px; }
       .rss-carousel { grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 6px; }
       .rss-carousel-arrow { width: 34px; height: 34px; font-size: 20px; }
-      .rss-carousel-page { gap: 10px; }
+      .rss-carousel-page { grid-template-columns: 1fr !important; gap: 12px; }
+      .rss-item { min-height: 0; }
+      .rss-image { height: 180px; }
+      .rss-title { font-size: 0.95rem; }
+      .rss-carousel-viewport { touch-action: pan-y; }
+
+      .modal-content { width: calc(100% - 20px); max-width: none; max-height: 86vh; padding: 18px; gap: 14px; -webkit-overflow-scrolling: touch; }
+      .modal-footer { flex-wrap: wrap; gap: 8px; }
+      .modal-footer button { flex: 1 1 120px; min-height: 42px; }
+      .form-group input, .form-group select { min-height: 42px; }
+      .badge-btn, .btn-primary, .btn-secondary { min-height: 40px; }
+    }
+
+    @media (max-width: 520px) {
+      .speed-dial-grid, #section-dials.grid-fixed .speed-dial-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .widget-toggles { grid-template-columns: 1fr 1fr; }
+      .rss-carousel { grid-template-columns: 30px minmax(0, 1fr) 30px; }
+      .rss-carousel-arrow { width: 30px; height: 30px; font-size: 18px; }
+      .rss-image { height: 160px; }
     }
   </style>
 </head>
@@ -2002,14 +2051,21 @@
     function getEffectiveNewsColumns() {
       const configured = normalizeNewsLayout(state.newsLayout).columns;
       const width = window.innerWidth || document.documentElement.clientWidth || 1200;
+      if (width <= 520) return 1;
       if (width <= 768) return Math.min(configured, 2);
       if (width <= 1100) return Math.min(configured, 3);
       return configured;
     }
 
+    function getEffectiveNewsRows() {
+      const configured = normalizeNewsLayout(state.newsLayout).rows;
+      const width = window.innerWidth || document.documentElement.clientWidth || 1200;
+      if (width <= 520) return 1;
+      return configured;
+    }
+
     function getNewsPageSize() {
-      const layout = normalizeNewsLayout(state.newsLayout);
-      return getEffectiveNewsColumns() * layout.rows;
+      return getEffectiveNewsColumns() * getEffectiveNewsRows();
     }
 
     function applyNewsLayout() {
@@ -2022,7 +2078,7 @@
       };
       const size = sizeMap[state.newsLayout.size];
       root.style.setProperty('--news-columns-effective', String(getEffectiveNewsColumns()));
-      root.style.setProperty('--news-rows', String(state.newsLayout.rows));
+      root.style.setProperty('--news-rows', String(getEffectiveNewsRows()));
       root.style.setProperty('--news-gap', window.innerWidth <= 768 ? '10px' : '16px');
       root.style.setProperty('--news-card-min-height', size.minHeight);
       root.style.setProperty('--news-image-height', size.imageHeight);
