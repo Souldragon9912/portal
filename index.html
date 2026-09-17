@@ -56,76 +56,57 @@
       position: relative;
     }
 
-    @keyframes smoothSlideDown {
-      from { opacity: 0; transform: scaleY(0.9) translateY(-20px); }
-      to { opacity: 1; transform: scaleY(1) translateY(0); }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     @keyframes spin-border {
       0% { transform: translate(-50%, -50%) rotate(0deg); }
       100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
-    @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* THE FLASHING BLUE FOLDER MERGE ANIMATION */
     @keyframes folderMergePulse {
       0% { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); background-color: rgba(88, 166, 255, 0.15); }
       50% { box-shadow: 0 0 0 4px var(--accent) inset, 0 0 35px rgba(88, 166, 255, 0.9); background-color: rgba(88, 166, 255, 0.4); }
       100% { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 15px rgba(88, 166, 255, 0.4); background-color: rgba(88, 166, 255, 0.15); }
     }
 
-    /* --- Movable Top Navigation Bar --- */
+    /* --- Combined Top Nav & Dropping Calendar --- */
+    .top-widget-container {
+      position: absolute; top: 20px; left: 20px; z-index: 50;
+      display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+      transition: transform 0.3s;
+    }
+    .top-widget-container.edit-unlocked { cursor: grab; }
+    .top-widget-container.edit-unlocked:active { cursor: grabbing; }
+    
     .top-nav-bar {
       display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 10px 16px;
       background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-glass); border-radius: 12px; position: absolute; top: 20px; left: 20px;
-      z-index: 50; box-shadow: 0 4px 16px rgba(0,0,0,0.4); user-select: none; transition: border 0.3s, background 0.3s;
+      border: 1px solid var(--border-glass); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      user-select: none; transition: border 0.3s, background 0.3s; width: max-content;
     }
-    .top-nav-bar.edit-unlocked { cursor: grab; border: 2px dashed var(--accent); background: rgba(22, 27, 34, 0.85); }
-    .top-nav-bar.edit-unlocked:active { cursor: grabbing; }
+    .top-widget-container.edit-unlocked .top-nav-bar { border: 2px dashed var(--accent); background: rgba(22, 27, 34, 0.85); }
 
     .widget-toggles { display: flex; gap: 10px; }
-    .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
-    /* --- Floating Bottom-Right Lock & Save Button --- */
-    .floating-lock-btn {
-      position: fixed; bottom: 30px; right: 30px; background: #ff9500; color: white; padding: 14px 24px;
-      border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,0.6);
-      cursor: pointer; z-index: 300; border: none; display: none; align-items: center; gap: 8px;
-      transition: transform 0.2s, background 0.2s; animation: fadeInSlide 0.3s ease-out;
+    /* The Cascading Calendar - Made to fill 100% of height! */
+    .dropdown-calendar {
+      max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; width: 100%; min-width: 320px;
+      background: var(--bg-glass); backdrop-filter: blur(16px); border-radius: 16px; border: 1px solid transparent;
+      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-in-out, padding 0.3s;
+      padding: 0 20px; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
-    .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
-    .floating-lock-btn.show { display: flex; }
-
-    /* --- Floating & Resizable Built-in Calendar --- */
-    .inline-calendar-wrapper { 
-      position: absolute; 
-      top: 80px; left: 20px; /* Default placement */
-      background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
-      border-radius: 16px; border: 1px solid var(--border-glass); 
-      padding: 20px; 
-      display: flex; flex-direction: column; align-items: center; 
-      opacity: 0; pointer-events: none; transform: scale(0.95);
-      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 60; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      resize: both; overflow: hidden; /* Enables native dragging to resize */
-      min-width: 280px; min-height: 280px; 
+    .dropdown-calendar.open, body.edit-mode .dropdown-calendar { 
+      max-height: 600px; opacity: 1; pointer-events: auto; padding: 20px; border-color: var(--border-glass); resize: both;
     }
-    .inline-calendar-wrapper.open, body.edit-mode .inline-calendar-wrapper { 
-      opacity: 1; pointer-events: auto; transform: scale(1); 
-    }
-    body.edit-mode .inline-calendar-wrapper { 
-      border: 2px dashed var(--accent) !important; background: rgba(0,0,0,0.6); cursor: grab; z-index: 999;
-    }
-    body.edit-mode .inline-calendar-wrapper:active { cursor: grabbing; }
-
-    .generic-calendar { flex-grow: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(6, 1fr); gap: 6px; text-align: center; width: 100%; height: 100%; }
-    .cal-day-header { font-size: 12px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; }
-    .cal-day { display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; }
-    .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }
+    body.edit-mode .dropdown-calendar { border: 2px dashed var(--accent) !important; background: rgba(0,0,0,0.6); }
+    
+    .generic-calendar { flex-grow: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(6, 1fr); gap: 6px; text-align: center; width: 100%; height: 100%; min-height: 250px; }
+    .cal-day-header { font-size: 11px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; }
+    .cal-day { display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s, transform 0.2s; width: 100%; height: 100%; }
+    .cal-day:not(.empty):hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); cursor: pointer; }
     .cal-day.empty { background: transparent; }
     .cal-day.today { background: var(--accent); color: #fff; font-weight: bold; box-shadow: 0 4px 12px var(--accent-glow); }
 
@@ -149,11 +130,19 @@
     .main-panel.edit-mode-container:active { cursor: grabbing; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
-    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
-    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; justify-content: center; position: relative; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); justify-content: center; gap: 14px; width: 100%; }
+
+    /* --- Floating Lock & Save Button --- */
+    .floating-lock-btn {
+      position: fixed; bottom: 30px; right: 30px; background: #ff9500; color: white; padding: 14px 24px;
+      border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+      cursor: pointer; z-index: 300; border: none; display: none; align-items: center; gap: 8px;
+      transition: transform 0.2s, background 0.2s; animation: fadeInSlide 0.3s ease-out;
+    }
+    .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
+    .floating-lock-btn.show { display: flex; }
 
     /* --- SORTABLE JS SPECIFIC PHYSICS & DRAG CLASSES --- */
     .draggable-wrapper { position: relative; cursor: grab; }
@@ -167,6 +156,7 @@
       transform: scale(0.92) !important; 
       box-shadow: 0 0 0 3px var(--accent) inset, 0 8px 30px rgba(88, 166, 255, 0.3) !important; 
       opacity: 0.9; transition: all 0.2s; 
+      animation: folderMergePulse 1s infinite !important;
     }
 
     /* Base Cards */
@@ -196,16 +186,16 @@
 
     /* --- Opera/Brave Micro Folders --- */
     .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
-    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none;}
-    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2); pointer-events: none; }
+    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none; }
+    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
 
-    /* In-Grid Row Breakdown Accordion (Headerless) */
+    /* In-Grid Row Breakdown Accordion */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
       background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border: none !important; box-shadow: none !important;
       padding: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column;
-      transform-origin: top center; animation: smoothSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; overflow: hidden;
+      transform-origin: top center; overflow: hidden;
     }
     .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); justify-content: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
     
@@ -299,7 +289,8 @@
     /* --- Mobile Minimalist Optimizations --- */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      .top-nav-bar { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; justify-content: space-between; padding: 10px; flex-wrap: wrap; }
+      .top-widget-container { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; }
+      .top-nav-bar { justify-content: space-between; padding: 10px; flex-wrap: wrap; width: 100%; }
       .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
       .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
       .top-nav-bar > div:last-child { width: 100%; justify-content: center; margin-top: 4px; margin-left: 0 !important; }
@@ -307,7 +298,7 @@
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
       #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
-      .inline-calendar-wrapper { display: none !important; }
+      .dropdown-calendar { display: none !important; }
       
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
       .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
@@ -324,31 +315,29 @@
 <body class="">
 
   <!-- ========================================== -->
-  <!--           MOVABLE TOP NAVIGATION           -->
+  <!--    MOVABLE TOP NAVIGATION & CASCADING CAL  -->
   <!-- ========================================== -->
-  <div class="top-nav-bar" id="topNavWidget" draggable="false">
-    <div class="widget-toggles">
-      <!-- Calendar action bound to clock -->
-      <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal</button>
-      <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
+  <div class="top-widget-container" id="topNavWidget" draggable="false">
+    <div class="top-nav-bar">
+      <div class="widget-toggles">
+        <button class="nav-btn" id="nav-btn-calendar" onclick="toggleDrawer('calendar-drawer')">🗓 G-Cal</button>
+        <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
+      </div>
+      <div style="display: flex; align-items: center; margin-left: 10px;">
+        <!-- Clock toggles the built-in calendar -->
+        <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
+        <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
+      </div>
     </div>
-    <div style="display: flex; align-items: center; margin-left: 10px;">
-      <!-- Clock toggles the built-in calendar -->
-      <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
-      <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
+    
+    <!-- The Cascading Built-in Calendar -->
+    <div class="dropdown-calendar" id="inline-calendar-wrapper">
+      <div class="generic-calendar" id="generic-calendar-grid"></div>
     </div>
   </div>
 
   <!-- Floating Lock & Save Button -->
   <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock Sections</button>
-
-  <!-- ========================================== -->
-  <!--           INLINE BUILT-IN CALENDAR         -->
-  <!-- ========================================== -->
-  <div class="inline-calendar-wrapper" id="inline-calendar-wrapper" draggable="false">
-    <h3 id="cal-month-title" style="margin-bottom: 12px; font-size: 18px;"></h3>
-    <div class="generic-calendar" id="generic-calendar-grid"></div>
-  </div>
 
   <!-- ========================================== -->
   <!--              MAIN DASHBOARD AREA           -->
@@ -556,10 +545,6 @@
             <label class="toggle-switch"><input type="checkbox" id="toggle-mod-news"><span class="slider"></span></label>
           </div>
           <div class="toggle-row">
-            <span>📅 Built-in Calendar (Toggle via Clock)</span>
-            <label class="toggle-switch"><input type="checkbox" id="toggle-mod-builtin-cal" checked disabled><span class="slider" style="background-color: var(--accent); opacity: 0.5; cursor: not-allowed;"></span></label>
-          </div>
-          <div class="toggle-row">
             <span>🗓 Google Calendar (G-Cal Sync)</span>
             <label class="toggle-switch"><input type="checkbox" id="toggle-mod-gcal"><span class="slider"></span></label>
           </div>
@@ -739,6 +724,7 @@
       if (isEditMode) {
         if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Sections'; }
         if (floatBtn) floatBtn.classList.add('show');
+        
         topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
         searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
         dialsSection.setAttribute('draggable', 'true'); dialsSection.classList.add('edit-mode-container');
@@ -749,6 +735,7 @@
         closeModal('settings-modal');
         document.body.classList.add('edit-mode');
         
+        // Lock Sortable while manipulating massive sections
         if(rootSortable) rootSortable.option("disabled", true);
         if(accordionSortable) accordionSortable.option("disabled", true);
         if(servicesSortable) servicesSortable.option("disabled", true);
@@ -756,6 +743,7 @@
       } else {
         if (btn) { btn.classList.remove('active-edit'); btn.style.background = '#333'; btn.innerText = '✏ Unlock Layout'; }
         if (floatBtn) floatBtn.classList.remove('show');
+        
         topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
         searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
         dialsSection.setAttribute('draggable', 'false'); dialsSection.classList.remove('edit-mode-container');
@@ -764,11 +752,46 @@
         calWidget.setAttribute('draggable', 'false'); calWidget.classList.remove('edit-mode-container');
         document.body.classList.remove('edit-mode');
 
+        // Re-enable Sortable tiles
         if(rootSortable) rootSortable.option("disabled", false);
         if(accordionSortable) accordionSortable.option("disabled", false);
         if(servicesSortable) servicesSortable.option("disabled", false);
       }
     }
+
+    // Fix corrupted image data upon load
+    function sanitizeDials(dials) {
+        return dials.map(d => {
+            if (d.img && d.img.includes('<svg')) { d.img = ''; }
+            return d;
+        });
+    }
+
+    window.addEventListener('load', () => {
+      initDraggableWidget('topNavWidget', 'pos_topNavWidget');
+      initDraggableWidget('searchWidget', 'pos_searchWidget');
+      initDraggableWidget('section-dials', 'pos_dialsSection');
+      initDraggableWidget('section-services', 'pos_servicesSection');
+      initDraggableWidget('section-news', 'pos_newsSection');
+      
+      // Auto-save calendar manual resizes
+      const calWrapper = document.getElementById('inline-calendar-wrapper');
+      const savedSize = JSON.parse(localStorage.getItem('size_calendarWidget'));
+      if (savedSize) {
+         calWrapper.style.width = savedSize.w + 'px';
+         calWrapper.style.height = savedSize.h + 'px';
+      }
+      const ro = new ResizeObserver(() => {
+         localStorage.setItem('size_calendarWidget', JSON.stringify({
+             w: calWrapper.offsetWidth,
+             h: calWrapper.offsetHeight
+         }));
+      });
+      ro.observe(calWrapper);
+      
+      state.dials = sanitizeDials(state.dials);
+      localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+    });
 
     // ===== ICONIFY API SEARCH =====
     async function searchIcons(mode) {
@@ -811,7 +834,6 @@
        }
     }
 
-    // ===== SMART URL PARSER =====
     function generateSmartLabel(urlStr) {
       try {
         const url = new URL(urlStr);
@@ -841,7 +863,7 @@
       bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
       services: JSON.parse(localStorage.getItem('dash_services')) || [], 
       rssFeeds: JSON.parse(localStorage.getItem('dash_rss_feeds')) || ['https://www.theverge.com', 'https://9to5google.com'],
-      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, news: true, builtin_cal: true, gcal: true, bookmarks: true },
+      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, news: true, gcal: true, bookmarks: true },
       searchEngines: JSON.parse(localStorage.getItem('dash_search_engines')) || defaultSearchEngines,
       activeEngineId: localStorage.getItem('dash_active_engine') || 'se_google'
     };
@@ -896,34 +918,36 @@
         renderDials();
     }
 
-    // Force array to exactly match current DOM elements
+    // Recursively build the state array exactly based on the visual DOM sequence
     function syncDialStateFromDOM() {
       const newDials = [];
-      
-      Array.from(document.getElementById('speed-dials-container').children).forEach(node => {
+      const gridItems = Array.from(document.getElementById('speed-dials-container').children);
+
+      gridItems.forEach(node => {
          if (node.classList.contains('draggable-wrapper') && node.dataset.dialData) {
-             const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-             data.folder = ''; 
-             newDials.push(data);
+           const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+           data.folder = ''; 
+           newDials.push(data);
          } else if (node.classList.contains('dial-folder-tile') && node.dataset.folderName) {
-             const fname = node.dataset.folderName;
-             if (fname === openAccordionFolder) {
-                 const accordion = document.querySelector('.expanded-folder-accordion');
-                 if (accordion) {
-                     accordion.querySelectorAll('.draggable-wrapper').forEach(innerNode => {
-                         if(innerNode.dataset.dialData) {
-                             const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
-                             data.folder = fname; 
-                             newDials.push(data);
-                         }
-                     });
-                 }
-             } else {
-                 newDials.push(...state.dials.filter(d => d.folder === fname));
-             }
+           const fname = node.dataset.folderName;
+           if (fname === openAccordionFolder) {
+               const accordion = document.querySelector('.expanded-folder-accordion');
+               if (accordion) {
+                   accordion.querySelectorAll('.draggable-wrapper').forEach(innerNode => {
+                       if(innerNode.dataset.dialData) {
+                           const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
+                           data.folder = fname; 
+                           newDials.push(data);
+                       }
+                   });
+               }
+           } else {
+               newDials.push(...state.dials.filter(d => d.folder === fname));
+           }
          }
       });
 
+      // Filter duplicates
       const uniqueDials = []; const map = new Map();
       for (const item of newDials) {
          const key = item.url + '|' + item.name;
@@ -938,7 +962,9 @@
     function syncServiceStateFromDOM() {
       const newServices = [];
       document.querySelectorAll('#services-container > .draggable-wrapper').forEach(node => {
-         newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
+         if (node.dataset.serviceData) {
+             newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
+         }
       });
       state.services = newServices; localStorage.setItem('dash_services', JSON.stringify(state.services));
     }
@@ -952,7 +978,8 @@
       document.getElementById('edit-dial-url').value = dial.url || '';
       document.getElementById('edit-dial-folder').value = dial.folder || '';
       document.getElementById('edit-dial-img').value = dial.img || '';
-
+      
+      document.getElementById('edit-icon-search-input').value = '';
       document.getElementById('edit-icon-results').style.display = 'none';
 
       document.getElementById('edit-dial-modal').style.display = 'flex';
@@ -979,7 +1006,7 @@
       document.getElementById('dial-url').value = '';
       document.getElementById('dial-folder').value = '';
       document.getElementById('dial-img').value = '';
-      
+      document.getElementById('add-icon-search-input').value = '';
       document.getElementById('add-icon-results').style.display = 'none';
       
       document.getElementById('dial-modal').style.display = 'flex';
@@ -991,7 +1018,7 @@
       let url = document.getElementById('dial-url').value.trim();
       let folder = document.getElementById('dial-folder').value.trim(); 
       let img = document.getElementById('dial-img').value.trim();
-
+      
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
@@ -1000,6 +1027,8 @@
     }
 
     // ===== RENDER DIALS =====
+    const GLOBE_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/%3E%3C/svg%3E";
+
     let openAccordionFolder = null;
 
     function renderDials() {
@@ -1022,27 +1051,39 @@
       const renderedFolders = new Set();
       const allRenderNodes = [];
 
-      Object.keys(grouped).sort().forEach(folderName => {
-        if (folderName === '_root') return;
-        const items = grouped[folderName];
-        if (items.length === 0) return; 
-        
-        const folderTile = document.createElement('div');
-        folderTile.className = 'dial-folder-tile draggable-wrapper';
-        folderTile.dataset.folderName = folderName;
+      // Iterate sequential state array so folders don't jump positions
+      state.dials.forEach((dial, idx) => {
+        if (dial.folder) {
+           if (!renderedFolders.has(dial.folder)) {
+              renderedFolders.add(dial.folder);
+              const items = state.dials.filter(d => d.folder === dial.folder);
+              if (items.length === 0) return; // Clean up empty folders instantly
+              
+              const folderTile = document.createElement('div');
+              folderTile.className = 'dial-folder-tile draggable-wrapper';
+              folderTile.dataset.folderName = dial.folder;
 
-        let previewImgs = '';
-        for (let i = 0; i < Math.min(items.length, 4); i++) {
-          let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${new URL(items[i].url).hostname}&sz=64`;
-          previewImgs += `<img src="${src}" alt="icon" draggable="false">`;
+              let previewImgs = '';
+              for (let i = 0; i < Math.min(items.length, 4); i++) {
+                let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
+                let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+                previewImgs += `<img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="icon" draggable="false">`;
+              }
+
+              folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${dial.folder}</span>`;
+              
+              folderTile.addEventListener('click', (e) => {
+                // Prevent opening if the user is dragging to move it
+                if(isEditMode) return;
+                toggleAccordionFolder(dial.folder);
+              });
+
+              allRenderNodes.push({ type: 'folder', name: dial.folder, node: folderTile, items });
+           }
+        } else {
+           allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
         }
-
-        folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
-        folderTile.addEventListener('click', () => toggleAccordionFolder(folderName));
-        allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile });
       });
-
-      grouped._root.forEach(dial => { allRenderNodes.push({ type: 'dial', node: createDialElement(dial) }); });
 
       const addWrapper = document.createElement('div');
       addWrapper.className = 'draggable-wrapper add-wrapper';
@@ -1051,6 +1092,7 @@
 
       allRenderNodes.forEach(item => container.appendChild(item.node));
       
+      // Inject Accordion if open
       if (openAccordionFolder) {
         requestAnimationFrame(() => {
            const activeTile = document.querySelector(`.dial-folder-tile[data-folder-name="${openAccordionFolder}"]`);
@@ -1069,8 +1111,8 @@
                insertAfterNode.insertAdjacentElement('afterend', accordion);
 
                accordionSortable = new Sortable(accordion.querySelector('.expanded-folder-inner-grid'), {
-                   group: 'dials', 
-                   disabled: isEditMode, 
+                   group: 'dials', // Allow dragging in and out of folder
+                   disabled: isEditMode, // Lock tile sorting if moving sections
                    animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-dial-tile',
                    ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                    onEnd: syncDialStateFromDOM
@@ -1080,8 +1122,8 @@
       }
 
       rootSortable = new Sortable(container, {
-          group: 'dials', 
-          disabled: isEditMode, 
+          group: 'dials', // Shared group for cross-folder drag
+          disabled: isEditMode, // Lock tile sorting if moving sections
           animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper, .expanded-folder-accordion',
           ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
           onMove: function(evt, originalEvent) {
@@ -1092,13 +1134,13 @@
               const relX = originalEvent.clientX - rect.left;
               const relY = originalEvent.clientY - rect.top;
               
-              // 60% Merge Zone 
-              const marginX = rect.width * 0.2; 
-              const marginY = rect.height * 0.2;
+              // 50% Merge Zone (Outer 25% edge triggers swap)
+              const marginX = rect.width * 0.25; 
+              const marginY = rect.height * 0.25;
 
               if (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY) {
                   evt.related.classList.add('drag-folder-hover');
-                  return false; 
+                  return false; // Prevent sorting, prep to merge
               }
           },
           onEnd: function(evt) {
@@ -1114,6 +1156,7 @@
     }
 
     function toggleAccordionFolder(folderName) {
+      syncDialStateFromDOM(); // Sync layout strictly before toggling to stop it from jumping!
       if (openAccordionFolder === folderName) { openAccordionFolder = null; } 
       else { openAccordionFolder = folderName; }
       renderDials();
@@ -1140,7 +1183,7 @@
       return `
         <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
           <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener" draggable="false">
-             <img src="${src}" alt="${dial.name}" draggable="false" />
+             <img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="${dial.name}" draggable="false" />
              <span>${dial.name}</span>
           </a>
           ${editBtnHtml}${deleteBtnHtml}
@@ -1486,6 +1529,7 @@
       document.getElementById('generic-calendar-grid').innerHTML = html; 
       wrapper.classList.add('open');
 
+      // Staggered cascade open animation
       setTimeout(() => {
          const rows = wrapper.querySelectorAll('.cal-week-row');
          rows.forEach((row, idx) => {
@@ -1512,11 +1556,12 @@
       document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
       document.getElementById('settings-opacity-num').value = parseInt(localStorage.getItem('dash_opacity')) || 55;
 
-      if (document.getElementById('toggle-mod-dials')) document.getElementById('toggle-mod-dials').checked = state.modules.dials;
-      if (document.getElementById('toggle-mod-services')) document.getElementById('toggle-mod-services').checked = state.modules.services;
-      if (document.getElementById('toggle-mod-news')) document.getElementById('toggle-mod-news').checked = state.modules.news;
-      if (document.getElementById('toggle-mod-gcal')) document.getElementById('toggle-mod-gcal').checked = state.modules.gcal;
-      if (document.getElementById('toggle-mod-bookmarks')) document.getElementById('toggle-mod-bookmarks').checked = state.modules.bookmarks;
+      const safeCheck = (id, defaultVal) => { const el = document.getElementById(id); if(el) {el.checked = defaultVal;} };
+      safeCheck('toggle-mod-dials', state.modules.dials);
+      safeCheck('toggle-mod-services', state.modules.services);
+      safeCheck('toggle-mod-news', state.modules.news);
+      safeCheck('toggle-mod-gcal', state.modules.gcal);
+      safeCheck('toggle-mod-bookmarks', state.modules.bookmarks);
       
       const customEngines = state.searchEngines.filter(e => e.isCustom); const listContainer = document.getElementById('custom-engines-list');
       listContainer.innerHTML = customEngines.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>' : customEngines.map(e => `<div class="se-settings-item"><div style="display:flex; align-items:center;"><span class="se-color-dot" style="background: ${e.colors[0]}"></span><strong>${e.name}</strong></div><button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button></div>`).join('');
@@ -1572,15 +1617,15 @@
       localStorage.setItem('dash_opacity', opacityVal);
       applyGlassPreferences();
 
-      const safeChecked = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
+      const getCheck = (id) => document.getElementById(id) ? document.getElementById(id).checked : true;
 
       state.modules = { 
-          dials: safeChecked('toggle-mod-dials'), 
-          services: safeChecked('toggle-mod-services'), 
-          news: safeChecked('toggle-mod-news'), 
-          builtin_cal: true, // Tied to clock
-          gcal: safeChecked('toggle-mod-gcal'), 
-          bookmarks: safeChecked('toggle-mod-bookmarks') 
+          dials: getCheck('toggle-mod-dials'), 
+          services: getCheck('toggle-mod-services'), 
+          news: getCheck('toggle-mod-news'), 
+          builtin_cal: true, // Always tied to clock now
+          gcal: getCheck('toggle-mod-gcal'), 
+          bookmarks: getCheck('toggle-mod-bookmarks') 
       };
       localStorage.setItem('dash_modules', JSON.stringify(state.modules));
       applyModuleVisibility(); initGoogleAuth(); closeModal('settings-modal');
@@ -1596,14 +1641,8 @@
       safeSet('nav-btn-calendar', state.modules.gcal ? 'inline-block' : 'none');
       safeSet('nav-btn-bookmarks', state.modules.bookmarks ? 'inline-block' : 'none');
       
-      if (!state.modules.gcal) {
-         const gd = document.getElementById('calendar-drawer');
-         if(gd) gd.classList.remove('open');
-      }
-      if (!state.modules.bookmarks) {
-         const bd = document.getElementById('bookmarks-drawer');
-         if(bd) bd.classList.remove('open');
-      }
+      if (!state.modules.gcal) { const gc = document.getElementById('calendar-drawer'); if(gc) gc.classList.remove('open'); }
+      if (!state.modules.bookmarks) { const bm = document.getElementById('bookmarks-drawer'); if(bm) bm.classList.remove('open'); }
     }
 
     // ===== ADD SEARCH ENGINE =====
@@ -1624,35 +1663,10 @@
     // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
-      renderEngineDropdown(); 
-      renderDials(); 
-      renderServices(); 
-      renderBookmarks(); 
+      renderEngineDropdown(); renderDials(); renderServices(); renderBookmarks(); 
       applyModuleVisibility();
       if (state.modules.news) fetchRSS();
       setTimeout(initGoogleAuth, 500);
-      
-      initDraggableWidget('topNavWidget', 'pos_topNavWidget');
-      initDraggableWidget('searchWidget', 'pos_searchWidget');
-      initDraggableWidget('section-dials', 'pos_dialsSection');
-      initDraggableWidget('section-services', 'pos_servicesSection');
-      initDraggableWidget('section-news', 'pos_newsSection');
-      initDraggableWidget('inline-calendar-wrapper', 'pos_calendarWidget');
-      
-      // Auto-save calendar manual resizes
-      const calWrapper = document.getElementById('inline-calendar-wrapper');
-      const savedSize = JSON.parse(localStorage.getItem('size_calendarWidget'));
-      if (savedSize) {
-         calWrapper.style.width = savedSize.w + 'px';
-         calWrapper.style.height = savedSize.h + 'px';
-      }
-      const ro = new ResizeObserver(() => {
-         localStorage.setItem('size_calendarWidget', JSON.stringify({
-             w: calWrapper.offsetWidth,
-             h: calWrapper.offsetHeight
-         }));
-      });
-      ro.observe(calWrapper);
     });
   </script>
 </body>
