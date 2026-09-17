@@ -37,6 +37,7 @@
       --card-blur: 16px;
       --card-radius: 20px;
       --card-clip: none;
+      --card-aspect: 1 / 1;
       --card-min-width: 130px;
       --dial-grid-cols: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
     }
@@ -213,9 +214,9 @@
       width: 100%; pointer-events: auto; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); 
     }
     
-    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: 1; }
+    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: var(--card-aspect); }
     .service-card { padding: 14px 16px; flex-direction: column; justify-content: center; gap: 6px; border-radius: 12px; clip-path: none; aspect-ratio: auto; }
-    .add-dial-tile { flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: var(--text-muted); border: 2px dashed rgba(255, 255, 255, 0.2); background: rgba(22, 27, 34, 0.25); aspect-ratio: 1; clip-path: none; border-radius: var(--card-radius); }
+    .add-dial-tile { flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: var(--text-muted); border: 2px dashed rgba(255, 255, 255, 0.2); background: rgba(22, 27, 34, 0.25); aspect-ratio: var(--card-aspect); clip-path: var(--card-clip); border-radius: var(--card-radius); }
     .add-service-tile { clip-path: none; border-radius: 12px; aspect-ratio: auto; min-height: 70px; flex-direction: row; justify-content: center; gap: 8px; }
     
     .dial-card:hover, .service-card:hover, .add-dial-tile:hover, .dial-folder-tile:hover { 
@@ -230,7 +231,7 @@
     .service-card .desc { font-size: 11px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
     /* --- Opera/Brave Micro Folders --- */
-    .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
+    .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: var(--card-aspect); overflow: hidden; }
     .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none; }
     .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
@@ -254,18 +255,25 @@
     /* --- News Stream --- */
     .news-floating-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
     .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
-    .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
-    .rss-status { grid-column: 1 / -1; color: var(--text-muted); font-size: 12px; padding: 8px 2px; }
-    .rss-error-card { grid-column: 1 / -1; background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.22); border-radius: 12px; padding: 12px 14px; color: var(--text-muted); font-size: 12px; }
+    .rss-status { color: var(--text-muted); font-size: 12px; padding: 0 2px 10px; }
+    .rss-error-card { background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.22); border-radius: 12px; padding: 10px 12px; color: var(--text-muted); font-size: 12px; margin-bottom: 10px; }
     .rss-error-card strong { color: var(--danger); }
-    .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .rss-carousel { display: grid; grid-template-columns: 42px minmax(0, 1fr) 42px; gap: 12px; align-items: stretch; }
+    .rss-carousel-arrow { align-self: center; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border-glass); background: rgba(22,27,34,0.78); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; line-height: 1; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform 0.2s, background 0.2s, opacity 0.2s, border-color 0.2s; box-shadow: 0 6px 20px rgba(0,0,0,0.35); z-index: 2; }
+    .rss-carousel-arrow:hover:not(:disabled) { transform: scale(1.08); background: rgba(88,166,255,0.18); border-color: rgba(88,166,255,0.45); }
+    .rss-carousel-arrow:disabled { opacity: 0.28; cursor: default; transform: none; }
+    .rss-carousel-viewport { min-width: 0; overflow: hidden; }
+    .rss-carousel-track { display: flex; width: 100%; transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
+    .rss-carousel-page { flex: 0 0 100%; min-width: 100%; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+    .rss-item { min-width: 0; display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
     .rss-item:hover { background: rgba(33, 38, 45, 0.95); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
-    .rss-image { width: 100%; height: 150px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
-    .rss-meta-block { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; justify-content: space-between; }
-    .rss-title { font-size: 0.92rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    .rss-source-date { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
-    .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 8px; border-radius: 6px; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .rss-date { font-family: monospace; font-size: 11px; }
+    .rss-image { width: 100%; height: 120px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+    .rss-meta-block { padding: 11px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; justify-content: space-between; }
+    .rss-title { font-size: 0.83rem; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .rss-source-date { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+    .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 7px; border-radius: 6px; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rss-date { font-family: monospace; font-size: 10px; white-space: nowrap; }
+    .rss-carousel-empty { grid-column: 1 / -1; min-height: 180px; display: grid; place-items: center; color: var(--text-muted); font-size: 12px; border: 1px dashed var(--border-glass); border-radius: 14px; background: rgba(22,27,34,0.35); }
 
     /* Dropdown UI Content Components */
     .cal-auth-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 16px; background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; }
@@ -323,6 +331,11 @@
     input:checked + .slider { background-color: var(--accent); }
     input:checked + .slider:before { transform: translateX(18px); }
 
+    @media (max-width: 1100px) and (min-width: 769px) {
+      .rss-carousel-page { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .rss-image { height: 125px; }
+    }
+
     /* Mobile Minimalist Optimizations */
     @media (max-width: 768px) {
       body { padding: 8px; }
@@ -338,14 +351,18 @@
       .dropdown-panel { display: none !important; position: static; width: 100%; min-width: 0; }
       
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-      .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
+      .dial-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: var(--card-aspect); }
+      .service-card { padding: 10px 4px; gap: 6px; aspect-ratio: auto; }
       .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
       .dial-card span, .service-card .name, .dial-folder-tile span { display: none; }
       .service-card .desc { display: none; }
       .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
       .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 10px; }
       #section-news { margin-top: 20px; }
-      .rss-feed-list { grid-template-columns: 1fr; gap: 12px; }
+      .rss-carousel { grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 6px; }
+      .rss-carousel-arrow { width: 34px; height: 34px; font-size: 20px; }
+      .rss-carousel-page { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .rss-image { height: 110px; }
     }
   </style>
 </head>
@@ -440,14 +457,18 @@
           <div>
             <label style="font-size: 11px;">Tile Shape Preset</label>
             <select id="settings-shape" style="width:100%; margin-top:4px;">
-              <option value="4px|none">Sharp Square</option>
-              <option value="12px|none">Rounded Rectangle</option>
-              <option value="20px|none" selected>Smooth Squircle</option>
-              <option value="30% 70% 70% 30% / 30% 30% 70% 70%">Organic Blob</option>
-              <option value="15px 40px 15px 40px">Asymmetric Leaf</option>
-              <option value="50px">Opera Style Pill (50px)</option>
-              <option value="50%|none">Circle / Capsule</option>
-              <option value="0px|polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">Hexagon</option>
+              <option value="4px|none|1 / 1">Sharp Square</option>
+              <option value="12px|none|1 / 1">Rounded Rectangle</option>
+              <option value="20px|none|1 / 1" selected>Smooth Squircle</option>
+              <option value="30% 70% 70% 30% / 30% 30% 70% 70%|none|1 / 1">Organic Blob</option>
+              <option value="15px 40px 15px 40px|none|1 / 1">Asymmetric Leaf</option>
+              <option value="26px|none|1.45 / 1">Opera Style Wide Pill</option>
+              <option value="20px|none|1.25 / 1">Soft Pill</option>
+              <option value="50%|none|1 / 1">Circle / Capsule</option>
+              <option value="0px|polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)|1 / 1">Hexagon</option>
+              <option value="8px|polygon(14% 0%, 86% 0%, 100% 18%, 100% 82%, 86% 100%, 14% 100%, 0% 82%, 0% 18%)|1 / 1">Octagon</option>
+              <option value="18px|polygon(50% 0%, 92% 18%, 100% 50%, 92% 82%, 50% 100%, 8% 82%, 0% 50%, 8% 18%)|1 / 1">Diamond Eight</option>
+              <option value="28px 10px 28px 10px|none|1.18 / 1">Ticket</option>
             </select>
           </div>
           <div>
@@ -558,8 +579,13 @@
         <span class="layout-drag-handle" data-layout-handle title="Drag the news section">⠿ Move</span>
         <button class="badge-btn" onclick="fetchRSS()">Refresh</button>
       </div>
-      <div class="rss-feed-list" id="rssFeedList">
-        <div style="color: var(--text-muted); font-size: 0.9rem; padding: 8px;">Synchronizing aggregated news nodes...</div>
+      <div id="rssStatus" class="rss-status">Synchronizing aggregated news nodes...</div>
+      <div class="rss-carousel" id="rssCarousel">
+        <button class="rss-carousel-arrow" id="rssPrevBtn" type="button" aria-label="Previous news articles" onclick="moveRSSCarousel(-1)">‹</button>
+        <div class="rss-carousel-viewport">
+          <div class="rss-carousel-track" id="rssFeedTrack"></div>
+        </div>
+        <button class="rss-carousel-arrow" id="rssNextBtn" type="button" aria-label="Next news articles" onclick="moveRSSCarousel(1)">›</button>
       </div>
     </div>
   </main>
@@ -648,8 +674,13 @@
 
     // ===== APPLY USER FROSTED GLASS & SHAPE SETTINGS =====
     function applyGlassPreferences() {
-      const shapeStr = localStorage.getItem('dash_shape') || '20px|none';
-      const [radius = '20px', clip = 'none'] = shapeStr.split('|');
+      let shapeStr = localStorage.getItem('dash_shape') || '20px|none|1 / 1';
+      const shapeParts = shapeStr.split('|');
+      if (shapeParts.length < 3) {
+        shapeStr = `${shapeParts[0] || '20px'}|${shapeParts[1] || 'none'}|1 / 1`;
+        localStorage.setItem('dash_shape', shapeStr);
+      }
+      const [radius = '20px', clip = 'none', aspect = '1 / 1'] = shapeStr.split('|');
       const blur = (localStorage.getItem('dash_blur') || '16') + 'px';
       const opacity = localStorage.getItem('dash_opacity') || '55';
       const minWidth = localStorage.getItem('dash_min_width') || '130px';
@@ -671,6 +702,7 @@
       document.documentElement.style.setProperty('--card-blur', blur);
       document.documentElement.style.setProperty('--card-radius', radius);
       document.documentElement.style.setProperty('--card-clip', clip);
+      document.documentElement.style.setProperty('--card-aspect', aspect);
       document.documentElement.style.setProperty('--card-min-width', minWidth);
       document.documentElement.style.setProperty('--dial-grid-cols', gridCols);
     }
@@ -1467,7 +1499,9 @@
 
     const FEED_TIMEOUT = 8500;
     const MAX_ITEMS_PER_SOURCE = 12;
-    const MAX_TOTAL_ITEMS = 30;
+    const MAX_TOTAL_ITEMS = 60;
+    let rssCarouselPage = 0;
+    let rssCarouselPageCount = 1;
 
     function normalizeFeedInput(inputUrl) {
       let url = inputUrl.trim();
@@ -1645,19 +1679,106 @@
       return output;
     }
 
-    async function fetchRSS() {
-      const el = document.getElementById('rssFeedList');
-      const titleEl = document.getElementById('rssHeaderTitle');
-      if (!el) return;
-      const urls = [...state.rssFeeds];
+    function updateRSSCarouselButtons() {
+      const prev = document.getElementById('rssPrevBtn');
+      const next = document.getElementById('rssNextBtn');
+      if (prev) prev.disabled = rssCarouselPage <= 0;
+      if (next) next.disabled = rssCarouselPage >= rssCarouselPageCount - 1;
+      const track = document.getElementById('rssFeedTrack');
+      if (track) track.style.transform = `translateX(-${rssCarouselPage * 100}%)`;
+    }
 
-      if (!urls.length) {
-        el.innerHTML = '<div class="rss-status">No active feeds. Open Settings → Manage News Feeds to add a site or RSS URL.</div>';
-        if (titleEl) titleEl.textContent = '📡 Aggregated News Stream';
+    function moveRSSCarousel(delta) {
+      rssCarouselPage = Math.max(0, Math.min(rssCarouselPage + delta, rssCarouselPageCount - 1));
+      updateRSSCarouselButtons();
+    }
+
+    function createRSSArticleCard(art) {
+      const card = document.createElement('a');
+      card.className = 'rss-item';
+      card.href = art.link;
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+
+      if (art.imgUrl && /^https?:\/\//i.test(art.imgUrl)) {
+        const img = document.createElement('img');
+        img.className = 'rss-image';
+        img.src = art.imgUrl;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.addEventListener('error', () => img.remove());
+        card.appendChild(img);
+      } else {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'rss-image';
+        card.appendChild(placeholder);
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'rss-meta-block';
+      const title = document.createElement('div');
+      title.className = 'rss-title';
+      title.textContent = art.title;
+      const sourceDate = document.createElement('div');
+      sourceDate.className = 'rss-source-date';
+      const source = document.createElement('span');
+      source.className = 'rss-source-tag';
+      source.textContent = art.sourceName || 'News';
+      const date = document.createElement('span');
+      date.className = 'rss-date';
+      date.textContent = art.timestamp ? new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recent';
+      sourceDate.append(source, date);
+      meta.append(title, sourceDate);
+      card.appendChild(meta);
+      return card;
+    }
+
+    function renderRSSCarousel(articles) {
+      const track = document.getElementById('rssFeedTrack');
+      if (!track) return;
+      track.innerHTML = '';
+
+      const pageSize = 6;
+      rssCarouselPageCount = Math.max(1, Math.ceil(articles.length / pageSize));
+      rssCarouselPage = Math.min(rssCarouselPage, rssCarouselPageCount - 1);
+
+      if (!articles.length) {
+        const page = document.createElement('div');
+        page.className = 'rss-carousel-page';
+        const empty = document.createElement('div');
+        empty.className = 'rss-carousel-empty';
+        empty.textContent = 'No articles are available from the configured feeds yet.';
+        page.appendChild(empty);
+        track.appendChild(page);
+        updateRSSCarouselButtons();
         return;
       }
 
-      el.innerHTML = '<div class="rss-status">Synchronizing news sources…</div>';
+      for (let i = 0; i < articles.length; i += pageSize) {
+        const page = document.createElement('div');
+        page.className = 'rss-carousel-page';
+        articles.slice(i, i + pageSize).forEach(article => page.appendChild(createRSSArticleCard(article)));
+        track.appendChild(page);
+      }
+      updateRSSCarouselButtons();
+    }
+
+    async function fetchRSS() {
+      const titleEl = document.getElementById('rssHeaderTitle');
+      const statusEl = document.getElementById('rssStatus');
+      if (!document.getElementById('rssFeedTrack')) return;
+      const urls = [...state.rssFeeds];
+
+      if (!urls.length) {
+        if (statusEl) statusEl.textContent = 'No active feeds. Open Settings → Manage News Feeds to add a site or RSS URL.';
+        if (titleEl) titleEl.textContent = '📡 Aggregated News Stream';
+        renderRSSCarousel([]);
+        return;
+      }
+
+      if (statusEl) statusEl.textContent = 'Synchronizing news sources…';
+      rssCarouselPage = 0;
       const results = await Promise.all(urls.map(async rawUrl => {
         try {
           const result = await fetchOneFeed(rawUrl);
@@ -1673,67 +1794,15 @@
         .slice(0, MAX_TOTAL_ITEMS);
       const failures = results.filter(r => !r.ok);
 
-      el.innerHTML = '';
-      if (titleEl) titleEl.textContent = `📡 News Stream · ${results.filter(r => r.ok).length}/${results.length} sources`;
-
-      if (!articles.length) {
-        const status = document.createElement('div');
-        status.className = 'rss-error-card';
-        status.textContent = 'No articles could be loaded. Check the feed/site URLs or try Refresh again.';
-        el.appendChild(status);
+      if (titleEl) titleEl.textContent = `📡 News Stream · ${articles.length} articles`;
+      if (statusEl) {
+        statusEl.textContent = failures.length
+          ? `${articles.length} articles loaded · ${failures.length} source${failures.length === 1 ? '' : 's'} unavailable`
+          : `${articles.length} articles loaded · 6 shown at a time`;
+        statusEl.title = failures.length ? failures.map(f => `${f.rawUrl}: ${f.error}`).join(' | ') : '';
       }
 
-      for (const failure of failures) {
-        const card = document.createElement('div');
-        card.className = 'rss-error-card';
-        const strong = document.createElement('strong');
-        strong.textContent = 'Feed unavailable: ';
-        card.append(strong, document.createTextNode(`${failure.rawUrl} — ${failure.error}`));
-        el.appendChild(card);
-      }
-
-      for (const art of articles) {
-        if (!/^https?:\/\//i.test(art.link)) continue;
-        const card = document.createElement('a');
-        card.className = 'rss-item';
-        card.href = art.link;
-        card.target = '_blank';
-        card.rel = 'noopener noreferrer';
-
-        if (art.imgUrl && /^https?:\/\//i.test(art.imgUrl)) {
-          const img = document.createElement('img');
-          img.className = 'rss-image';
-          img.src = art.imgUrl;
-          img.alt = '';
-          img.loading = 'lazy';
-          img.referrerPolicy = 'no-referrer';
-          img.addEventListener('error', () => img.remove());
-          card.appendChild(img);
-        } else {
-          const placeholder = document.createElement('div');
-          placeholder.className = 'rss-image';
-          card.appendChild(placeholder);
-        }
-
-        const meta = document.createElement('div');
-        meta.className = 'rss-meta-block';
-        const title = document.createElement('div');
-        title.className = 'rss-title';
-        title.textContent = art.title;
-        const sourceDate = document.createElement('div');
-        sourceDate.className = 'rss-source-date';
-        const source = document.createElement('span');
-        source.className = 'rss-source-tag';
-        source.textContent = art.sourceName || 'News';
-        const date = document.createElement('span');
-        date.className = 'rss-date';
-        date.textContent = art.timestamp ? new Date(art.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recent';
-        sourceDate.append(source, date);
-        meta.append(title, sourceDate);
-        card.appendChild(meta);
-        el.appendChild(card);
-      }
-
+      renderRSSCarousel(articles);
       localStorage.setItem('dash_rss_last_fetch', String(Date.now()));
     }
 
@@ -1953,7 +2022,8 @@
           document.getElementById('settings-wallpaper').value = state.wallpaper; 
           document.getElementById('settings-client-id').value = state.googleClientId;
           
-          const savedShape = localStorage.getItem('dash_shape') || '20px|none';
+          let savedShape = localStorage.getItem('dash_shape') || '20px|none|1 / 1';
+          if (savedShape.split('|').length < 3) savedShape = `${savedShape}|1 / 1`;
           document.getElementById('settings-shape').value = savedShape;
           document.getElementById('settings-size').value = localStorage.getItem('dash_min_width') || '130px';
           document.getElementById('settings-grid-cols').value = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
