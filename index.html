@@ -54,7 +54,7 @@
     }
 
     @keyframes smoothSlideDown {
-      from { opacity: 0; transform: scaleY(0.95) translateY(-10px); }
+      from { opacity: 0; transform: scaleY(0.9) translateY(-20px); }
       to { opacity: 1; transform: scaleY(1) translateY(0); }
     }
     @keyframes spin-border {
@@ -112,7 +112,6 @@
       align-items: center;
       gap: 8px;
       transition: transform 0.2s, background 0.2s;
-      animation: fadeInSlide 0.3s ease-out;
     }
     .floating-lock-btn:hover { background: #e08400; transform: scale(1.05); }
     .floating-lock-btn.show { display: flex; }
@@ -129,7 +128,7 @@
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
-    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 40; transition: border 0.3s; }
+    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); z-index: 40; transition: border 0.3s; }
     .search-box-wrapper.edit-unlocked { cursor: grab; border: 2px dashed var(--accent); }
     .search-box-wrapper.edit-unlocked:active { cursor: grabbing; }
     .search-box-wrapper::before { content: ""; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%; background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1)); transform: translate(-50%, -50%) rotate(0deg); animation: spin-border 4s linear infinite; z-index: 0; }
@@ -152,25 +151,26 @@
       position: absolute; top: 680px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px;
     }
 
-    .main-panel.edit-mode-container {
-      border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; cursor: grab;
-    }
+    .main-panel.edit-mode-container { border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; cursor: grab; }
     .main-panel.edit-mode-container:active { cursor: grabbing; }
+
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .panel-title { font-size: 16px; font-weight: 600; }
-    .badge-btn { background: transparent; border: 1px solid var(--border-glass); color: var(--accent); font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
-    .badge-btn:hover { background: rgba(88, 166, 255, 0.15); transform: scale(1.03); }
 
-    .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; position: relative; }
-    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; width: 100%; }
+    /* The Speed Dial Grid - explicit justify content centers fixed-column layouts perfectly */
+    .speed-dial-grid { 
+      display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; 
+      justify-content: center; position: relative; 
+    }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); justify-content: center; gap: 14px; width: 100%; }
 
     /* --- Global Draggable Tile Physics & FLIP Animations --- */
-    .draggable-wrapper { position: relative; cursor: grab; }
+    .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     .draggable-wrapper:active { cursor: grabbing; }
     
-    /* When an item is actively dragged, render the placeholder transparent but leave the dragging ghost intact */
-    .draggable-wrapper.is-dragging { opacity: 0 !important; }
-    .draggable-wrapper.drag-folder-hover { transform: scale(0.92) !important; opacity: 0.85; }
+    /* Adjusted Dragging Visibility: Tile stays fully visible but slightly faded so you know what you are dragging */
+    .draggable-wrapper.is-dragging { opacity: 0.6 !important; transform: scale(0.95); z-index: 100; pointer-events: none; }
+    .draggable-wrapper.drag-folder-hover { transform: scale(1.05) !important; opacity: 1; }
 
     .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { 
       background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); 
@@ -199,31 +199,31 @@
     .service-card .name { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .service-card .desc { font-size: 11px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
-    /* --- Opera/Brave Micro Folders (No Emojis) --- */
-    .dial-folder-tile { flex-direction: column; align-items: center; justify-content: center; cursor: pointer; aspect-ratio: 1; position: relative; }
-    .folder-preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 4px; width: 48px; height: 48px; padding: 4px; background: rgba(0, 0, 0, 0.25); border-radius: 10px; margin-bottom: 8px; }
-    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; pointer-events: none; }
-    .dial-folder-tile span { font-size: 12px; font-weight: 500; color: var(--text-main); max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* --- Full-Card Size Micro Folders (No Emojis) --- */
+    .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
+    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; }
+    .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2); pointer-events: none; }
+    .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); }
 
-    /* In-Grid Row Breakdown Accordion */
+    /* In-Grid Row Breakdown Accordion (Headerless) */
     .expanded-folder-accordion {
       grid-column: 1 / -1;
-      background: rgba(18, 22, 28, 0.85);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: var(--card-radius);
-      padding: 24px;
-      margin-top: 4px;
-      margin-bottom: 4px;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0;
+      margin-top: 10px;
+      margin-bottom: 10px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
       transform-origin: top center;
-      animation: smoothSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.6) inset;
+      /* Slower, more fluid spring animation */
+      animation: smoothSlideDown 0.45s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+      overflow: hidden;
     }
-    .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 14px; }
+    .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); justify-content: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
     
     /* Edit Controls */
     .card-delete-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
@@ -253,6 +253,7 @@
     .news-floating-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
     .news-title-clean { font-size: 15px; font-weight: 600; color: var(--text-main); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
 
+    /* Flexible RSS Grid to prevent forced 2-columns on large screens */
     .rss-feed-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
     .rss-item { display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
     .rss-item:hover { background: rgba(33, 38, 45, 0.95); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
@@ -263,7 +264,7 @@
     .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 8px; border-radius: 6px; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .rss-date { font-family: monospace; font-size: 11px; }
 
-    /* --- Settings Modals & Drawers --- */
+    /* --- Modals & Drawers --- */
     .rss-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 12px; margin-top: 10px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; border: 1px solid var(--border-glass); }
     .rss-manager-item { position: relative; width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
     .rss-manager-item:hover { transform: scale(1.05); }
@@ -333,7 +334,7 @@
       
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
       .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
-      .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
+      .dial-card img, .service-card img { width: 28px; height: 28px; }
       .dial-card span, .service-card .name, .dial-folder-tile span { font-size: 11px; }
       .service-card .desc { display: none; }
       .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
@@ -509,12 +510,12 @@
           <label style="font-size: 11px;">Speed Dial Grid Layout</label>
           <select id="settings-grid-cols" style="width:100%; margin-top:4px;">
             <option value="repeat(auto-fill, minmax(var(--card-min-width), 1fr))" selected>Auto-Fill (Responsive)</option>
-            <option value="repeat(2, 1fr)">2 Columns Fixed</option>
-            <option value="repeat(3, 1fr)">3 Columns Fixed</option>
-            <option value="repeat(4, 1fr)">4 Columns Fixed</option>
-            <option value="repeat(5, 1fr)">5 Columns Fixed</option>
-            <option value="repeat(6, 1fr)">6 Columns Fixed</option>
-            <option value="repeat(8, 1fr)">8 Columns Fixed</option>
+            <option value="repeat(2, var(--card-min-width))">2 Columns Fixed</option>
+            <option value="repeat(3, var(--card-min-width))">3 Columns Fixed</option>
+            <option value="repeat(4, var(--card-min-width))">4 Columns Fixed</option>
+            <option value="repeat(5, var(--card-min-width))">5 Columns Fixed</option>
+            <option value="repeat(6, var(--card-min-width))">6 Columns Fixed</option>
+            <option value="repeat(8, var(--card-min-width))">8 Columns Fixed</option>
           </select>
         </div>
 
@@ -697,7 +698,10 @@
       let offsetX, offsetY;
 
       widget.addEventListener('dragstart', (e) => {
-        if (!isEditMode) { e.preventDefault(); return; }
+        if (!isEditMode) {
+          e.preventDefault();
+          return;
+        }
         const rect = widget.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
@@ -832,25 +836,16 @@
       searchInput.value = '';
     });
 
-    // ===== ALWAYS ACTIVE DRAG, REORDER, CALCULATED FLIP & FOLDERS =====
+    // ===== ALWAYS ACTIVE ITEM REORDERING & HOVER FOLDERS =====
     let draggedNode = null;
     let mergeTarget = null;
 
     function handleTileDragStart(e) { 
-      if (isEditMode) return;
+      if (isEditMode) return; 
       draggedNode = e.currentTarget; 
       e.dataTransfer.effectAllowed = 'move'; 
-      e.dataTransfer.setData('text/plain', draggedNode.dataset.dialData); // Needed for Firefox
-      
-      // Prevent Firefox/Zen transparent ghost bug by setting a solid clone
-      const clone = draggedNode.cloneNode(true);
-      clone.style.position = 'absolute'; clone.style.top = '-1000px'; clone.style.opacity = '1';
-      document.body.appendChild(clone);
-      e.dataTransfer.setDragImage(clone, 65, 65);
-      setTimeout(() => clone.remove(), 100);
-
-      // Hide the original card completely so it becomes an invisible spacer
-      setTimeout(() => draggedNode.classList.add('is-dragging'), 10);
+      e.dataTransfer.setData('text/plain', draggedNode.dataset.dialData);
+      setTimeout(() => draggedNode.classList.add('is-dragging'), 0);
     }
 
     function handleTileDragOver(e) {
@@ -883,7 +878,7 @@
             const children = Array.from(parent.children);
             const draggedIdx = children.indexOf(draggedNode);
             const targetIdx = children.indexOf(targetNode);
-            if(draggedIdx === targetIdx) return; // Prevent mid-animation flicker
+            if (draggedIdx === targetIdx) return; // Prevent mid-animation flicker
 
             // --- CALCULATED REFLOW FLIP ---
             const rects = new Map();
@@ -903,7 +898,7 @@
                 el.style.transition = 'none';
                 requestAnimationFrame(() => {
                   el.style.transform = '';
-                  el.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+                  el.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
                 });
               }
             });
@@ -977,6 +972,14 @@
       state.dials = newDials; localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); 
     }
 
+    function syncServiceStateFromDOM() {
+      const newServices = [];
+      document.querySelectorAll('#services-container > .draggable-wrapper').forEach(node => {
+         newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
+      });
+      state.services = newServices; localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices();
+    }
+
     // ===== RENDER DIALS WITH DYNAMIC ROW-BREAKING FOLDERS =====
     let openAccordionFolder = null;
 
@@ -1016,7 +1019,7 @@
           previewImgs += `<img src="${img}" alt="icon" draggable="false">`;
         }
 
-        folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div>`;
+        folderTile.innerHTML = `<div class="folder-merge-overlay"></div><div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
 
         folderTile.addEventListener('click', (e) => {
           if (isEditMode) return;
@@ -1078,6 +1081,7 @@
       box.className = 'expanded-folder-accordion';
       box.dataset.folderName = folderName;
 
+      // No header title at all - perfectly clean transition.
       let innerHtml = `<div class="expanded-folder-inner-grid" data-folder-name="${folderName}">`;
       items.forEach(dial => { innerHtml += createDialHTMLString(dial); });
       innerHtml += `</div>`;
@@ -1100,7 +1104,8 @@
       let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeDial(${dial._origIdx})">&times;</button>` : '';
 
       return `
-        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
+        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}" draggable="${!isEditMode}">
+          <div class="dial-merge-overlay"></div>
           <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener" draggable="false"><img src="${imgSrc}" alt="${dial.name}" draggable="false" /><span>${dial.name}</span></a>
           ${editBtnHtml}${deleteBtnHtml}
         </div>
@@ -1111,7 +1116,6 @@
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = createDialHTMLString(dial);
       const wrapper = tempDiv.firstElementChild;
-      wrapper.draggable = !isEditMode;
       wrapper.addEventListener('dragstart', handleTileDragStart);
       wrapper.addEventListener('dragover', handleTileDragOver);
       wrapper.addEventListener('drop', handleTileDrop);
@@ -1166,8 +1170,8 @@
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
         const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = !isEditMode; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
-        wrapper.addEventListener('dragstart', (e) => { if(isEditMode)return; draggedNode=e.currentTarget; e.dataTransfer.effectAllowed='move'; }); 
-        wrapper.addEventListener('dragenter', (e) => handleDragEnter(e, 'service')); 
+        wrapper.addEventListener('dragstart', (e) => { if(isEditMode)return; draggedNode=e.currentTarget; e.dataTransfer.effectAllowed='move'; setTimeout(() => draggedNode.classList.add('is-dragging'), 0); }); 
+        wrapper.addEventListener('dragover', (e) => handleDragEnter(e, 'service')); 
         wrapper.addEventListener('dragend', (e) => handleDragEnd(e, 'service'));
         
         let deleteBtnHtml = isEditMode ? `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>` : '';
@@ -1202,7 +1206,7 @@
       state.services.push({ name, desc, url }); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); closeModal('service-modal');
     }
 
-    // ===== ALL-ORIGINS RAW BULLETPROOF RSS ENGINE =====
+    // ===== MULTI-PROXY BULLETPROOF RSS ENGINE =====
     const rssDirectFeeds = {
       'theverge.com': 'https://www.theverge.com/rss/index.xml',
       '9to5google.com': 'https://9to5google.com/feed/',
@@ -1237,19 +1241,21 @@
         try {
           const feedUrl = resolveRssUrl(rawUrl);
 
-          // 1. Try rss2json proxy natively (cleanest parsing)
-          const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
-          const data = await r2j.json();
-          if (data.status === 'ok') {
-            return data.items.map(item => ({
-              title: item.title, link: item.link,
-              timestamp: new Date(item.pubDate).getTime(),
-              sourceName: data.feed.title || new URL(rawUrl).hostname,
-              imgUrl: item.thumbnail || item.enclosure?.link || ''
-            }));
-          }
+          // 1. Try rss2json natively first
+          try {
+             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+             const data = await r2j.json();
+             if (data.status === 'ok') {
+               return data.items.map(item => ({
+                 title: item.title, link: item.link,
+                 timestamp: new Date(item.pubDate).getTime(),
+                 sourceName: data.feed.title || new URL(rawUrl).hostname,
+                 imgUrl: item.thumbnail || item.enclosure?.link || ''
+               }));
+             }
+          } catch(e) {}
 
-          // 2. Fallback to raw AllOrigins fetch if WAF blocked rss2json
+          // 2. Fallback to raw AllOrigins fetch if WAF blocks rss2json
           const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
           const proxyData = await proxyRes.json();
           if (proxyData && proxyData.contents) {
@@ -1284,7 +1290,6 @@
 
       const sourceDecks = await Promise.all(feedPromises);
       
-      // Fair-Share Interleaving
       let masterArticleDeck = [];
       let maxLength = Math.max(...sourceDecks.map(deck => deck.length), 0);
 
