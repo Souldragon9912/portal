@@ -73,31 +73,38 @@
     }
 
     /* --- Combined Top Nav & Encased Calendar --- */
-    .top-nav-bar {
-      display: flex; flex-direction: column; align-items: stretch; padding: 10px 16px;
-      background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-glass); border-radius: 12px; position: absolute; top: 20px; left: 20px;
-      z-index: 50; box-shadow: 0 4px 16px rgba(0,0,0,0.4); user-select: none; transition: border 0.3s, background 0.3s;
-      width: max-content;
+    .top-widget-container {
+      position: absolute; top: 20px; left: 20px; z-index: 50;
+      display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+      transition: transform 0.3s;
     }
-    .top-nav-bar.edit-unlocked { cursor: grab; border: 2px dashed var(--accent); background: rgba(22, 27, 34, 0.85); }
-    .top-nav-bar.edit-unlocked:active { cursor: grabbing; }
+    .top-widget-container.edit-unlocked { cursor: grab; }
+    .top-widget-container.edit-unlocked:active { cursor: grabbing; }
+    
+    .top-nav-bar {
+      display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 15px; padding: 10px 16px;
+      background: rgba(22, 27, 34, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glass); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      user-select: none; transition: border 0.3s, background 0.3s; width: max-content;
+    }
+    .top-widget-container.edit-unlocked .top-nav-bar { border: 2px dashed var(--accent); background: rgba(22, 27, 34, 0.85); }
 
-    .top-nav-header { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 15px; }
-
-    .widget-toggles { display: flex; gap: 10px; }
+    .widget-toggles { display: flex; gap: 10px; flex-direction: row; align-items: center; }
     .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
 
     /* Cascading Encased Calendar */
     .dropdown-calendar {
       max-height: 0; opacity: 0; overflow: hidden; pointer-events: none; width: 100%; min-width: 320px;
-      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-in-out, margin 0.3s, padding 0.3s;
+      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-in-out, padding 0.3s;
       display: flex; flex-direction: column; align-items: center;
+      background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-radius: 16px; border: 1px solid transparent; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      padding: 0 20px; 
     }
     .dropdown-calendar.open { 
-      max-height: 400px; opacity: 1; pointer-events: auto; 
-      margin-top: 16px; border-top: 1px solid var(--border-glass); padding-top: 16px;
+      max-height: 450px; opacity: 1; pointer-events: auto; 
+      border-color: var(--border-glass); padding: 20px;
     }
     
     .generic-calendar { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 350px; }
@@ -144,18 +151,22 @@
     .speed-dial-grid { display: grid; grid-template-columns: var(--dial-grid-cols); gap: 16px; width: 100%; justify-content: center; position: relative; }
     .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); justify-content: center; gap: 14px; width: 100%; }
 
-    /* --- Global Draggable Tile Physics & FLIP Animations --- */
-    .draggable-wrapper { position: relative; cursor: grab; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    /* --- SortableJS Global Drag Classes --- */
+    .draggable-wrapper { position: relative; cursor: grab; }
     .draggable-wrapper:active { cursor: grabbing; }
-    .draggable-wrapper.is-dragging { opacity: 0.01 !important; pointer-events: none; }
     
-    .draggable-wrapper.drag-folder-hover .dial-card, 
-    .draggable-wrapper.drag-folder-hover .dial-folder-tile { 
-      transform: scale(0.9) !important; 
-      border-color: var(--accent) !important;
+    .sortable-ghost { opacity: 0 !important; }
+    .sortable-drag { opacity: 1 !important; transform: scale(1.05) !important; z-index: 1000 !important; box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important; cursor: grabbing !important; }
+    
+    /* Vivaldi/Opera Drag-to-Merge Pulsing Zone */
+    .drag-folder-hover .dial-card, .drag-folder-hover .dial-folder-tile { 
+      transform: scale(0.92) !important; 
+      box-shadow: 0 0 0 3px var(--accent) inset, 0 8px 30px rgba(88, 166, 255, 0.3) !important; 
+      opacity: 0.9; transition: all 0.2s; 
       animation: folderMergePulse 1s infinite !important;
     }
 
+    /* Base Cards */
     .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { 
       background: var(--card-bg); backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur)); 
       border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--card-radius); clip-path: var(--card-clip);
@@ -182,7 +193,7 @@
 
     /* --- Opera/Brave Micro Folders --- */
     .dial-folder-tile { position: relative; padding: 6px; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; aspect-ratio: 1; overflow: hidden; }
-    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none;}
+    .folder-preview-grid { position: absolute; inset: 8px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 6px; z-index: 1; pointer-events: none; }
     .folder-preview-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: calc(var(--card-radius) / 2.5); pointer-events: none; }
     .dial-folder-tile span { position: relative; z-index: 2; font-size: 11px; font-weight: 600; color: #fff; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 12px; margin-bottom: 2px; backdrop-filter: blur(4px); pointer-events: none; }
 
@@ -196,9 +207,11 @@
     .expanded-folder-inner-grid { display: grid; grid-template-columns: var(--dial-grid-cols); justify-content: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
     
     /* Strict Edit Mode Controls - Hidden universally unless body.edit-mode is active */
-    .card-delete-btn, .card-edit-btn { position: absolute; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s; z-index: 10; }
+    .card-delete-btn, .card-edit-btn { position: absolute; background: rgba(0, 0, 0, 0.7); color: var(--text-muted); border: none; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 10; }
+    .card-delete-btn { top: 6px; right: 6px; font-size: 14px; }
     .card-edit-btn { top: 6px; left: 6px; font-size: 12px; }
     
+    /* Only display the buttons when Unlock Layout is clicked */
     body.edit-mode .draggable-wrapper:hover .card-delete-btn, 
     body.edit-mode .draggable-wrapper:hover .card-edit-btn { display: flex; }
     
@@ -232,6 +245,7 @@
     .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
     .drawer-close { background: transparent; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
     .drawer-close:hover { color: var(--text-main); }
+    
     .cal-auth-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 16px; background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 12px; }
     .events-container { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; padding-right: 4px; }
     .cal-event-card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s; }
@@ -239,10 +253,12 @@
     .cal-event-title { font-weight: 600; font-size: 14px; color: var(--text-main); }
     .cal-event-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--accent); }
     
+    /* Sleek Bookmarks Redesign */
     .bookmark-input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
     .bookmark-input-group input { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-glass); color: var(--text-main); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
     .bookmarks-list { list-style: none; display: flex; flex-direction: column; gap: 0; flex: 1; overflow-y: auto; padding-right: 4px; margin-top: 4px; }
     .bookmark-folder-header { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; margin-bottom: 6px; border-bottom: 1px solid rgba(88,166,255,0.2); padding-bottom: 4px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    
     .bookmark-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; transition: all 0.2s; }
     .bookmark-item:hover { background: rgba(88,166,255,0.08); border-color: rgba(88,166,255,0.3); transform: translateX(4px); }
     .bookmark-item img { width: 18px; height: 18px; border-radius: 4px; margin-right: 12px; }
@@ -281,14 +297,16 @@
     @media (max-width: 768px) {
       body { padding: 8px; }
       .top-widget-container { position: relative; top: 0; left: 0; width: 100%; margin-bottom: 12px; }
-      .top-nav-bar { justify-content: space-between; padding: 10px; flex-wrap: wrap; width: 100%; }
-      .widget-toggles { display: flex !important; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
+      .top-nav-bar { flex-wrap: wrap; width: 100%; }
+      .widget-toggles { flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
       .widget-toggles .nav-btn { font-size: 11px; padding: 6px 10px; }
       .top-nav-bar > div:last-child { width: 100%; justify-content: center; margin-top: 4px; margin-left: 0 !important; }
+      
       .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
       .hero-container { margin-top: 0; gap: 16px; }
       #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
       .dropdown-calendar { display: none !important; }
+      
       .speed-dial-grid, .services-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
       .dial-card, .service-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: 1; }
       .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
@@ -313,6 +331,7 @@
         <button class="nav-btn" id="nav-btn-bookmarks" onclick="toggleDrawer('bookmarks-drawer')">📑 Bookmarks</button>
       </div>
       <div style="display: flex; align-items: center; margin-left: 10px;">
+        <!-- Clock toggles the built-in calendar -->
         <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
         <button class="nav-btn" onclick="openSettingsModal()">⚙ Settings</button>
       </div>
@@ -521,7 +540,7 @@
   <div class="modal" id="dial-modal">
     <div class="modal-content" style="overflow: visible;">
       <h3>Add Speed Dial</h3>
-      <div class="form-group"><label>Label</label><input type="text" id="dial-title" placeholder="YouTube, GitHub, etc." /></div>
+      <div class="form-group"><label>Label (Leave blank to auto-fetch from URL)</label><input type="text" id="dial-title" placeholder="YouTube, GitHub, etc." /></div>
       <div class="form-group"><label>URL</label><input type="url" id="dial-url" placeholder="https://..." /></div>
       <div class="form-group"><label>Folder (Optional)</label><input type="text" id="dial-folder" placeholder="e.g. Social, Work..." list="dial-folder-list" /></div>
       <datalist id="dial-folder-list"></datalist>
@@ -666,7 +685,6 @@
       if (isEditMode) {
         if (btn) { btn.classList.add('active-edit'); btn.style.background = '#ff9500'; btn.innerText = '🔒 Lock Sections'; }
         if (floatBtn) floatBtn.classList.add('show');
-        
         topNav.setAttribute('draggable', 'true'); topNav.classList.add('edit-unlocked');
         searchWidget.setAttribute('draggable', 'true'); searchWidget.classList.add('edit-unlocked');
         dialsSection.setAttribute('draggable', 'true'); dialsSection.classList.add('edit-mode-container');
@@ -674,16 +692,26 @@
         newsSection.setAttribute('draggable', 'true'); newsSection.classList.add('edit-mode-container');
         closeModal('settings-modal');
         document.body.classList.add('edit-mode');
+        
+        // Lock Sortable while manipulating massive sections
+        if(rootSortable) rootSortable.option("disabled", true);
+        if(accordionSortable) accordionSortable.option("disabled", true);
+        if(servicesSortable) servicesSortable.option("disabled", true);
+
       } else {
         if (btn) { btn.classList.remove('active-edit'); btn.style.background = '#333'; btn.innerText = '✏ Unlock Layout'; }
         if (floatBtn) floatBtn.classList.remove('show');
-        
         topNav.setAttribute('draggable', 'false'); topNav.classList.remove('edit-unlocked');
         searchWidget.setAttribute('draggable', 'false'); searchWidget.classList.remove('edit-unlocked');
         dialsSection.setAttribute('draggable', 'false'); dialsSection.classList.remove('edit-mode-container');
         servicesSection.setAttribute('draggable', 'false'); servicesSection.classList.remove('edit-mode-container');
         newsSection.setAttribute('draggable', 'false'); newsSection.classList.remove('edit-mode-container');
         document.body.classList.remove('edit-mode');
+
+        // Re-enable Sortable tiles
+        if(rootSortable) rootSortable.option("disabled", false);
+        if(accordionSortable) accordionSortable.option("disabled", false);
+        if(servicesSortable) servicesSortable.option("disabled", false);
       }
     }
 
@@ -771,6 +799,10 @@
     };
     let tokenClient = null;
 
+    let rootSortable = null;
+    let accordionSortable = null;
+    let servicesSortable = null;
+
     // ===== SEARCH ENGINE LOGIC =====
     function renderEngineDropdown() {
       const select = document.getElementById('engine-select');
@@ -791,172 +823,60 @@
       searchInput.value = '';
     });
 
-    // ===== PURE NATIVE HTML5 DRAG & DROP PHYSICS (ALWAYS ACTIVE) =====
-    let draggedNode = null;
-    let mergeTarget = null;
-    let dragType = null;
-    let lastSwapTime = 0; // Anti-Bounce Debounce Timer
+    // ===== SORTABLE.JS FOLDER MERGING LOGIC =====
+    function handleSortableMerge(draggedEl, targetEl) {
+        if (draggedEl.dataset.folderName) { renderDials(); return; } // Prevent folder-into-folder nesting
 
-    function handleTileDragStart(e, type) { 
-      e.stopPropagation(); // prevent section dragging
-      if (isEditMode) return; // Prevent sorting when moving sections
-      
-      draggedNode = e.currentTarget; 
-      dragType = type;
-      e.dataTransfer.effectAllowed = 'move'; 
-      e.dataTransfer.setData('text/plain', draggedNode.dataset.dialData || draggedNode.dataset.folderName || ''); 
-      
-      // Makes original tile invisible so only the crisp ghost image follows cursor
-      setTimeout(() => draggedNode.classList.add('is-dragging'), 0);
-    }
-
-    function handleTileDragOver(e, type) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (isEditMode || !draggedNode || dragType !== type) return;
-      
-      const targetNode = e.currentTarget.closest('.draggable-wrapper');
-      if (!targetNode || draggedNode === targetNode) return;
-
-      const rect = targetNode.getBoundingClientRect();
-      const relX = e.clientX - rect.left;
-      const relY = e.clientY - rect.top;
-
-      // Clean 60% inner bounding box for Merge Zone (Hover to Merge)
-      const marginX = rect.width * 0.20;
-      const marginY = rect.height * 0.20;
-      const isMergeZone = (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY);
-
-      if (isMergeZone && type === 'dial' && !draggedNode.classList.contains('dial-folder-tile') && targetNode !== document.querySelector('.add-wrapper')) {
-          if (mergeTarget !== targetNode) {
-              if(mergeTarget) mergeTarget.classList.remove('drag-folder-hover');
-              targetNode.classList.add('drag-folder-hover');
-              mergeTarget = targetNode;
-          }
-          return;
-      } else {
-          if (mergeTarget) {
-              mergeTarget.classList.remove('drag-folder-hover');
-              mergeTarget = null;
-          }
-
-          // Anti-bounce debounce: prevent rapid vibrating if hovering on edge
-          if (Date.now() - lastSwapTime < 150) return;
-
-          const parent = targetNode.parentNode;
-          const children = Array.from(parent.children);
-          const targetIdx = children.indexOf(targetNode);
-
-          // Allow cross-container dragging (e.g. out of a folder into root)
-          const isSameContainer = (draggedNode.parentNode === parent);
-          
-          const rects = new Map();
-          children.forEach(el => rects.set(el, el.getBoundingClientRect()));
-
-          if (isSameContainer) {
-              const draggedIdx = children.indexOf(draggedNode);
-              if (draggedIdx === targetIdx) return;
-              if (draggedIdx < targetIdx) { parent.insertBefore(draggedNode, targetNode.nextSibling); } 
-              else { parent.insertBefore(draggedNode, targetNode); }
-          } else {
-              parent.insertBefore(draggedNode, targetNode);
-          }
-
-          lastSwapTime = Date.now();
-
-          // FLIP Animation Execution
-          Array.from(parent.children).forEach(el => {
-            const oldRect = rects.get(el);
-            const newRect = el.getBoundingClientRect();
-            if (oldRect && (oldRect.left !== newRect.left || oldRect.top !== newRect.top)) {
-              const dx = oldRect.left - newRect.left;
-              const dy = oldRect.top - newRect.top;
-              el.style.transform = `translate(${dx}px, ${dy}px)`;
-              el.style.transition = 'none';
-              requestAnimationFrame(() => {
-                el.style.transform = '';
-                el.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-              });
+        const draggedData = JSON.parse(decodeURIComponent(draggedEl.dataset.dialData));
+        const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
+        
+        const targetFolderStr = targetEl.dataset.folderName;
+        if (targetFolderStr) {
+            activeDial.folder = targetFolderStr;
+        } else {
+            const targetData = JSON.parse(decodeURIComponent(targetEl.dataset.dialData));
+            const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
+            const newFolder = prompt("Name your new folder:", "New Folder");
+            if (newFolder && newFolder.trim()) {
+                activeDial.folder = newFolder.trim();
+                tDial.folder = newFolder.trim();
+            } else {
+                return renderDials(); // canceled
             }
-          });
-      }
-    }
-
-    function handleTileDrop(e, type) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (!draggedNode || isEditMode) return;
-
-      if (mergeTarget && type === 'dial') {
-        mergeTarget.classList.remove('drag-folder-hover');
-        const targetFolderStr = mergeTarget.dataset.folderName;
-        const targetDataStr = mergeTarget.dataset.dialData;
-        const draggedDataStr = draggedNode.dataset.dialData;
-
-        if (draggedDataStr) {
-            const draggedData = JSON.parse(decodeURIComponent(draggedDataStr));
-            const activeDial = state.dials.find(d => d.url === draggedData.url && d.name === draggedData.name);
-
-            if (targetFolderStr) {
-               activeDial.folder = targetFolderStr;
-            } else if (targetDataStr) {
-               const targetData = JSON.parse(decodeURIComponent(targetDataStr));
-               const tDial = state.dials.find(d => d.url === targetData.url && d.name === targetData.name);
-               const newFolder = prompt("Name your new folder:", "New Folder");
-               if (newFolder && newFolder.trim()) {
-                   activeDial.folder = newFolder.trim();
-                   tDial.folder = newFolder.trim();
-               }
-            }
-            localStorage.setItem('dash_dials', JSON.stringify(state.dials));
-            renderDials();
         }
-      } else {
-        if (type === 'dial') syncDialStateFromDOM(); else syncServiceStateFromDOM();
-      }
-      
-      draggedNode.classList.remove('is-dragging');
-      draggedNode = null;
-      mergeTarget = null;
+        localStorage.setItem('dash_dials', JSON.stringify(state.dials));
+        renderDials();
     }
 
-    function handleTileDragEnd(e, type) { 
-      if (draggedNode) draggedNode.classList.remove('is-dragging'); 
-      if (mergeTarget) mergeTarget.classList.remove('drag-folder-hover');
-      draggedNode = null; 
-      mergeTarget = null;
-    }
-
-    // Recursively build the state array exactly based on the visual DOM sequence
+    // Recursively build the state array exactly based on the sequential visual DOM order
     function syncDialStateFromDOM() {
       const newDials = [];
-      const gridItems = Array.from(document.getElementById('speed-dials-container').children);
-
-      gridItems.forEach(node => {
+      
+      Array.from(document.getElementById('speed-dials-container').children).forEach(node => {
          if (node.classList.contains('draggable-wrapper') && node.dataset.dialData) {
-           const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
-           data.folder = ''; 
-           newDials.push(data);
+             const data = JSON.parse(decodeURIComponent(node.dataset.dialData));
+             data.folder = ''; 
+             newDials.push(data);
          } else if (node.classList.contains('dial-folder-tile') && node.dataset.folderName) {
-           const fname = node.dataset.folderName;
-           if (fname === openAccordionFolder) {
-               const accordion = document.querySelector('.expanded-folder-accordion');
-               if (accordion) {
-                   accordion.querySelectorAll('.draggable-wrapper').forEach(innerNode => {
-                       if(innerNode.dataset.dialData) {
-                           const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
-                           data.folder = fname; 
-                           newDials.push(data);
-                       }
-                   });
-               }
-           } else {
-               newDials.push(...state.dials.filter(d => d.folder === fname));
-           }
+             const fname = node.dataset.folderName;
+             if (fname === openAccordionFolder) {
+                 const accordion = document.querySelector('.expanded-folder-accordion');
+                 if (accordion) {
+                     accordion.querySelectorAll('.draggable-wrapper').forEach(innerNode => {
+                         if(innerNode.dataset.dialData) {
+                             const data = JSON.parse(decodeURIComponent(innerNode.dataset.dialData));
+                             data.folder = fname; 
+                             newDials.push(data);
+                         }
+                     });
+                 }
+             } else {
+                 newDials.push(...state.dials.filter(d => d.folder === fname));
+             }
          }
       });
 
-      // Filter duplicates
+      // Filter duplicates that may exist from cross-dragging
       const uniqueDials = []; const map = new Map();
       for (const item of newDials) {
          const key = item.url + item.name;
@@ -971,9 +891,7 @@
     function syncServiceStateFromDOM() {
       const newServices = [];
       document.querySelectorAll('#services-container > .draggable-wrapper').forEach(node => {
-         if (node.dataset.serviceData) {
-             newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
-         }
+         newServices.push(JSON.parse(decodeURIComponent(node.dataset.serviceData)));
       });
       state.services = newServices; localStorage.setItem('dash_services', JSON.stringify(state.services));
     }
@@ -1022,11 +940,8 @@
     }
 
     function saveNewDial() {
-      let name = document.getElementById('dial-title').value.trim(); 
-      let url = document.getElementById('dial-url').value.trim();
-      let folder = document.getElementById('dial-folder').value.trim(); 
-      let img = document.getElementById('dial-img').value.trim();
-
+      let name = document.getElementById('dial-title').value.trim(); let url = document.getElementById('dial-url').value.trim();
+      let folder = document.getElementById('dial-folder').value.trim(); let img = document.getElementById('dial-img').value.trim();
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
@@ -1040,6 +955,9 @@
     function renderDials() {
       const container = document.getElementById('speed-dials-container'); const datalist = document.getElementById('dial-folder-list');
       
+      if (rootSortable) rootSortable.destroy();
+      if (accordionSortable) accordionSortable.destroy();
+
       const folders = [...new Set(state.dials.filter(d => d.folder).map(d => d.folder))].sort();
       if (datalist) datalist.innerHTML = folders.map(f => `<option value="${f}">`).join('');
 
@@ -1054,53 +972,37 @@
       const renderedFolders = new Set();
       const allRenderNodes = [];
 
-      // Iterate sequential state array so folders don't jump positions
-      state.dials.forEach((dial, idx) => {
-        if (dial.folder) {
-           if (!renderedFolders.has(dial.folder)) {
-              renderedFolders.add(dial.folder);
-              const items = state.dials.filter(d => d.folder === dial.folder);
-              if (items.length === 0) return; // Clean up empty folders instantly
-              
-              const folderTile = document.createElement('div');
-              folderTile.className = 'dial-folder-tile draggable-wrapper';
-              folderTile.dataset.folderName = dial.folder;
-              folderTile.draggable = true;
-              folderTile.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-              folderTile.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-              folderTile.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-              folderTile.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
+      Object.keys(grouped).sort().forEach(folderName => {
+        if (folderName === '_root') return;
+        const items = grouped[folderName];
+        if (items.length === 0) return; // Clean up empty folders instantly
+        
+        const folderTile = document.createElement('div');
+        folderTile.className = 'dial-folder-tile draggable-wrapper';
+        folderTile.dataset.folderName = folderName;
 
-              let previewImgs = '';
-              for (let i = 0; i < Math.min(items.length, 4); i++) {
-                let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
-                let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
-                previewImgs += `<img src="${src}" alt="icon" draggable="false">`;
-              }
-
-              folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${dial.folder}</span>`;
-              
-              folderTile.addEventListener('click', (e) => {
-                toggleAccordionFolder(dial.folder);
-              });
-
-              allRenderNodes.push({ type: 'folder', name: dial.folder, node: folderTile, items });
-           }
-        } else {
-           allRenderNodes.push({ type: 'dial', node: createDialElement(dial) });
+        let previewImgs = '';
+        for (let i = 0; i < Math.min(items.length, 4); i++) {
+          let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
+          let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+          previewImgs += `<img src="${src}" alt="icon" draggable="false">`;
         }
+
+        folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
+        folderTile.addEventListener('click', () => toggleAccordionFolder(folderName));
+        allRenderNodes.push({ type: 'folder', name: folderName, node: folderTile });
       });
 
+      grouped._root.forEach(dial => { allRenderNodes.push({ type: 'dial', node: createDialElement(dial) }); });
+
       const addWrapper = document.createElement('div');
-      addWrapper.className = 'draggable-wrapper add-wrapper';
+      addWrapper.className = 'add-wrapper';
       addWrapper.innerHTML = `<div class="add-dial-tile" onclick="openAddDialModal()"><span>+</span><span>Add Tile</span></div>`;
-      addWrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-      addWrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
       allRenderNodes.push({ type: 'add', node: addWrapper });
 
       allRenderNodes.forEach(item => container.appendChild(item.node));
       
-      // Accurately calculate the end of the current row so the folder breaks below it
+      // Inject Accordion if open
       if (openAccordionFolder) {
         requestAnimationFrame(() => {
            const activeTile = document.querySelector(`.dial-folder-tile[data-folder-name="${openAccordionFolder}"]`);
@@ -1117,13 +1019,54 @@
                    if (gridChildren[i].offsetTop === folderTop) { insertAfterNode = gridChildren[i]; } else { break; }
                }
                insertAfterNode.insertAdjacentElement('afterend', accordion);
+
+               accordionSortable = new Sortable(accordion.querySelector('.expanded-folder-inner-grid'), {
+                   group: 'dials', // Allow dragging in and out of folder
+                   disabled: isEditMode, // Lock tile sorting if moving sections
+                   animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-dial-tile',
+                   ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+                   onEnd: syncDialStateFromDOM
+               });
            }
         });
       }
+
+      rootSortable = new Sortable(container, {
+          group: 'dials', // Shared group for cross-folder drag
+          disabled: isEditMode, // Lock tile sorting if moving sections
+          animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper, .expanded-folder-accordion',
+          ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+          onMove: function(evt, originalEvent) {
+              document.querySelectorAll('.drag-folder-hover').forEach(el => el.classList.remove('drag-folder-hover'));
+              if (evt.related.classList.contains('add-wrapper') || evt.related.classList.contains('expanded-folder-accordion')) return false;
+
+              const rect = evt.related.getBoundingClientRect();
+              const relX = originalEvent.clientX - rect.left;
+              const relY = originalEvent.clientY - rect.top;
+              
+              // 70% Merge Zone (Outer 15% edge triggers swap)
+              const marginX = rect.width * 0.15; 
+              const marginY = rect.height * 0.15;
+
+              if (relX > marginX && relX < rect.width - marginX && relY > marginY && relY < rect.height - marginY) {
+                  evt.related.classList.add('drag-folder-hover');
+                  return false; // Prevent sorting, prep to merge
+              }
+          },
+          onEnd: function(evt) {
+              const target = document.querySelector('.drag-folder-hover');
+              if (target) {
+                  target.classList.remove('drag-folder-hover');
+                  handleSortableMerge(evt.item, target);
+              } else {
+                  syncDialStateFromDOM();
+              }
+          }
+      });
     }
 
     function toggleAccordionFolder(folderName) {
-      syncDialStateFromDOM(); // Sync layout strictly before toggling to stop it from jumping!
+      if (isEditMode) return; // Prevent expanding while organizing layout
       if (openAccordionFolder === folderName) { openAccordionFolder = null; } 
       else { openAccordionFolder = folderName; }
       renderDials();
@@ -1138,13 +1081,6 @@
       items.forEach(dial => { innerHtml += createDialHTMLString(dial); });
       innerHtml += `</div>`;
       box.innerHTML = innerHtml;
-
-      box.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
-        wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-        wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-        wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-        wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
-      });
       return box;
     }
 
@@ -1155,7 +1091,7 @@
       let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); event.preventDefault(); removeDial(${dial._origIdx})">&times;</button>`;
 
       return `
-        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}" draggable="true">
+        <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
           <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener" draggable="false">
              <img src="${src}" alt="${dial.name}" draggable="false" />
              <span>${dial.name}</span>
@@ -1168,42 +1104,38 @@
     function createDialElement(dial) {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = createDialHTMLString(dial);
-      const wrapper = tempDiv.firstElementChild;
-      wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'dial'));
-      wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'dial'));
-      wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'dial'));
-      wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'dial'));
-      return wrapper;
+      return tempDiv.firstElementChild;
     }
 
     // ===== RENDER SERVICES =====
     function renderServices() {
       const container = document.getElementById('services-container');
+      if (servicesSortable) servicesSortable.destroy();
       container.innerHTML = '';
       
       state.services.forEach((srv, idx) => {
         srv._origIdx = idx;
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.draggable = true; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
-        wrapper.addEventListener('dragstart', (e) => handleTileDragStart(e, 'service')); 
-        wrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'service')); 
-        wrapper.addEventListener('drop', (e) => handleTileDrop(e, 'service'));
-        wrapper.addEventListener('dragend', (e) => handleTileDragEnd(e, 'service'));
-        
+        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper'; wrapper.dataset.serviceData = encodeURIComponent(JSON.stringify(srv));
         let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); removeService(${idx})">&times;</button>`;
         wrapper.innerHTML = `<a href="${srv.url}" class="service-card" target="_blank" rel="noopener"><div style="display: flex; justify-content: space-between; align-items: center; width:100%;"><span class="name">${srv.name}</span><span class="status-dot" id="srv-dot-${idx}"></span></div><span class="desc">${srv.desc}</span></a>${deleteBtnHtml}`;
         container.appendChild(wrapper);
       });
 
       const addWrapper = document.createElement('div');
-      addWrapper.className = 'draggable-wrapper add-wrapper';
+      addWrapper.className = 'add-wrapper';
       addWrapper.innerHTML = `<div class="add-dial-tile add-service-tile" onclick="openAddServiceModal()"><span>+</span><span>Add Service</span></div>`;
-      addWrapper.addEventListener('dragover', (e) => handleTileDragOver(e, 'service'));
-      addWrapper.addEventListener('drop', (e) => handleTileDrop(e, 'service'));
       container.appendChild(addWrapper);
 
       pingServices();
+
+      servicesSortable = new Sortable(container, {
+          disabled: isEditMode, // Lock tile sorting if moving sections
+          animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
+          ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+          onEnd: syncServiceStateFromDOM
+      });
     }
-    
+
     function pingServices() {
       state.services.forEach((srv, idx) => {
         const dot = document.getElementById(`srv-dot-${idx}`); if (!dot) return;
@@ -1224,22 +1156,6 @@
     }
 
     // ===== MULTI-PROXY BULLETPROOF RSS ENGINE =====
-    const rssDirectFeeds = {
-      'theverge.com': 'https://www.theverge.com/rss/index.xml',
-      '9to5google.com': 'https://9to5google.com/feed/',
-      'linustechtips.com': 'https://linustechtips.com/rss/',
-      'bleepingcomputer.com': 'https://www.bleepingcomputer.com/feed/',
-      'arstechnica.com': 'https://feeds.arstechnica.com/arstechnica/index',
-      'hackernews.com': 'https://news.ycombinator.com/rss'
-    };
-
-    function resolveRssUrl(userUrl) {
-      let hostname;
-      try { hostname = new URL(userUrl).hostname.replace(/^www\./, ''); } catch(e) { return userUrl; }
-      if (rssDirectFeeds[hostname]) return rssDirectFeeds[hostname];
-      return userUrl; 
-    }
-
     const fetchRSS = async () => {
       const el = document.getElementById('rssFeedList');
       const titleEl = document.getElementById('rssHeaderTitle');
@@ -1256,10 +1172,8 @@
 
       const feedPromises = urls.map(async (rawUrl) => {
         try {
-          const feedUrl = resolveRssUrl(rawUrl);
-
           try {
-             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+             const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rawUrl)}`);
              const data = await r2j.json();
              if (data.status === 'ok') {
                return data.items.map(item => ({
@@ -1271,7 +1185,7 @@
              }
           } catch(e) {}
 
-          const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
+          const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rawUrl)}`);
           const proxyData = await proxyRes.json();
           if (proxyData && proxyData.contents) {
              let parser = new DOMParser();
