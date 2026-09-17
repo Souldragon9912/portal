@@ -156,7 +156,7 @@
     #section-dials { background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important; position: absolute; top: 160px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px; }
     #section-dials.grid-fixed { width: fit-content; max-width: none; }
     #section-services { background: var(--bg-glass) !important; backdrop-filter: blur(16px) !important; border: 1px solid var(--border-glass) !important; border-radius: 18px !important; padding: 24px !important; position: absolute; top: 420px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px; }
-    #section-news { background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important; position: absolute; top: 680px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1000px; }
+    #section-news { background: transparent !important; backdrop-filter: none !important; border: none !important; padding: 0 !important; position: absolute; top: 680px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1180px; }
 
     .main-panel.edit-mode-container { border: 2px dashed var(--accent) !important; background: rgba(0, 0, 0, 0.3) !important; padding: 20px !important; border-radius: 16px; }
     .layout-drag-handle {
@@ -264,14 +264,14 @@
     .rss-carousel-arrow:disabled { opacity: 0.28; cursor: default; transform: none; }
     .rss-carousel-viewport { min-width: 0; overflow: hidden; }
     .rss-carousel-track { display: flex; width: 100%; transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
-    .rss-carousel-page { flex: 0 0 100%; min-width: 100%; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
-    .rss-item { min-width: 0; display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 14px; background: rgba(22, 27, 34, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .rss-carousel-page { flex: 0 0 100%; min-width: 100%; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
+    .rss-item { min-width: 0; min-height: 280px; display: flex; flex-direction: column; text-decoration: none; color: #e5e7eb; border-radius: 18px; background: rgba(22, 27, 34, 0.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s; }
     .rss-item:hover { background: rgba(33, 38, 45, 0.95); color: #fff; transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
-    .rss-image { width: 100%; height: 120px; object-fit: cover; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
-    .rss-meta-block { padding: 11px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; justify-content: space-between; }
-    .rss-title { font-size: 0.83rem; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .rss-image { width: 100%; height: 150px; object-fit: cover; display: block; background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+    .rss-meta-block { padding: 13px; display: flex; flex-direction: column; gap: 9px; flex-grow: 1; justify-content: space-between; }
+    .rss-title { font-size: 0.9rem; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
     .rss-source-date { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
-    .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 2px 7px; border-radius: 6px; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rss-source-tag { background: rgba(88, 166, 255, 0.15); color: var(--accent); padding: 3px 8px; border-radius: 7px; font-weight: 600; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .rss-date { font-family: monospace; font-size: 10px; white-space: nowrap; }
     .rss-carousel-empty { grid-column: 1 / -1; min-height: 180px; display: grid; place-items: center; color: var(--text-muted); font-size: 12px; border: 1px dashed var(--border-glass); border-radius: 14px; background: rgba(22,27,34,0.35); }
 
@@ -333,7 +333,7 @@
 
     @media (max-width: 1100px) and (min-width: 769px) {
       .rss-carousel-page { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .rss-image { height: 125px; }
+      .rss-image { height: 150px; }
     }
 
     /* Mobile Minimalist Optimizations */
@@ -362,7 +362,7 @@
       .rss-carousel { grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 6px; }
       .rss-carousel-arrow { width: 34px; height: 34px; font-size: 20px; }
       .rss-carousel-page { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .rss-image { height: 110px; }
+      .rss-image { height: 130px; }
     }
   </style>
 </head>
@@ -1579,25 +1579,53 @@
       try { return new URL(candidate, baseUrl).href; } catch (err) { return candidate; }
     }
 
-    function extractImageFromNode(item, baseUrl) {
-      const mediaContent = item.getElementsByTagNameNS('*', 'content')[0];
-      const mediaThumb = item.getElementsByTagNameNS('*', 'thumbnail')[0];
-      const enclosure = item.getElementsByTagName('enclosure')[0];
-      const fromNode = mediaContent?.getAttribute('url') || mediaThumb?.getAttribute('url') || enclosure?.getAttribute('url') || '';
-      if (fromNode) return absoluteUrl(fromNode, baseUrl);
+    function extractImageCandidatesFromNode(item, baseUrl) {
+      const candidates = [];
+      const addCandidate = value => {
+        if (!value) return;
+        const absolute = absoluteUrl(value, baseUrl);
+        if (absolute && !candidates.includes(absolute)) candidates.push(absolute);
+      };
 
-      const htmlNode = item.getElementsByTagName('content:encoded')[0] || item.getElementsByTagName('description')[0] || item.getElementsByTagName('content')[0];
-      if (htmlNode?.textContent) {
+      // Prefer explicit media/enclosure artwork used by most modern feeds.
+      Array.from(item.getElementsByTagNameNS('*', 'content')).forEach(node => addCandidate(node.getAttribute('url')));
+      Array.from(item.getElementsByTagNameNS('*', 'thumbnail')).forEach(node => addCandidate(node.getAttribute('url')));
+      Array.from(item.getElementsByTagName('media:content')).forEach(node => addCandidate(node.getAttribute('url')));
+      Array.from(item.getElementsByTagName('media:thumbnail')).forEach(node => addCandidate(node.getAttribute('url')));
+      Array.from(item.getElementsByTagName('enclosure')).forEach(node => addCandidate(node.getAttribute('url')));
+
+      const imageNodes = item.getElementsByTagName('image');
+      Array.from(imageNodes).forEach(node => {
+        const urlNode = node.getElementsByTagName('url')[0];
+        addCandidate(urlNode?.textContent?.trim());
+      });
+
+      // Fall back to the first image embedded in content/description.
+      const htmlNodes = [
+        ...Array.from(item.getElementsByTagName('content:encoded')),
+        ...Array.from(item.getElementsByTagName('description')),
+        ...Array.from(item.getElementsByTagName('content'))
+      ];
+      for (const htmlNode of htmlNodes) {
+        const rawHtml = htmlNode?.textContent || '';
+        if (!rawHtml) continue;
         try {
-          const doc = new DOMParser().parseFromString(htmlNode.textContent, 'text/html');
-          const image = doc.querySelector('img[src]');
-          if (image) return absoluteUrl(image.getAttribute('src'), baseUrl);
+          const doc = new DOMParser().parseFromString(rawHtml, 'text/html');
+          doc.querySelectorAll('img[src], source[srcset]').forEach(node => {
+            const src = node.getAttribute('src');
+            if (src) addCandidate(src);
+            const srcset = node.getAttribute('srcset');
+            if (srcset) {
+              const first = srcset.split(',')[0]?.trim().split(/\s+/)[0];
+              addCandidate(first);
+            }
+          });
         } catch (err) {}
       }
-      return '';
+      return candidates;
     }
 
-    function parseXmlFeed(xmlText, feedUrl, fallbackName) {
+        function parseXmlFeed(xmlText, feedUrl, fallbackName) {
       const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
       if (xmlDoc.querySelector('parsererror')) throw new Error('Invalid XML feed');
       const channelTitle = xmlDoc.getElementsByTagName('channel')[0]?.getElementsByTagName('title')[0]?.textContent || xmlDoc.getElementsByTagName('feed')[0]?.getElementsByTagName('title')[0]?.textContent || fallbackName;
@@ -1612,30 +1640,67 @@
         const link = absoluteUrl(linkNode?.getAttribute('href') || linkNode?.textContent?.trim() || '#', feedUrl);
         const dateNode = item.getElementsByTagName('pubDate')[0] || item.getElementsByTagName('updated')[0] || item.getElementsByTagName('published')[0] || item.getElementsByTagName('dc:date')[0];
         const parsedTimestamp = dateNode ? Date.parse(dateNode.textContent.trim()) : NaN;
+        const imageCandidates = extractImageCandidatesFromNode(item, feedUrl);
         return {
           title,
           link,
           timestamp: Number.isFinite(parsedTimestamp) ? parsedTimestamp : 0,
           sourceName: channelTitle,
-          imgUrl: extractImageFromNode(item, feedUrl)
+          imgUrl: imageCandidates[0] || '',
+          imageCandidates
         };
       });
       return { sourceName: channelTitle, articles };
     }
 
+    function extractImageCandidatesFromRss2JsonItem(item, baseUrl) {
+      const candidates = [];
+      const addCandidate = value => {
+        if (!value) return;
+        const absolute = absoluteUrl(value, baseUrl);
+        if (absolute && !candidates.includes(absolute)) candidates.push(absolute);
+      };
+
+      addCandidate(item.thumbnail);
+      addCandidate(item.image);
+      addCandidate(item.enclosure?.link);
+      addCandidate(item.enclosure?.url);
+
+      const html = item.content || item.description || '';
+      if (html) {
+        try {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          doc.querySelectorAll('img[src], source[srcset]').forEach(node => {
+            const src = node.getAttribute('src');
+            if (src) addCandidate(src);
+            const srcset = node.getAttribute('srcset');
+            if (srcset) {
+              const first = srcset.split(',')[0]?.trim().split(/\s+/)[0];
+              addCandidate(first);
+            }
+          });
+        } catch (err) {}
+      }
+      return candidates;
+    }
+
     function normalizeRss2Json(data, rawUrl) {
       const sourceName = data.feed?.title || new URL(rawUrl).hostname.replace(/^www\./, '');
-      const articles = (data.items || []).slice(0, MAX_ITEMS_PER_SOURCE).map(item => ({
-        title: (item.title || 'Untitled Article').trim(),
-        link: absoluteUrl(item.link || '#', rawUrl),
-        timestamp: Number.isFinite(Date.parse(item.pubDate || item.isoDate || '')) ? Date.parse(item.pubDate || item.isoDate) : 0,
-        sourceName,
-        imgUrl: absoluteUrl(item.thumbnail || item.enclosure?.link || '', rawUrl)
-      }));
+      const articles = (data.items || []).slice(0, MAX_ITEMS_PER_SOURCE).map(item => {
+        const imageCandidates = extractImageCandidatesFromRss2JsonItem(item, rawUrl);
+        return {
+          title: (item.title || 'Untitled Article').trim(),
+          link: absoluteUrl(item.link || '#', rawUrl),
+          timestamp: Number.isFinite(Date.parse(item.pubDate || item.isoDate || '')) ? Date.parse(item.pubDate || item.isoDate) : 0,
+          sourceName,
+          imgUrl: imageCandidates[0] || '',
+          imageCandidates
+        };
+      });
       return { sourceName, articles };
     }
 
-    async function fetchOneFeed(rawUrl) {
+        async function fetchOneFeed(rawUrl) {
       const candidates = resolveFeedCandidates(rawUrl);
       if (!candidates.length) throw new Error('Invalid feed/site URL');
       const fallbackName = (() => { try { return new URL(rawUrl).hostname.replace(/^www\./, ''); } catch (e) { return rawUrl; } })();
@@ -1700,18 +1765,35 @@
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
 
-      if (art.imgUrl && /^https?:\/\//i.test(art.imgUrl)) {
+      const imageCandidates = Array.isArray(art.imageCandidates) && art.imageCandidates.length
+        ? art.imageCandidates.slice()
+        : (art.imgUrl ? [art.imgUrl] : []);
+      if (imageCandidates.length) {
         const img = document.createElement('img');
         img.className = 'rss-image';
-        img.src = art.imgUrl;
         img.alt = '';
         img.loading = 'lazy';
         img.referrerPolicy = 'no-referrer';
-        img.addEventListener('error', () => img.remove());
+        let candidateIndex = 0;
+        const tryNextImage = () => {
+          while (candidateIndex < imageCandidates.length && !/^https?:\/\//i.test(imageCandidates[candidateIndex])) candidateIndex++;
+          if (candidateIndex >= imageCandidates.length) {
+            img.remove();
+            const fallback = document.createElement('div');
+            fallback.className = 'rss-image';
+            fallback.setAttribute('aria-hidden', 'true');
+            card.insertBefore(fallback, card.firstChild);
+            return;
+          }
+          img.src = imageCandidates[candidateIndex++];
+        };
+        img.addEventListener('error', tryNextImage);
         card.appendChild(img);
+        tryNextImage();
       } else {
         const placeholder = document.createElement('div');
         placeholder.className = 'rss-image';
+        placeholder.setAttribute('aria-hidden', 'true');
         card.appendChild(placeholder);
       }
 
