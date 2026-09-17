@@ -1300,6 +1300,41 @@
       setTimeout(() => document.getElementById('dial-modal').classList.add('show'), 10);
     }
 
+    function openAddServiceModal() {
+      const nameEl = document.getElementById('srv-name');
+      const descEl = document.getElementById('srv-desc');
+      const urlEl = document.getElementById('srv-url');
+      const healthEl = document.getElementById('srv-health-url');
+
+      if (nameEl) nameEl.value = '';
+      if (descEl) descEl.value = '';
+      if (urlEl) urlEl.value = '';
+      if (healthEl) healthEl.value = '';
+
+      const modal = document.getElementById('service-modal');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      requestAnimationFrame(() => modal.classList.add('show'));
+      setTimeout(() => nameEl?.focus(), 30);
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.remove('show');
+      setTimeout(() => {
+        if (!modal.classList.contains('show')) modal.style.display = 'none';
+      }, 300);
+    }
+
+    // Close a modal when clicking its backdrop.
+    document.addEventListener('click', (event) => {
+      if (!(event.target instanceof HTMLElement)) return;
+      const modal = event.target.closest('.modal');
+      if (!modal || event.target !== modal) return;
+      closeModal(modal.id);
+    });
+
     function saveNewDial() {
       let name = document.getElementById('dial-title').value.trim(); let url = document.getElementById('dial-url').value.trim();
       let folder = document.getElementById('dial-folder').value.trim(); let img = document.getElementById('dial-img').value.trim();
