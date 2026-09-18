@@ -360,73 +360,174 @@
     @media (max-width: 1100px) and (min-width: 769px) {
     }
 
-    /* Mobile Optimizations */
+    /* Mobile: focused browser start-page experience */
     @media (max-width: 768px) {
       body { padding: 8px; }
-      .top-widget-container { position: relative; top: 0; right: auto; left: 0; width: 100%; margin-bottom: 12px; align-items: stretch; }
-      .top-nav-bar { justify-content: space-between; padding: 10px; flex-wrap: wrap; width: 100%; gap: 8px; }
-      .widget-toggles { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; justify-content: stretch; width: 100%; }
-      .widget-toggles .nav-btn { font-size: 11px; padding: 8px 8px; min-height: 38px; }
-      .top-nav-bar > div:last-child { width: 100%; justify-content: space-between; margin-top: 0; margin-left: 0 !important; gap: 6px; }
-      #live-clock { flex: 1; text-align: center; margin-right: 0 !important; min-height: 38px; display: flex; align-items: center; justify-content: center; }
-      .top-nav-bar > div:last-child .nav-btn { min-height: 38px; }
 
-      /* Dropdowns remain usable on mobile instead of being hidden. */
+      /* Keep only the essentials in the mobile top bar:
+         Bookmarks + clock + Settings. Google Calendar remains a desktop feature;
+         the clock's built-in calendar stays available. */
+      .top-widget-container {
+        position: relative;
+        top: 0;
+        right: auto;
+        left: 0;
+        width: 100%;
+        margin-bottom: 12px;
+        align-items: stretch;
+      }
+      .top-nav-bar {
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 8px;
+        flex-wrap: nowrap;
+        width: 100%;
+        gap: 6px;
+      }
+      .widget-toggles {
+        display: flex !important;
+        align-items: center;
+        gap: 6px;
+        width: auto;
+        flex: 0 0 auto;
+      }
+      #nav-btn-calendar { display: none !important; }
+      .widget-toggles .nav-btn {
+        font-size: 10px;
+        padding: 6px 9px;
+        min-height: 34px;
+        white-space: nowrap;
+      }
+      .top-nav-bar > div:last-child {
+        width: auto;
+        margin-top: 0;
+        margin-left: auto !important;
+        gap: 5px;
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+      }
+      #live-clock {
+        flex: 0 0 auto;
+        text-align: center;
+        margin-right: 0 !important;
+        min-height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 3px;
+        font-size: 12px !important;
+      }
+      .top-nav-bar > div:last-child .nav-btn {
+        min-height: 34px;
+        padding: 6px 9px;
+        font-size: 10px;
+      }
+
+      /* Mobile dropdowns: full-width, touch-friendly, but not part of the layout bar. */
       .dropdown-panel, .dropdown-panel.open {
         position: fixed !important;
         left: 8px !important;
         right: 8px !important;
-        top: 72px !important;
+        top: 56px !important;
         width: auto !important;
         min-width: 0 !important;
         max-width: none !important;
-        max-height: calc(100vh - 88px) !important;
+        max-height: calc(100vh - 72px) !important;
         z-index: 500 !important;
       }
       .dropdown-panel { display: flex !important; opacity: 0; pointer-events: none; }
       .dropdown-panel.open { opacity: 1; pointer-events: auto; }
-      .dropdown-panel { padding-left: 14px; padding-right: 14px; }
+      .dropdown-panel { padding-left: 12px; padding-right: 12px; }
       .dropdown-panel.open { padding: 14px; }
+      /* Google Calendar is intentionally hidden from the mobile navigation. */
+      #gcal-dropdown { display: none !important; }
 
-      .search-box-wrapper { position: relative; top: 0; left: 0; transform: none; width: 100%; max-width: 100%; margin-bottom: 16px; }
+      .search-box-wrapper {
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 16px;
+      }
       .search-box { flex-wrap: wrap; gap: 7px; }
-      .search-box select { flex: 0 0 100%; width: 100%; }
-      .search-box input { flex: 1 1 100%; min-width: 0; width: 100%; }
+      .search-box select { flex: 0 0 100%; width: 100%; min-height: 40px; }
+      .search-box input { flex: 1 1 100%; min-width: 0; width: 100%; min-height: 42px; }
       .hero-container { margin-top: 0; gap: 16px; }
-      #section-dials, #section-services, #section-news { position: relative; top: 0; left: 0; transform: none; margin-top: 0; }
 
-      /* Keep tiles touch-friendly without making the page feel cramped. */
-      .speed-dial-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-      #section-dials.grid-fixed .speed-dial-grid { width: 100%; max-width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .dial-card, .add-dial-tile, .dial-folder-tile { padding: 10px 4px; gap: 6px; aspect-ratio: var(--card-aspect); }
-      .service-card { padding: 12px; gap: 6px; aspect-ratio: auto; min-height: 82px; }
-      .dial-card img, .service-card img, .folder-preview-grid img { width: 28px; height: 28px; }
+      /* Mobile only exposes the essentials: Search, Speed Dials, Bookmarks, Clock, Settings. */
+      #section-dials {
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        margin-top: 0;
+      }
+      #section-services, #section-news {
+        display: none !important;
+      }
+
+      /* Tile size now follows the same Tile Size Scale setting used on desktop.
+         The grid uses fixed-width tracks so Micro/Compact/Standard/Large actually
+         change the tile size instead of stretching every tile to fill the phone. */
+      .speed-dial-grid {
+        width: 100%;
+        max-width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(var(--card-min-width), var(--card-min-width)));
+        justify-content: center;
+        gap: 10px;
+      }
+      #section-dials.grid-fixed .speed-dial-grid {
+        width: 100%;
+        max-width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(var(--card-min-width), var(--card-min-width)));
+        justify-content: center;
+      }
+      .dial-card, .add-dial-tile, .dial-folder-tile {
+        padding: 10px 4px;
+        gap: 6px;
+        aspect-ratio: var(--card-aspect);
+      }
+      .dial-card img {
+        width: var(--dial-icon-size, 28px);
+        height: var(--dial-icon-size, 28px);
+      }
+      .folder-preview-grid img {
+        width: 100%;
+        height: 100%;
+      }
       .dial-card span, .dial-folder-tile span { display: none; }
-      .service-card .name { display: -webkit-box; }
-      .service-card .desc { display: none; }
-      .add-dial-tile span:first-child, .add-service-tile span:first-child { font-size: 22px; }
-      .add-dial-tile span:last-child, .add-service-tile span:last-child { font-size: 10px; }
+      .add-dial-tile span:first-child { font-size: 22px; }
+      .add-dial-tile span:last-child { font-size: 10px; }
 
       /* Touch users do not have hover, so edit/delete controls stay visible in edit mode. */
       body.edit-mode .draggable-wrapper .card-delete-btn,
       body.edit-mode .draggable-wrapper .card-edit-btn { display: flex; }
       body.edit-mode .layout-drag-handle { min-height: 34px; padding: 7px 10px; font-size: 12px; }
 
-      #section-news { margin-top: 20px; }
-      .rss-carousel { grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 6px; }
-      .rss-carousel-arrow { width: 34px; height: 34px; font-size: 20px; }
-      .rss-carousel-page { grid-template-columns: 1fr !important; gap: 12px; }
-      .rss-item { min-height: 0; }
-      .rss-image { height: 180px; }
-      .rss-title { font-size: 0.95rem; }
-      .rss-carousel-viewport { touch-action: pan-y; }
-
-      .modal-content { width: calc(100% - 20px); max-width: none; max-height: 86vh; padding: 18px; gap: 14px; -webkit-overflow-scrolling: touch; }
+      /* Mobile modals stay usable for adding/editing dials and bookmarks/settings. */
+      .modal-content {
+        width: calc(100% - 20px);
+        max-width: none;
+        max-height: 86vh;
+        padding: 18px;
+        gap: 14px;
+        -webkit-overflow-scrolling: touch;
+      }
       .modal-footer { flex-wrap: wrap; gap: 8px; }
       .modal-footer button { flex: 1 1 120px; min-height: 42px; }
       .form-group input, .form-group select { min-height: 42px; }
       .badge-btn, .btn-primary, .btn-secondary { min-height: 40px; }
+    }
+
+    @media (max-width: 380px) {
+      .top-nav-bar { padding-left: 6px; padding-right: 6px; gap: 4px; }
+      .widget-toggles .nav-btn,
+      .top-nav-bar > div:last-child .nav-btn { padding-left: 7px; padding-right: 7px; font-size: 9px; }
+      #live-clock { font-size: 11px !important; }
+      .speed-dial-grid { gap: 8px; }
     }
 
     @media (max-width: 520px) {
@@ -811,6 +912,8 @@
       const opacity = localStorage.getItem('dash_opacity') || '55';
       const minWidth = localStorage.getItem('dash_min_width') || '130px';
       const gridCols = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
+      const numericMinWidth = parseInt(minWidth, 10) || 130;
+      const iconSize = Math.max(24, Math.min(40, Math.round(numericMinWidth * 0.23)));
       const fixedMatch = gridCols.match(/^repeat\((\d+),/);
       const dialSection = document.getElementById('section-dials');
       if (fixedMatch) {
@@ -830,6 +933,7 @@
       document.documentElement.style.setProperty('--card-clip', clip);
       document.documentElement.style.setProperty('--card-aspect', aspect);
       document.documentElement.style.setProperty('--card-min-width', minWidth);
+      document.documentElement.style.setProperty('--dial-icon-size', `${iconSize}px`);
       document.documentElement.style.setProperty('--dial-grid-cols', gridCols);
     }
     applyGlassPreferences();
