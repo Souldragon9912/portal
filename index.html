@@ -1055,7 +1055,15 @@
       const now = new Date();
       const el = document.getElementById('live-clock');
       if (!el) return;
-      const prefs = (typeof state !== 'undefined' && state.clockPrefs) ? state.clockPrefs : { format:'12', seconds:false, date:false, day:false };
+      // updateClock() runs once during initial script setup, before the main
+      // state object is initialized. A direct `typeof state` check is unsafe
+      // here because `state` is a lexical binding in its temporal dead zone.
+      let prefs = { format:'12', seconds:false, date:false, day:false };
+      try {
+        if (state && state.clockPrefs) prefs = state.clockPrefs;
+      } catch (e) {
+        // Keep the default clock preferences until state is initialized.
+      }
       const opts = { hour: '2-digit', minute: '2-digit', hour12: prefs.format !== '24' };
       if (prefs.seconds) opts.second = '2-digit';
       let text = now.toLocaleTimeString([], opts);
@@ -1105,8 +1113,9 @@
       document.documentElement.style.setProperty('--card-min-width', minWidth);
       document.documentElement.style.setProperty('--dial-icon-size', `${iconSize}px`);
       document.documentElement.style.setProperty('--dial-grid-cols', gridCols);
-      if (typeof state !== 'undefined') applyTheme();
     }
+    // Apply basic glass/dial sizing before state exists; the persisted theme is
+    // applied later in the load handler, after the state object is initialized.
     applyGlassPreferences();
 
     // ===== MOVABLE WIDGET & SECTION POSITIONS =====
@@ -3419,6 +3428,8 @@
 
     // ===== SYSTEM BOOT SEQUENCE =====
     window.addEventListener('load', () => {
+      applyGlassPreferences();
+      applyTheme();
       document.body.style.backgroundImage = `url('${state.wallpaper}')`;
       applyNewsLayout();
       // One-time migration: the repaired control bar now defaults to the top-right anchor.
