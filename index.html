@@ -143,7 +143,7 @@
 
     /* --- Movable Central Search Bar --- */
     .hero-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 28px; margin-top: 80px; }
-    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: 680px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 60; transition: border 0.3s, box-shadow 0.2s; }
+    .search-box-wrapper { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); padding: 2px; border-radius: 16px; overflow: hidden; display: flex; width: 100%; max-width: var(--search-width, 680px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); animation: fadeInSlide 0.6s ease-out; z-index: 60; transition: border 0.3s, box-shadow 0.2s; }
     .search-box-wrapper.edit-unlocked { cursor: grab; border: 2px dashed var(--accent); }
     .search-box-wrapper.edit-unlocked:active { cursor: grabbing; }
     .search-box-wrapper::before { content: ""; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%; background: conic-gradient(var(--se-c1), var(--se-c2), var(--se-c3), var(--se-c4), var(--se-c1)); transform: translate(-50%, -50%) rotate(0deg); animation: spin-border 4s linear infinite; z-index: 0; }
@@ -214,7 +214,7 @@
       width: 100%; pointer-events: auto; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); 
     }
     
-    .dial-card { padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: var(--card-aspect); }
+    .dial-card { --dial-icon-size: 32px; background: var(--dial-custom-bg, var(--card-bg)); padding: 18px 12px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 500; aspect-ratio: var(--card-aspect); }
     .service-card { padding: 14px 16px; flex-direction: column; justify-content: center; gap: 6px; border-radius: 12px; clip-path: none; aspect-ratio: auto; }
     .add-dial-tile { flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: var(--text-muted); border: 2px dashed rgba(255, 255, 255, 0.2); background: rgba(22, 27, 34, 0.25); aspect-ratio: var(--card-aspect); clip-path: var(--card-clip); border-radius: var(--card-radius); }
     .add-service-tile { clip-path: none; border-radius: 12px; aspect-ratio: auto; min-height: 70px; flex-direction: row; justify-content: center; gap: 8px; }
@@ -223,7 +223,7 @@
       background: rgba(33, 38, 45, 0.85); transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); 
     }
     
-    .dial-card img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
+    .dial-card img { width: var(--dial-icon-size, 32px); height: var(--dial-icon-size, 32px); border-radius: 6px; object-fit: cover; }
     .dial-card span { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-align: center; padding: 0 4px; pointer-events: none; }
     
     .service-card .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #fbbc05; box-shadow: 0 0 6px #fbbc05; transition: background 0.3s, box-shadow 0.3s; }
@@ -357,6 +357,60 @@
     input:checked + .slider { background-color: var(--accent); }
     input:checked + .slider:before { transform: translateX(18px); }
 
+
+    /* --- Optional Product Features --- */
+    :root { --search-width: 680px; --mobile-dial-columns: 3; }
+    .hide-search-engine #engine-select { display: none !important; }
+    .hide-search-engine .search-box { gap: 0; }
+    .minimal-mode #section-services,
+    .minimal-mode #section-news,
+    .minimal-mode #nav-btn-calendar,
+    .minimal-mode #nav-btn-bookmarks { display: none !important; }
+    .minimal-mode #section-dials { margin-top: 20px; }
+
+    .undo-toast {
+      position: fixed; left: 24px; bottom: 24px; z-index: 700;
+      display: none; align-items: center; gap: 10px; padding: 10px 12px;
+      background: rgba(18,22,28,0.94); border: 1px solid var(--border-glass);
+      border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); backdrop-filter: blur(14px);
+    }
+    .undo-toast.show { display: flex; animation: fadeInSlide .25s ease-out; }
+    .undo-toast span { color: var(--text-muted); font-size: 11px; }
+    .undo-toast button { min-height: 32px !important; padding: 5px 10px !important; }
+
+    .feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .feature-card { background: rgba(0,0,0,0.18); border: 1px solid var(--border-glass); border-radius: 12px; padding: 12px; }
+    .feature-card > label:first-child { color: var(--text-main); font-weight: 600; font-size: 12px; margin-bottom: 7px; display: block; }
+    .feature-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:7px; }
+    .feature-row > label { font-size:11px; color:var(--text-muted); flex:1; }
+    .feature-row input, .feature-row select { min-width:0; flex: 0 1 180px; }
+    .feature-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .feature-actions .badge-btn { flex:1 1 120px; }
+    .profile-controls { display:grid; grid-template-columns:1fr auto auto; gap:6px; }
+    .folder-style-preview { display:flex; align-items:center; gap:8px; margin-top:8px; }
+    .folder-style-swatch { width:18px; height:18px; border-radius:6px; border:1px solid rgba(255,255,255,0.25); }
+    .folder-edit-btn { position:absolute; top:6px; left:6px; z-index:5; width:24px; height:24px; display:none; align-items:center; justify-content:center; border:none; border-radius:50%; background:rgba(0,0,0,0.72); color:#fff; cursor:pointer; }
+    body.edit-mode .folder-edit-btn { display:flex; }
+    .dial-folder-tile { border-color: color-mix(in srgb, var(--folder-accent, var(--border-glass)) 48%, rgba(255,255,255,0.18)); }
+    .dial-folder-tile .folder-icon { position:relative; z-index:3; font-size:13px; margin-right:3px; background:rgba(0,0,0,0.58); border-radius:8px; padding:2px 5px; }
+    .folder-preview-grid.stack img:nth-child(1) { transform:translate(6px,6px) scale(.94); }
+    .folder-preview-grid.stack img:nth-child(2) { transform:translate(2px,2px) scale(.97); }
+    .folder-preview-grid.strip { grid-template-columns:repeat(4,1fr); grid-template-rows:1fr; inset:12px 8px 36px; }
+    .folder-preview-grid.strip img { border-radius:8px; }
+
+    .backup-status { font-size:10px; color:var(--text-muted); margin-top:7px; }
+    .se-order-btn { min-width:28px; min-height:26px; padding:2px 6px; border:1px solid var(--border-glass); background:rgba(255,255,255,.04); color:var(--text-main); border-radius:6px; cursor:pointer; font-size:11px; }
+    .se-order-btn:disabled { opacity:.3; cursor:default; }
+    .shortcut-list { display:grid; grid-template-columns:1fr auto; gap:6px 12px; font-size:11px; color:var(--text-muted); }
+    .shortcut-list code { color:var(--accent); background:rgba(88,166,255,.08); border:1px solid rgba(88,166,255,.16); border-radius:6px; padding:2px 6px; }
+
+    @media (max-width: 768px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .undo-toast { left: 10px; right: 10px; bottom: 10px; justify-content:space-between; }
+      .profile-controls { grid-template-columns: 1fr 1fr; }
+      .profile-controls select, .profile-controls input { grid-column:1 / -1; }
+    }
+
     @media (max-width: 1100px) and (min-width: 769px) {
     }
 
@@ -472,17 +526,17 @@
       /* Tile size now follows the same Tile Size Scale setting used on desktop.
          The grid uses fixed-width tracks so Micro/Compact/Standard/Large actually
          change the tile size instead of stretching every tile to fill the phone. */
-      .speed-dial-grid {
+       .speed-dial-grid {
         width: 100%;
         max-width: 100%;
-        grid-template-columns: repeat(auto-fit, minmax(var(--card-min-width), var(--card-min-width)));
+        grid-template-columns: repeat(var(--mobile-dial-columns, 3), minmax(0, 1fr));
         justify-content: center;
         gap: 10px;
       }
-      #section-dials.grid-fixed .speed-dial-grid {
+      #section-dials.grid-fixed  .speed-dial-grid {
         width: 100%;
         max-width: 100%;
-        grid-template-columns: repeat(auto-fit, minmax(var(--card-min-width), var(--card-min-width)));
+        grid-template-columns: repeat(var(--mobile-dial-columns, 3), minmax(0, 1fr));
         justify-content: center;
       }
       .dial-card, .add-dial-tile, .dial-folder-tile {
@@ -531,7 +585,7 @@
     }
 
     @media (max-width: 520px) {
-      .speed-dial-grid, #section-dials.grid-fixed .speed-dial-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .speed-dial-grid, #section-dials.grid-fixed .speed-dial-grid { grid-template-columns: repeat(min(2, var(--mobile-dial-columns, 3)), minmax(0, 1fr)); }
       .widget-toggles { grid-template-columns: 1fr 1fr; }
       .rss-carousel { grid-template-columns: 30px minmax(0, 1fr) 30px; }
       .rss-carousel-arrow { width: 30px; height: 30px; font-size: 18px; }
@@ -732,6 +786,97 @@
         <div id="rssManagerGrid" class="rss-manager-grid"></div>
       </div>
 
+
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Personalization & Power Features</label>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <label>Dashboard Profile</label>
+            <div class="profile-controls">
+              <select id="settings-profile-select"></select>
+              <button class="badge-btn" type="button" onclick="createProfileFromSettings()">New Profile</button>
+              <button class="badge-btn" type="button" onclick="saveCurrentProfile()">Save Here</button>
+            </div>
+            <div class="feature-row"><label>Profile actions</label><button class="badge-btn" type="button" onclick="deleteCurrentProfile()">Delete</button></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Quick Layout Preset</label>
+            <div class="feature-row"><label>Choose a starting arrangement</label><select id="settings-layout-preset"><option value="">Choose preset…</option><option value="compact">Compact</option><option value="balanced">Balanced</option><option value="large">Large Tiles</option><option value="minimal">Minimal</option><option value="news-focus">News Focus</option></select></div>
+            <div class="feature-actions"><button class="badge-btn" type="button" onclick="applySelectedLayoutPreset()">Apply Preset</button></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Theme</label>
+            <div class="feature-row"><label>Interface theme</label><select id="settings-theme"><option value="midnight">Midnight</option><option value="azure">Azure</option><option value="carbon">Carbon</option><option value="frost">Frost</option><option value="solarized">Solarized</option><option value="oled">OLED Black</option></select></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Search Bar</label>
+            <div class="feature-row"><label>Width</label><select id="settings-search-width"><option value="520px">Compact</option><option value="680px">Standard</option><option value="860px">Wide</option><option value="1100px">Extra Wide</option></select></div>
+            <div class="feature-row"><label>Show engine selector</label><input type="checkbox" id="settings-show-engine"></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Clock</label>
+            <div class="feature-row"><label>Format</label><select id="settings-clock-format"><option value="12">12-hour</option><option value="24">24-hour</option></select></div>
+            <div class="feature-row"><label>Show seconds</label><input type="checkbox" id="settings-clock-seconds"></div>
+            <div class="feature-row"><label>Show date</label><input type="checkbox" id="settings-clock-date"></div>
+            <div class="feature-row"><label>Show day</label><input type="checkbox" id="settings-clock-day"></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Mobile Speed Dials</label>
+            <div class="feature-row"><label>Columns</label><select id="settings-mobile-columns"><option value="2">2 Columns</option><option value="3">3 Columns</option><option value="4">4 Columns</option></select></div>
+          </div>
+
+          <div class="feature-card">
+            <label>News</label>
+            <div class="feature-row"><label>Auto refresh</label><select id="settings-news-refresh"><option value="0">Manual</option><option value="15">Every 15 min</option><option value="30">Every 30 min</option><option value="60">Every hour</option></select></div>
+            <div class="feature-row"><label>Favorites only</label><input type="checkbox" id="settings-news-favorites-only"></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Folder Appearance</label>
+            <div class="feature-row"><label>Folder</label><select id="settings-folder-name"></select></div>
+            <div class="feature-row"><label>Icon</label><input type="text" id="settings-folder-icon" maxlength="4" value="📁" style="max-width:70px;"></div>
+            <div class="feature-row"><label>Accent</label><input type="color" id="settings-folder-color" value="#58a6ff" style="max-width:70px;"></div>
+            <div class="feature-row"><label>Preview count</label><select id="settings-folder-count"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option></select></div>
+            <div class="feature-row"><label>Preview style</label><select id="settings-folder-mode"><option value="grid">Grid</option><option value="stack">Stack</option><option value="strip">Strip</option></select></div>
+            <div class="feature-actions"><button class="badge-btn" type="button" onclick="saveFolderStyleFromSettings()">Save Folder Style</button></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Keyboard Shortcuts</label>
+            <div class="feature-row"><label>Enable shortcuts</label><input type="checkbox" id="settings-shortcuts-enabled"></div>
+            <div class="shortcut-list" style="margin-top:8px;"><span>Focus search</span><code>Ctrl/⌘ K</code><span>Bookmarks</span><code>Ctrl/⌘ Shift B</code><span>Settings</span><code>Ctrl/⌘ Shift S</code><span>Speed Dial 1–9</span><code>Alt + 1…9</code></div>
+          </div>
+
+          <div class="feature-card">
+            <label>Local Browser Backups</label>
+            <div class="feature-row"><label>Automatic snapshot</label><select id="settings-backup-interval"><option value="0">Off</option><option value="60">Hourly</option><option value="360">Every 6 hours</option><option value="1440">Daily</option><option value="10080">Weekly</option></select></div>
+            <div class="feature-row"><label>Keep snapshots</label><select id="settings-backup-retention"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select></div>
+            <div class="feature-actions"><button class="badge-btn" type="button" onclick="createLocalBackupNow()">Backup Now</button><button class="badge-btn" type="button" onclick="restoreLatestLocalBackup()">Restore Latest</button></div>
+            <div id="backup-status" class="backup-status">No local browser snapshots yet.</div>
+          </div>
+
+          <div class="feature-card">
+            <label>Minimal Mode</label>
+            <div class="feature-row"><label>Search + Speed Dials + Clock + Settings</label><input type="checkbox" id="settings-minimal-mode"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Reset Individual Layouts</label>
+        <div class="feature-actions">
+          <button class="badge-btn" type="button" onclick="resetSectionLayout('dials')">Reset Speed Dials</button>
+          <button class="badge-btn" type="button" onclick="resetSectionLayout('news')">Reset News</button>
+          <button class="badge-btn" type="button" onclick="resetSectionLayout('positions')">Reset Section Positions</button>
+          <button class="badge-btn" type="button" onclick="resetSectionLayout('appearance')">Reset Appearance</button>
+        </div>
+      </div>
+
       <div class="form-group" style="margin-top: 10px;">
         <label>Google OAuth Client ID</label>
         <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
@@ -768,7 +913,8 @@
     </div>
   </div>
 
-  <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock Sections</button>
+  <button class="floating-lock-btn" id="floatingLockBtn" onclick="toggleEditMode()">🔒 Lock Layout</button>
+  <div class="undo-toast" id="undoToast"><span id="undoToastText">Change saved.</span><button class="badge-btn" type="button" onclick="undoLastChange()">↶ Undo</button></div>
 
   <main class="hero-container">
     <div class="search-box-wrapper" id="searchWidget">
@@ -840,6 +986,12 @@
         <input type="text" id="dial-img" placeholder="https://..." />
       </div>
 
+
+      <div class="feature-grid" style="margin-top:4px;">
+        <div class="feature-card"><label>Open behavior</label><div class="feature-row"><label>Open in new tab</label><input type="checkbox" id="dial-new-tab" checked></div></div>
+        <div class="feature-card"><label>Tile appearance</label><div class="feature-row"><label>Custom background</label><input type="color" id="dial-bg" value="#161b22" style="max-width:70px;"></div><div class="feature-row"><label>Icon size</label><input type="number" id="dial-icon-size" min="16" max="64" value="32" style="max-width:80px;"></div></div>
+      </div>
+
       <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('dial-modal')">Cancel</button><button class="btn-primary" onclick="saveNewDial()">Add Link</button></div>
     </div>
   </div>
@@ -869,6 +1021,12 @@
         <input type="text" id="edit-dial-img" placeholder="https://..." />
       </div>
 
+
+      <div class="feature-grid" style="margin-top:4px;">
+        <div class="feature-card"><label>Open behavior</label><div class="feature-row"><label>Open in new tab</label><input type="checkbox" id="edit-dial-new-tab" checked></div></div>
+        <div class="feature-card"><label>Tile appearance</label><div class="feature-row"><label>Custom background</label><input type="color" id="edit-dial-bg" value="#161b22" style="max-width:70px;"></div><div class="feature-row"><label>Icon size</label><input type="number" id="edit-dial-icon-size" min="16" max="64" value="32" style="max-width:80px;"></div></div>
+      </div>
+
       <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('edit-dial-modal')">Cancel</button><button class="btn-primary" onclick="saveEditedDial()">Save Changes</button></div>
     </div>
   </div>
@@ -895,7 +1053,19 @@
     // ===== LIVE CLOCK =====
     function updateClock() {
       const now = new Date();
-      document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const el = document.getElementById('live-clock');
+      if (!el) return;
+      const prefs = (typeof state !== 'undefined' && state.clockPrefs) ? state.clockPrefs : { format:'12', seconds:false, date:false, day:false };
+      const opts = { hour: '2-digit', minute: '2-digit', hour12: prefs.format !== '24' };
+      if (prefs.seconds) opts.second = '2-digit';
+      let text = now.toLocaleTimeString([], opts);
+      if (prefs.day || prefs.date) {
+        const dateOpts = {};
+        if (prefs.day) dateOpts.weekday = 'short';
+        if (prefs.date) { dateOpts.month = 'short'; dateOpts.day = 'numeric'; }
+        text += ' · ' + now.toLocaleDateString([], dateOpts);
+      }
+      el.innerText = text;
     }
     setInterval(updateClock, 1000); updateClock();
 
@@ -935,6 +1105,7 @@
       document.documentElement.style.setProperty('--card-min-width', minWidth);
       document.documentElement.style.setProperty('--dial-icon-size', `${iconSize}px`);
       document.documentElement.style.setProperty('--dial-grid-cols', gridCols);
+      if (typeof state !== 'undefined') applyTheme();
     }
     applyGlassPreferences();
 
@@ -1188,6 +1359,20 @@
           return defaults;
         }
       })()
+,
+      theme: localStorage.getItem('dash_theme') || 'midnight',
+      searchWidth: localStorage.getItem('dash_search_width') || '680px',
+      showEngineSelector: localStorage.getItem('dash_show_engine') !== 'false',
+      clockPrefs: (() => { try { return { format: '12', seconds: false, date: false, day: false, ...(JSON.parse(localStorage.getItem('dash_clock_prefs') || '{}') || {}) }; } catch(e) { return { format:'12', seconds:false, date:false, day:false }; } })(),
+      mobileColumns: parseInt(localStorage.getItem('dash_mobile_columns') || '3', 10) || 3,
+      newsAutoRefresh: parseInt(localStorage.getItem('dash_news_refresh') || '0', 10) || 0,
+      newsFavoritesOnly: localStorage.getItem('dash_news_favorites_only') === 'true',
+      favoriteFeeds: (() => { try { return JSON.parse(localStorage.getItem('dash_news_favorites') || '[]') || []; } catch(e) { return []; } })(),
+      shortcutsEnabled: localStorage.getItem('dash_shortcuts_enabled') !== 'false',
+      backupInterval: parseInt(localStorage.getItem('dash_backup_interval') || '0', 10) || 0,
+      backupRetention: parseInt(localStorage.getItem('dash_backup_retention') || '5', 10) || 5,
+      minimalMode: localStorage.getItem('dash_minimal_mode') === 'true',
+      folderStyles: (() => { try { return JSON.parse(localStorage.getItem('dash_folder_styles') || '{}') || {}; } catch(e) { return {}; } })()
     };
     let tokenClient = null;
 
@@ -1195,6 +1380,211 @@
     let accordionSortable = null;
     let accordionRenderFrame = null;
     let servicesSortable = null;
+
+
+    // ===== PRODUCT FEATURES ENGINE =====
+    const THEME_PRESETS = {
+      midnight: { bg:'#0d1117', glass:'rgba(22,27,34,0.75)', card:'rgba(22,27,34,0.55)', text:'#f0f6fc', muted:'#8b949e', accent:'#58a6ff' },
+      azure: { bg:'#071421', glass:'rgba(9,29,46,0.78)', card:'rgba(12,40,61,0.58)', text:'#ecf7ff', muted:'#8db2c9', accent:'#45b6ff' },
+      carbon: { bg:'#101010', glass:'rgba(28,28,28,0.78)', card:'rgba(20,20,20,0.62)', text:'#f5f5f5', muted:'#999999', accent:'#d1d1d1' },
+      frost: { bg:'#101722', glass:'rgba(52,66,82,0.70)', card:'rgba(42,55,70,0.60)', text:'#eef7ff', muted:'#a6b4c4', accent:'#8fd3ff' },
+      solarized: { bg:'#002b36', glass:'rgba(7,54,66,0.82)', card:'rgba(17,61,70,0.62)', text:'#eee8d5', muted:'#93a1a1', accent:'#b58900' },
+      oled: { bg:'#000000', glass:'rgba(8,8,8,0.94)', card:'rgba(4,4,4,0.88)', text:'#ffffff', muted:'#888888', accent:'#58a6ff' }
+    };
+    const LAYOUT_KEYS = ['dash_pos_topNavWidget','dash_pos_searchWidget','dash_pos_section_dials','dash_pos_section_services','dash_pos_section_news'];
+    const CONFIG_KEYS = [
+      'dash_wallpaper','dash_google_client_id','dash_dials','dash_dial_layout','dash_bookmarks','dash_services','dash_rss_feeds','dash_modules',
+      'dash_search_engines','dash_active_engine','dash_news_layout','dash_blur','dash_opacity','dash_shape','dash_min_width','dash_grid_cols',
+      'dash_theme','dash_search_width','dash_show_engine','dash_clock_prefs','dash_mobile_columns','dash_news_refresh','dash_news_favorites_only',
+      'dash_news_favorites','dash_shortcuts_enabled','dash_backup_interval','dash_backup_retention','dash_minimal_mode','dash_folder_styles',...LAYOUT_KEYS
+    ];
+    let undoStack = [];
+    let backupTimer = null;
+    let newsAutoRefreshTimer = null;
+
+    function snapshotConfig() {
+      const snap = {}; CONFIG_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) snap[k] = v; });
+      return { keys: snap, state: JSON.parse(JSON.stringify(state)), label: '', at: Date.now() };
+    }
+    function pushUndoSnapshot(label) {
+      try {
+        const snap = snapshotConfig(); snap.label = label || 'Change';
+        const sig = JSON.stringify(snap.keys);
+        if (undoStack.length && JSON.stringify(undoStack[undoStack.length-1].keys) === sig) return;
+        undoStack.push(snap); if (undoStack.length > 12) undoStack.shift();
+        const toast = document.getElementById('undoToast'); const text = document.getElementById('undoToastText');
+        if (text) text.textContent = `${snap.label} saved.`; if (toast) toast.classList.add('show');
+      } catch(e) {}
+    }
+    function undoLastChange() {
+      const snap = undoStack.pop(); if (!snap) return;
+      CONFIG_KEYS.forEach(k => localStorage.removeItem(k));
+      Object.entries(snap.keys).forEach(([k,v]) => localStorage.setItem(k,v));
+      location.reload();
+    }
+
+    function applyTheme() {
+      const t = THEME_PRESETS[state.theme] || THEME_PRESETS.midnight, root = document.documentElement;
+      root.style.setProperty('--page-bg', t.bg); root.style.setProperty('--bg-glass', t.glass); root.style.setProperty('--theme-card-bg', t.card);
+      root.style.setProperty('--text-main', t.text); root.style.setProperty('--text-muted', t.muted); root.style.setProperty('--accent', t.accent); root.style.setProperty('--accent-hover', t.accent);
+      document.body.style.backgroundColor = t.bg;
+      document.body.classList.toggle('minimal-mode', !!state.minimalMode);
+      document.body.classList.toggle('hide-search-engine', !state.showEngineSelector);
+      root.style.setProperty('--search-width', state.searchWidth || '680px');
+      root.style.setProperty('--mobile-dial-columns', String(Math.min(4, Math.max(2, state.mobileColumns || 3))));
+    }
+
+    function applyClockPreferences() { updateClock(); }
+
+    function scheduleNewsRefresh() {
+      if (newsAutoRefreshTimer) { clearInterval(newsAutoRefreshTimer); newsAutoRefreshTimer = null; }
+      const mins = Number(state.newsAutoRefresh || 0);
+      if (mins > 0) newsAutoRefreshTimer = setInterval(() => fetchRSS(), mins * 60000);
+    }
+
+    function scheduleBackups() {
+      if (backupTimer) { clearInterval(backupTimer); backupTimer = null; }
+      const mins = Number(state.backupInterval || 0);
+      if (mins > 0) backupTimer = setInterval(() => createLocalBackupNow(true), mins * 60000);
+      updateBackupStatus();
+    }
+
+    function getConfigPayload() {
+      const payload = { exportedAt: new Date().toISOString(), localStorage: {} };
+      CONFIG_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) payload.localStorage[k] = v; });
+      return payload;
+    }
+    function createLocalBackupNow(silent = false) {
+      const list = (() => { try { return JSON.parse(localStorage.getItem('dash_auto_backups') || '[]') || []; } catch(e) { return []; } })();
+      list.push({ at: new Date().toISOString(), payload: getConfigPayload() });
+      const max = Math.min(10, Math.max(1, Number(state.backupRetention || 5)));
+      while (list.length > max) list.shift();
+      localStorage.setItem('dash_auto_backups', JSON.stringify(list));
+      updateBackupStatus();
+      if (!silent) alert('Local browser backup created.');
+    }
+    function restoreLatestLocalBackup() {
+      const list = (() => { try { return JSON.parse(localStorage.getItem('dash_auto_backups') || '[]') || []; } catch(e) { return []; } })();
+      const latest = list[list.length-1]; if (!latest?.payload?.localStorage) return alert('No local browser backup is available.');
+      if (!confirm(`Restore the latest browser snapshot from ${new Date(latest.at).toLocaleString()}?`)) return;
+      CONFIG_KEYS.forEach(k => localStorage.removeItem(k)); Object.entries(latest.payload.localStorage).forEach(([k,v])=>localStorage.setItem(k,v)); location.reload();
+    }
+    function updateBackupStatus() {
+      const el = document.getElementById('backup-status'); if (!el) return;
+      let list=[]; try { list=JSON.parse(localStorage.getItem('dash_auto_backups')||'[]')||[]; } catch(e){}
+      el.textContent = list.length ? `${list.length} snapshot${list.length===1?'':'s'} stored · latest ${new Date(list[list.length-1].at).toLocaleString()}` : 'No local browser snapshots yet.';
+    }
+
+    function refreshProfileSelect() {
+      const sel = document.getElementById('settings-profile-select'); if (!sel) return;
+      let profiles = {}; try { profiles=JSON.parse(localStorage.getItem('dash_profiles')||'{}')||{}; } catch(e){}
+      if (!profiles.Default) { profiles.Default = getConfigPayload(); localStorage.setItem('dash_profiles', JSON.stringify(profiles)); }
+      const active = localStorage.getItem('dash_active_profile') || 'Default';
+      sel.innerHTML = Object.keys(profiles).sort().map(n=>`<option value="${escapeHTML(n)}">${escapeHTML(n)}</option>`).join('');
+      sel.value = active;
+    }
+    function saveCurrentProfile() {
+      const name = localStorage.getItem('dash_active_profile') || 'Default';
+      let profiles={}; try { profiles=JSON.parse(localStorage.getItem('dash_profiles')||'{}')||{}; } catch(e){}
+      profiles[name]=getConfigPayload(); localStorage.setItem('dash_profiles',JSON.stringify(profiles)); alert(`Profile “${name}” saved.`);
+    }
+    function createProfileFromSettings() {
+      const name = prompt('Name the new dashboard profile:', 'Gaming'); if (!name?.trim()) return;
+      let profiles={}; try { profiles=JSON.parse(localStorage.getItem('dash_profiles')||'{}')||{}; } catch(e){}
+      profiles[name.trim()] = getConfigPayload(); localStorage.setItem('dash_profiles',JSON.stringify(profiles)); localStorage.setItem('dash_active_profile',name.trim()); refreshProfileSelect();
+    }
+    function switchProfile(name) {
+      if (!name) return; let profiles={}; try { profiles=JSON.parse(localStorage.getItem('dash_profiles')||'{}')||{}; } catch(e){}
+      const payload=profiles[name]; if (!payload?.localStorage) return;
+      if ((localStorage.getItem('dash_active_profile')||'Default')===name) return;
+      saveCurrentProfile();
+      CONFIG_KEYS.forEach(k=>localStorage.removeItem(k)); Object.entries(payload.localStorage).forEach(([k,v])=>localStorage.setItem(k,v));
+      localStorage.setItem('dash_active_profile',name); location.reload();
+    }
+    function deleteCurrentProfile() {
+      const name = localStorage.getItem('dash_active_profile') || 'Default'; if (name==='Default') return alert('The Default profile cannot be deleted.');
+      let profiles={}; try { profiles=JSON.parse(localStorage.getItem('dash_profiles')||'{}')||{}; } catch(e){}
+      if (!confirm(`Delete profile “${name}”?`)) return;
+      delete profiles[name];
+      localStorage.setItem('dash_profiles',JSON.stringify(profiles));
+      const fallback = profiles.Default?.localStorage ? profiles.Default : { localStorage: getConfigPayload().localStorage };
+      CONFIG_KEYS.forEach(k=>localStorage.removeItem(k));
+      Object.entries(fallback.localStorage).forEach(([k,v])=>localStorage.setItem(k,v));
+      localStorage.setItem('dash_active_profile','Default');
+      location.reload();
+    }
+
+    function applyLayoutPreset(name) {
+      const presets = {
+        compact:{size:'100px',grid:'repeat(5, var(--card-min-width))',news:[4,1,'compact'],theme:'carbon',minimal:false},
+        balanced:{size:'130px',grid:'repeat(5, var(--card-min-width))',news:[4,1,'standard'],theme:'midnight',minimal:false},
+        large:{size:'160px',grid:'repeat(5, var(--card-min-width))',news:[3,1,'large'],theme:'frost',minimal:false},
+        minimal:{size:'100px',grid:'repeat(5, var(--card-min-width))',news:[3,1,'compact'],theme:'oled',minimal:true},
+        'news-focus':{size:'130px',grid:'repeat(5, var(--card-min-width))',news:[4,2,'standard'],theme:'midnight',minimal:false}
+      };
+      const p=presets[name]; if(!p) return;
+      document.getElementById('settings-size').value=p.size; document.getElementById('settings-grid-cols').value=p.grid;
+      document.getElementById('settings-news-columns').value=String(p.news[0]); document.getElementById('settings-news-rows').value=String(p.news[1]); document.getElementById('settings-news-size').value=p.news[2]; document.getElementById('settings-theme').value=p.theme; document.getElementById('settings-minimal-mode').checked=p.minimal;
+      saveSettings();
+    }
+    function applySelectedLayoutPreset(){ const v=document.getElementById('settings-layout-preset')?.value; if(v) applyLayoutPreset(v); }
+
+    function getFolderStyle(name) {
+      const raw=state.folderStyles?.[name] || {}; return { icon:'📁', color:'#58a6ff', count:4, mode:'grid', ...raw };
+    }
+    function refreshFolderStylePicker() {
+      const sel=document.getElementById('settings-folder-name'); if(!sel) return;
+      const names=[...new Set(state.dials.filter(d=>d.folder).map(d=>d.folder))].sort();
+      sel.innerHTML=names.length ? names.map(n=>`<option value="${escapeHTML(n)}">${escapeHTML(n)}</option>`).join('') : '<option value="">No folders yet</option>';
+      if(names.length) loadFolderStyleIntoSettings(names[0]);
+    }
+    function loadFolderStyleIntoSettings(name) {
+      const st=getFolderStyle(name); const set=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
+      set('settings-folder-icon',st.icon); set('settings-folder-color',st.color); set('settings-folder-count',String(st.count)); set('settings-folder-mode',st.mode);
+    }
+    function saveFolderStyleFromSettings() {
+      const name=document.getElementById('settings-folder-name')?.value; if(!name) return;
+      state.folderStyles=state.folderStyles||{}; state.folderStyles[name]={icon:document.getElementById('settings-folder-icon').value||'📁',color:document.getElementById('settings-folder-color').value,count:Number(document.getElementById('settings-folder-count').value)||4,mode:document.getElementById('settings-folder-mode').value||'grid'};
+      localStorage.setItem('dash_folder_styles',JSON.stringify(state.folderStyles)); renderDials();
+    }
+    function editFolderStyle(folderName) {
+      const st=getFolderStyle(folderName); const icon=prompt('Folder icon (emoji or short symbol):',st.icon); if(icon===null)return;
+      const color=prompt('Folder accent color (#RRGGBB):',st.color); if(color===null)return;
+      const count=prompt('Preview icon count (2-4):',String(st.count)); if(count===null)return;
+      const mode=prompt('Preview style: grid, stack, or strip',st.mode); if(mode===null)return;
+      state.folderStyles=state.folderStyles||{}; state.folderStyles[folderName]={icon:icon.trim()||'📁',color:/^#[0-9a-f]{6}$/i.test(color)?color:st.color,count:Math.min(4,Math.max(2,parseInt(count)||4)),mode:['grid','stack','strip'].includes(mode)?mode:'grid'};
+      localStorage.setItem('dash_folder_styles',JSON.stringify(state.folderStyles)); renderDials();
+    }
+
+    function resetSectionLayout(type) {
+      pushUndoSnapshot(`Reset ${type}`);
+      if(type==='dials') { localStorage.removeItem('dash_dial_layout'); }
+      if(type==='news') { state.newsLayout={columns:6,rows:1,size:'standard'}; localStorage.setItem('dash_news_layout',JSON.stringify(state.newsLayout)); localStorage.setItem('dash_news_favorites_only','false'); }
+      if(type==='positions') LAYOUT_KEYS.forEach(k=>localStorage.removeItem(k));
+      if(type==='appearance') ['dash_theme','dash_search_width','dash_show_engine','dash_clock_prefs','dash_mobile_columns','dash_minimal_mode','dash_blur','dash_opacity','dash_shape','dash_min_width','dash_grid_cols'].forEach(k=>localStorage.removeItem(k));
+      location.reload();
+    }
+
+    function renderNewsFavoriteManager() {
+      const grid=document.getElementById('rssManagerGrid'); if(!grid) return;
+      // Stars are added in renderRSSManager by URL, so this function just keeps state normalized.
+      state.favoriteFeeds=Array.isArray(state.favoriteFeeds)?state.favoriteFeeds:[];
+    }
+
+    function installShortcutHandler() {
+      document.addEventListener('keydown', e => {
+        if(!state.shortcutsEnabled) return;
+        const meta=e.ctrlKey || e.metaKey;
+        const tag=(e.target?.tagName||'').toLowerCase();
+        if(meta && e.key.toLowerCase()==='k') { e.preventDefault(); document.getElementById('search-input')?.focus(); return; }
+        if(meta && e.shiftKey && e.key.toLowerCase()==='b') { e.preventDefault(); if(state.modules.bookmarks) toggleBookmarksDropdown(); return; }
+        if(meta && e.shiftKey && e.key.toLowerCase()==='s') { e.preventDefault(); toggleSettingsDropdown(); return; }
+        if(tag==='input'||tag==='textarea'||tag==='select') return;
+        if(e.altKey && /^[1-9]$/.test(e.key)) {
+          const idx=Number(e.key)-1; const cards=[...document.querySelectorAll('#speed-dials-container > .draggable-wrapper:not(.add-wrapper) a.dial-card')]; if(cards[idx]) { e.preventDefault(); cards[idx].click(); }
+        }
+      });
+    }
 
     // ===== SEARCH ENGINE LOGIC =====
     function renderEngineDropdown() {
@@ -1286,6 +1676,7 @@
     }
 
     function handleSortableMerge(draggedEl, targetEl) {
+        pushUndoSnapshot('Create/Update Speed Dial Folder');
         // Folders are sortable containers/items, not merge sources. Never re-render
         // in the middle of a folder drag because that invalidates Sortable's DOM state.
         if (draggedEl?.dataset?.folderName) return;
@@ -1410,7 +1801,7 @@
       state.services = newServices; localStorage.setItem('dash_services', JSON.stringify(state.services));
     }
 
-    function removeDial(idx) { state.dials.splice(idx, 1); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); }
+    function removeDial(idx) { pushUndoSnapshot('Remove Speed Dial'); state.dials.splice(idx, 1); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); }
     
     function openEditDialModal(idx) {
       const dial = state.dials[idx];
@@ -1419,6 +1810,9 @@
       document.getElementById('edit-dial-url').value = dial.url || '';
       document.getElementById('edit-dial-folder').value = dial.folder || '';
       document.getElementById('edit-dial-img').value = dial.img || '';
+      document.getElementById('edit-dial-new-tab').checked = dial.newTab !== false;
+      document.getElementById('edit-dial-bg').value = /^#[0-9a-f]{6}$/i.test(dial.bg || '') ? dial.bg : '#161b22';
+      document.getElementById('edit-dial-icon-size').value = Math.min(64, Math.max(16, Number(dial.iconSize) || 32));
       
       document.getElementById('edit-icon-search-input').value = '';
       document.getElementById('edit-icon-results').style.display = 'none';
@@ -1433,9 +1827,13 @@
       const url = document.getElementById('edit-dial-url').value.trim();
       const folder = document.getElementById('edit-dial-folder').value.trim();
       const img = document.getElementById('edit-dial-img').value.trim();
+      const newTab = document.getElementById('edit-dial-new-tab').checked;
+      const bg = document.getElementById('edit-dial-bg').value;
+      const iconSize = Math.min(64, Math.max(16, Number(document.getElementById('edit-dial-icon-size').value) || 32));
       if (!url) return alert('URL required');
       
-      state.dials[idx] = { ...state.dials[idx], name: name || generateSmartLabel(url), url, folder, img };
+      pushUndoSnapshot('Edit Speed Dial');
+      state.dials[idx] = { ...state.dials[idx], name: name || generateSmartLabel(url), url, folder, img, newTab, bg, iconSize };
       localStorage.setItem('dash_dials', JSON.stringify(state.dials));
       renderDials();
       closeModal('edit-dial-modal');
@@ -1446,6 +1844,9 @@
       document.getElementById('dial-url').value = '';
       document.getElementById('dial-folder').value = '';
       document.getElementById('dial-img').value = '';
+      document.getElementById('dial-new-tab').checked = true;
+      document.getElementById('dial-bg').value = '#161b22';
+      document.getElementById('dial-icon-size').value = '32';
       document.getElementById('add-icon-search-input').value = '';
       document.getElementById('add-icon-results').style.display = 'none';
       
@@ -1491,11 +1892,15 @@
     function saveNewDial() {
       let name = document.getElementById('dial-title').value.trim(); let url = document.getElementById('dial-url').value.trim();
       let folder = document.getElementById('dial-folder').value.trim(); let img = document.getElementById('dial-img').value.trim();
+      const newTab = document.getElementById('dial-new-tab').checked;
+      const bg = document.getElementById('dial-bg').value;
+      const iconSize = Math.min(64, Math.max(16, Number(document.getElementById('dial-icon-size').value) || 32));
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
       if (openAccordionFolder && !folder) folder = openAccordionFolder;
-      state.dials.push({ name, url, img, folder }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
+      pushUndoSnapshot('Add Speed Dial');
+      state.dials.push({ name, url, img, folder, newTab, bg, iconSize }); localStorage.setItem('dash_dials', JSON.stringify(state.dials)); renderDials(); closeModal('dial-modal');
     }
 
     const GLOBE_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/%3E%3C/svg%3E";
@@ -1541,22 +1946,25 @@
 
       function makeFolderTile(folderName) {
         const items = grouped[folderName] || [];
+        const style = getFolderStyle(folderName);
         const folderTile = document.createElement('div');
         folderTile.className = 'dial-folder-tile draggable-wrapper';
         folderTile.dataset.folderName = folderName;
+        folderTile.style.setProperty('--folder-accent', style.color);
 
-        let previewImgs = '';
-        for (let i = 0; i < Math.min(items.length, 4); i++) {
+        const preview = document.createElement('div');
+        preview.className = `folder-preview-grid ${style.mode || 'grid'}`;
+        const count = Math.min(items.length, Math.max(2, Math.min(4, Number(style.count) || 4)));
+        for (let i = 0; i < count; i++) {
           let d = 'example.com'; try { d = new URL(items[i].url).hostname; } catch(e){}
           let src = items[i].img && items[i].img.trim() !== '' ? items[i].img : `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
-          previewImgs += `<img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="icon">`;
+          const img = document.createElement('img'); img.src=src; img.onerror=()=>img.src=GLOBE_SVG; img.alt='icon'; preview.appendChild(img);
         }
-
-        folderTile.innerHTML = `<div class="folder-preview-grid">${previewImgs}</div><span>${folderName}</span>`;
-        folderTile.addEventListener('click', () => {
-          if (isEditMode) return;
-          toggleAccordionFolder(folderName);
-        });
+        const label = document.createElement('span'); label.innerHTML=`<span class="folder-icon">${escapeHTML(style.icon||'📁')}</span>${escapeHTML(folderName)}`;
+        const editButton = document.createElement('button'); editButton.className='folder-edit-btn'; editButton.type='button'; editButton.title='Customize folder'; editButton.textContent='✎';
+        editButton.addEventListener('click', ev=>{ ev.stopPropagation(); ev.preventDefault(); editFolderStyle(folderName); });
+        folderTile.append(preview,label,editButton);
+        folderTile.addEventListener('click', () => { if (isEditMode) return; toggleAccordionFolder(folderName); });
         return folderTile;
       }
 
@@ -1624,6 +2032,7 @@
                    disabled: false,
                    animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-dial-tile',
                    ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+                   onStart: () => pushUndoSnapshot('Move Speed Dial'),
                    onEnd: syncDialStateFromDOM
                });
            }
@@ -1636,6 +2045,7 @@
           disabled: false,
           animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper, .expanded-folder-accordion',
           ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+          onStart: () => pushUndoSnapshot('Move Speed Dial'),
           onMove: function(evt, originalEvent) {
               document.querySelectorAll('.drag-folder-hover').forEach(el => el.classList.remove('drag-folder-hover'));
               if (!evt.related) return true;
@@ -1691,15 +2101,19 @@
 
     function createDialHTMLString(dial) {
       let domain = 'example.com'; try { domain = new URL(dial.url).hostname; } catch(e){}
-      let src = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+      let src = dial.img && dial.img.trim() !== '' ? dial.img : `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+      const target = dial.newTab === false ? '_self' : '_blank';
+      const rel = target === '_blank' ? 'noopener noreferrer' : '';
+      const bg = /^#[0-9a-f]{6}$/i.test(dial.bg || '') ? dial.bg : '';
+      const iconSize = Math.min(64, Math.max(16, Number(dial.iconSize) || 32));
+      const style = `--dial-icon-size:${iconSize}px;${bg ? `--dial-custom-bg:${bg};` : ''}`;
       let editBtnHtml = `<button class="card-edit-btn" title="Edit" onclick="event.stopPropagation(); event.preventDefault(); openEditDialModal(${dial._origIdx})">✎</button>`;
       let deleteBtnHtml = `<button class="card-delete-btn" title="Remove" onclick="event.stopPropagation(); event.preventDefault(); removeDial(${dial._origIdx})">&times;</button>`;
-
       return `
         <div class="draggable-wrapper" data-dial-data="${encodeURIComponent(JSON.stringify(dial))}">
-          <a href="${dial.url}" class="dial-card" target="_blank" rel="noopener">
-             <img src="${src}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="${dial.name}" />
-             <span>${dial.name}</span>
+          <a href="${escapeHTML(dial.url)}" class="dial-card" target="${target}" rel="${rel}" style="${style}" title="${escapeHTML(dial.name)}">
+             <img src="${escapeHTML(src)}" onerror="this.onerror=null; this.src='${GLOBE_SVG}';" alt="${escapeHTML(dial.name)}" />
+             <span>${escapeHTML(dial.name)}</span>
           </a>
           ${editBtnHtml}${deleteBtnHtml}
         </div>
@@ -1813,6 +2227,7 @@
         disabled: false,
         animation: 250, delay: 150, delayOnTouchOnly: true, filter: '.add-wrapper',
         ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+        onStart: () => pushUndoSnapshot('Move Service'),
         onEnd: syncServiceStateFromDOM
       });
       refreshServicesStatus();
@@ -1868,7 +2283,7 @@
     }
 
     function pingServices() { refreshServicesStatus(); }
-    function removeService(idx) { state.services.splice(idx, 1); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); }
+    function removeService(idx) { pushUndoSnapshot('Remove Service'); state.services.splice(idx, 1); localStorage.setItem('dash_services', JSON.stringify(state.services)); renderServices(); }
     function saveNewService() {
       let name = document.getElementById('srv-name').value.trim();
       const desc = document.getElementById('srv-desc').value.trim();
@@ -1877,6 +2292,7 @@
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!name) name = generateSmartLabel(url);
+      pushUndoSnapshot('Add Service');
       state.services.push({ name, desc, url, healthUrl, checkMode: healthUrl ? 'custom' : 'auto' });
       localStorage.setItem('dash_services', JSON.stringify(state.services));
       document.getElementById('srv-name').value = '';
@@ -2325,12 +2741,14 @@
         }
       }));
 
-      const articles = dedupeArticles(results.filter(r => r.ok).flatMap(r => r.articles || []))
+      const successful = results.filter(r => r.ok && (!state.newsFavoritesOnly || state.favoriteFeeds.includes(r.rawUrl)));
+      const articles = dedupeArticles(successful.flatMap(r => (r.articles || []).map(a => ({...a, feedUrl: r.rawUrl}))))
         .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
         .slice(0, MAX_TOTAL_ITEMS);
       const failures = results.filter(r => !r.ok);
 
       if (titleEl) titleEl.textContent = `📡 News Stream · ${articles.length} articles`;
+      if (state.newsFavoritesOnly && !state.favoriteFeeds.length && statusEl) statusEl.textContent = 'Favorites-only mode is on, but no news sources are favorited.';
       if (statusEl) {
         statusEl.textContent = failures.length
           ? `${articles.length} articles loaded · ${failures.length} source${failures.length === 1 ? '' : 's'} unavailable`
@@ -2359,6 +2777,7 @@
           const d = new URL(url).hostname;
           iconSrc = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=64`;
         } catch (e) {}
+        const star = document.createElement('button'); star.type='button'; star.className='rss-favorite-btn'; star.title='Toggle favorite'; star.textContent=state.favoriteFeeds.includes(url)?'★':'☆'; star.style.cssText='position:absolute;top:4px;left:4px;background:rgba(0,0,0,.58);border:none;color:#ffd866;border-radius:6px;width:22px;height:22px;cursor:pointer;z-index:4;'; star.addEventListener('click',()=>{ pushUndoSnapshot('Favorite News Feed'); if(state.favoriteFeeds.includes(url)) state.favoriteFeeds=state.favoriteFeeds.filter(x=>x!==url); else state.favoriteFeeds.push(url); localStorage.setItem('dash_news_favorites',JSON.stringify(state.favoriteFeeds)); renderRSSManager(); if(state.newsFavoritesOnly) fetchRSS(); });
         const button = document.createElement('button');
         button.className = 'rss-delete-btn';
         button.type = 'button';
@@ -2369,7 +2788,7 @@
         img.src = iconSrc;
         img.onerror = () => { img.src = GLOBE_SVG; };
         img.alt = 'site icon';
-        item.append(button, img);
+        item.append(star, button, img);
         grid.appendChild(item);
       });
     };
@@ -2379,6 +2798,7 @@
       const normalized = normalizeFeedInput(input.value);
       if (!normalized) return alert('Please enter a valid website or RSS URL.');
       if (!state.rssFeeds.includes(normalized)) {
+        pushUndoSnapshot('Add News Feed');
         state.rssFeeds.push(normalized);
         localStorage.setItem('dash_rss_feeds', JSON.stringify(state.rssFeeds));
         renderRSSManager();
@@ -2388,6 +2808,7 @@
     };
 
     const removeRSSFeed = (index) => {
+      pushUndoSnapshot('Remove News Feed');
       state.rssFeeds.splice(index, 1);
       localStorage.setItem('dash_rss_feeds', JSON.stringify(state.rssFeeds));
       renderRSSManager();
@@ -2427,10 +2848,11 @@
       if (!url) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
       if (!title) title = generateSmartLabel(url);
+      pushUndoSnapshot('Add Bookmark');
       state.bookmarks.unshift({ title, url, folder }); localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks));
       document.getElementById('bm-title').value = ''; document.getElementById('bm-url').value = ''; document.getElementById('bm-folder').value = ''; renderBookmarks();
     }
-    function removeBookmark(idx) { state.bookmarks.splice(idx, 1); localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks)); renderBookmarks(); }
+    function removeBookmark(idx) { pushUndoSnapshot('Remove Bookmark'); state.bookmarks.splice(idx, 1); localStorage.setItem('dash_bookmarks', JSON.stringify(state.bookmarks)); renderBookmarks(); }
 
     // ===== GOOGLE CALENDAR OAUTH =====
     const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events.readonly';
@@ -2723,6 +3145,21 @@
           document.getElementById('settings-news-size').value = state.newsLayout.size;
           document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
           document.getElementById('settings-opacity-num').value = parseInt(localStorage.getItem('dash_opacity')) || 55;
+          document.getElementById('settings-theme').value = state.theme;
+          document.getElementById('settings-search-width').value = state.searchWidth;
+          document.getElementById('settings-show-engine').checked = state.showEngineSelector;
+          document.getElementById('settings-clock-format').value = state.clockPrefs.format === '24' ? '24' : '12';
+          document.getElementById('settings-clock-seconds').checked = !!state.clockPrefs.seconds;
+          document.getElementById('settings-clock-date').checked = !!state.clockPrefs.date;
+          document.getElementById('settings-clock-day').checked = !!state.clockPrefs.day;
+          document.getElementById('settings-mobile-columns').value = String(state.mobileColumns);
+          document.getElementById('settings-news-refresh').value = String(state.newsAutoRefresh);
+          document.getElementById('settings-news-favorites-only').checked = !!state.newsFavoritesOnly;
+          document.getElementById('settings-shortcuts-enabled').checked = !!state.shortcutsEnabled;
+          document.getElementById('settings-backup-interval').value = String(state.backupInterval);
+          document.getElementById('settings-backup-retention').value = String(state.backupRetention);
+          document.getElementById('settings-minimal-mode').checked = !!state.minimalMode;
+          refreshProfileSelect(); refreshFolderStylePicker(); updateBackupStatus();
 
           const safeCheck = (id, defaultVal) => { const el = document.getElementById(id); if(el) {el.checked = defaultVal;} };
           safeCheck('toggle-mod-dials', state.modules.dials);
@@ -2730,9 +3167,22 @@
           safeCheck('toggle-mod-news', state.modules.news);
           safeCheck('toggle-mod-gcal', state.modules.gcal);
           safeCheck('toggle-mod-bookmarks', state.modules.bookmarks);
+          const folderPicker = document.getElementById('settings-folder-name'); if (folderPicker) folderPicker.onchange = () => loadFolderStyleIntoSettings(folderPicker.value);
+          const profilePicker = document.getElementById('settings-profile-select'); if (profilePicker) profilePicker.onchange = () => switchProfile(profilePicker.value);
           
-          const customEngines = state.searchEngines.filter(e => e.isCustom); const listContainer = document.getElementById('custom-engines-list');
-          listContainer.innerHTML = customEngines.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">No custom engines added.</span>' : customEngines.map(e => `<div class="se-settings-item"><div style="display:flex; align-items:center;"><span class="se-color-dot" style="background: ${e.colors[0]}"></span><strong>${e.name}</strong></div><button style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:16px;" onclick="removeSearchEngine('${e.id}')">&times;</button></div>`).join('');
+          const listContainer = document.getElementById('custom-engines-list');
+          listContainer.innerHTML = '';
+          state.searchEngines.forEach((e, i) => {
+            const row = document.createElement('div'); row.className='se-settings-item'; row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);';
+            const left=document.createElement('div'); left.style.cssText='display:flex;align-items:center;gap:7px;min-width:0;';
+            const dot=document.createElement('span'); dot.className='se-color-dot'; dot.style.background=e.colors[0];
+            const name=document.createElement('strong'); name.textContent=e.name; name.style.cssText='font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+            left.append(dot,name);
+            const actions=document.createElement('div'); actions.style.cssText='display:flex;gap:3px;flex:0 0 auto;';
+            [['▲',-1],['▼',1]].forEach(([label,delta])=>{ const b=document.createElement('button'); b.type='button'; b.className='se-order-btn'; b.textContent=label; b.title='Move engine'; b.disabled=(i+delta<0||i+delta>=state.searchEngines.length); b.addEventListener('click',()=>moveSearchEngine(e.id,delta)); actions.appendChild(b); });
+            if(e.isCustom){ const b=document.createElement('button'); b.type='button'; b.className='se-order-btn'; b.textContent='×'; b.title='Remove engine'; b.style.color='var(--danger)'; b.addEventListener('click',()=>removeSearchEngine(e.id)); actions.appendChild(b); }
+            row.append(left,actions); listContainer.appendChild(row);
+          });
           
           renderRSSManager();
           wrapper.classList.add('open');
@@ -2743,33 +3193,35 @@
 
     // ===== BACKUP & SYNC ENGINE =====
     function exportConfig() {
-      const backupState = { ...state }; delete backupState.googleToken;
-      const blob = new Blob([JSON.stringify(backupState, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'command-center-backup.json';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      const bundle = getConfigPayload();
+      bundle.profiles = (() => { try { return JSON.parse(localStorage.getItem('dash_profiles') || '{}') || {}; } catch(e) { return {}; } })();
+      bundle.activeProfile = localStorage.getItem('dash_active_profile') || 'Default';
+      bundle.autoBackups = (() => { try { return JSON.parse(localStorage.getItem('dash_auto_backups') || '[]') || []; } catch(e) { return []; } })();
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], {type:'application/json'});
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='command-center-backup.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     }
     function importConfig(event) {
-      const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const importedState = JSON.parse(e.target.result);
-          if (importedState.wallpaper) localStorage.setItem('dash_wallpaper', importedState.wallpaper);
-          if (importedState.googleClientId) localStorage.setItem('dash_google_client_id', importedState.googleClientId);
-          if (importedState.dials) localStorage.setItem('dash_dials', JSON.stringify(importedState.dials));
-          if (importedState.bookmarks) localStorage.setItem('dash_bookmarks', JSON.stringify(importedState.bookmarks));
-          if (importedState.services) localStorage.setItem('dash_services', JSON.stringify(importedState.services));
-          if (importedState.rssFeeds) localStorage.setItem('dash_rss_feeds', JSON.stringify(importedState.rssFeeds));
-          if (importedState.modules) localStorage.setItem('dash_modules', JSON.stringify(importedState.modules));
-          if (importedState.searchEngines) localStorage.setItem('dash_search_engines', JSON.stringify(importedState.searchEngines));
-          if (importedState.activeEngineId) localStorage.setItem('dash_active_engine', importedState.activeEngineId);
-          if (importedState.newsLayout) localStorage.setItem('dash_news_layout', JSON.stringify(importedState.newsLayout));
-          alert("Configuration imported successfully! The dashboard will now reload."); window.location.reload();
-        } catch (err) { alert("Invalid configuration file. Please select a valid JSON backup."); }
+      const file=event.target.files[0]; if(!file)return; const reader=new FileReader();
+      reader.onload=function(e){
+        try{
+          const imported=JSON.parse(e.target.result);
+          if(imported.localStorage){ CONFIG_KEYS.forEach(k=>localStorage.removeItem(k)); Object.entries(imported.localStorage).forEach(([k,v])=>localStorage.setItem(k,v)); }
+          else {
+            // Backward compatibility with older exports.
+            const map={wallpaper:'dash_wallpaper',googleClientId:'dash_google_client_id',dials:'dash_dials',bookmarks:'dash_bookmarks',services:'dash_services',rssFeeds:'dash_rss_feeds',modules:'dash_modules',searchEngines:'dash_search_engines',activeEngineId:'dash_active_engine',newsLayout:'dash_news_layout'};
+            Object.entries(map).forEach(([src,dst])=>{ if(imported[src]!==undefined) localStorage.setItem(dst,typeof imported[src]==='string'?imported[src]:JSON.stringify(imported[src])); });
+          }
+          if(imported.profiles) localStorage.setItem('dash_profiles',JSON.stringify(imported.profiles));
+          if(imported.activeProfile) localStorage.setItem('dash_active_profile',imported.activeProfile);
+          if(imported.autoBackups) localStorage.setItem('dash_auto_backups',JSON.stringify(imported.autoBackups));
+          alert('Configuration imported successfully! The dashboard will now reload.'); location.reload();
+        }catch(err){ alert('Invalid configuration file. Please select a valid JSON backup.'); }
       }; reader.readAsText(file);
     }
 
     // ===== SAVE CONFIGURATION =====
     function saveSettings() {
+      pushUndoSnapshot('Save Settings');
       const wp = document.getElementById('settings-wallpaper').value.trim();
       const cid = document.getElementById('settings-client-id').value.trim();
       const shapeVal = document.getElementById('settings-shape').value;
@@ -2780,35 +3232,44 @@
       const newsSizeVal = document.getElementById('settings-news-size').value;
       const blurVal = document.getElementById('settings-blur-num').value;
       const opacityVal = document.getElementById('settings-opacity-num').value;
+      const theme = document.getElementById('settings-theme').value;
+      const searchWidth = document.getElementById('settings-search-width').value;
+      const showEngine = document.getElementById('settings-show-engine').checked;
+      const clockPrefs = { format:document.getElementById('settings-clock-format').value, seconds:document.getElementById('settings-clock-seconds').checked, date:document.getElementById('settings-clock-date').checked, day:document.getElementById('settings-clock-day').checked };
+      const mobileColumns = Math.min(4, Math.max(2, parseInt(document.getElementById('settings-mobile-columns').value,10) || 3));
+      const newsRefresh = parseInt(document.getElementById('settings-news-refresh').value,10) || 0;
+      const favoritesOnly = document.getElementById('settings-news-favorites-only').checked;
+      const shortcutsEnabled = document.getElementById('settings-shortcuts-enabled').checked;
+      const backupInterval = parseInt(document.getElementById('settings-backup-interval').value,10) || 0;
+      const backupRetention = parseInt(document.getElementById('settings-backup-retention').value,10) || 5;
+      const minimalMode = document.getElementById('settings-minimal-mode').checked;
 
-      if (wp) { state.wallpaper = wp; localStorage.setItem('dash_wallpaper', wp); document.body.style.backgroundImage = `url('${state.wallpaper}')`; }
-      if (state.googleClientId !== cid) { clearCalendarToken(); tokenClient = null; googleAuthClientId = ''; }
-      state.googleClientId = cid; localStorage.setItem('dash_google_client_id', cid);
-      
-      localStorage.setItem('dash_shape', shapeVal);
-      localStorage.setItem('dash_min_width', sizeVal);
-      localStorage.setItem('dash_grid_cols', gridColsVal);
-      state.newsLayout = normalizeNewsLayout({ columns: newsColumnsVal, rows: newsRowsVal, size: newsSizeVal });
-      localStorage.setItem('dash_news_layout', JSON.stringify(state.newsLayout));
-      applyNewsLayout();
-      rssCarouselPage = 0;
-      if (lastRSSArticles.length) renderRSSCarousel(lastRSSArticles);
-      localStorage.setItem('dash_blur', blurVal);
-      localStorage.setItem('dash_opacity', opacityVal);
-      applyGlassPreferences();
+      if (wp) { state.wallpaper=wp; localStorage.setItem('dash_wallpaper',wp); document.body.style.backgroundImage=`url('${state.wallpaper}')`; }
+      if (state.googleClientId !== cid) { clearCalendarToken(); tokenClient=null; googleAuthClientId=''; }
+      state.googleClientId=cid; localStorage.setItem('dash_google_client_id',cid);
+      localStorage.setItem('dash_shape',shapeVal); localStorage.setItem('dash_min_width',sizeVal); localStorage.setItem('dash_grid_cols',gridColsVal);
+      state.newsLayout=normalizeNewsLayout({columns:newsColumnsVal,rows:newsRowsVal,size:newsSizeVal}); localStorage.setItem('dash_news_layout',JSON.stringify(state.newsLayout));
+      localStorage.setItem('dash_blur',blurVal); localStorage.setItem('dash_opacity',opacityVal);
+      state.theme=theme; localStorage.setItem('dash_theme',theme);
+      state.searchWidth=searchWidth; localStorage.setItem('dash_search_width',searchWidth);
+      state.showEngineSelector=showEngine; localStorage.setItem('dash_show_engine',String(showEngine));
+      state.clockPrefs=clockPrefs; localStorage.setItem('dash_clock_prefs',JSON.stringify(clockPrefs));
+      state.mobileColumns=mobileColumns; localStorage.setItem('dash_mobile_columns',String(mobileColumns));
+      state.newsAutoRefresh=newsRefresh; localStorage.setItem('dash_news_refresh',String(newsRefresh));
+      state.newsFavoritesOnly=favoritesOnly; localStorage.setItem('dash_news_favorites_only',String(favoritesOnly));
+      state.shortcutsEnabled=shortcutsEnabled; localStorage.setItem('dash_shortcuts_enabled',String(shortcutsEnabled));
+      state.backupInterval=backupInterval; localStorage.setItem('dash_backup_interval',String(backupInterval));
+      state.backupRetention=backupRetention; localStorage.setItem('dash_backup_retention',String(backupRetention));
+      state.minimalMode=minimalMode; localStorage.setItem('dash_minimal_mode',String(minimalMode));
+      localStorage.setItem('dash_folder_styles',JSON.stringify(state.folderStyles||{}));
 
-      const getCheck = (id) => document.getElementById(id) ? document.getElementById(id).checked : true;
-
-      state.modules = { 
-          dials: getCheck('toggle-mod-dials'), 
-          services: getCheck('toggle-mod-services'), 
-          news: getCheck('toggle-mod-news'), 
-          builtin_cal: true, // Tied to clock
-          gcal: getCheck('toggle-mod-gcal'), 
-          bookmarks: getCheck('toggle-mod-bookmarks') 
-      };
-      localStorage.setItem('dash_modules', JSON.stringify(state.modules));
-      applyModuleVisibility(); initGoogleAuth(); toggleSettingsDropdown();
+      const getCheck=id=>document.getElementById(id)?document.getElementById(id).checked:true;
+      state.modules={dials:getCheck('toggle-mod-dials'),services:getCheck('toggle-mod-services'),news:getCheck('toggle-mod-news'),builtin_cal:true,gcal:getCheck('toggle-mod-gcal'),bookmarks:getCheck('toggle-mod-bookmarks')};
+      localStorage.setItem('dash_modules',JSON.stringify(state.modules));
+      applyGlassPreferences(); applyTheme(); applyNewsLayout(); scheduleNewsRefresh(); scheduleBackups();
+      if(lastRSSArticles.length) renderRSSCarousel(lastRSSArticles);
+      applyModuleVisibility(); initGoogleAuth();
+      toggleSettingsDropdown();
     }
 
     function applyModuleVisibility() {
@@ -2830,14 +3291,25 @@
       const name = document.getElementById('new-se-name').value.trim(); const url = document.getElementById('new-se-url').value.trim(); const color = document.getElementById('new-se-color').value;
       if (!name || !url) return;
       const customColors = [color, '#12161c', color, '#12161c'];
+      pushUndoSnapshot('Add Search Engine');
       state.searchEngines.push({ id: 'se_custom_' + Date.now(), name: name, url: url, colors: customColors, isCustom: true });
       localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
       document.getElementById('new-se-name').value = ''; document.getElementById('new-se-url').value = ''; toggleSettingsDropdown(); toggleSettingsDropdown(); renderEngineDropdown();
     }
     function removeSearchEngine(id) {
+      pushUndoSnapshot('Remove Search Engine');
       state.searchEngines = state.searchEngines.filter(e => e.id !== id);
       if (state.activeEngineId === id) state.activeEngineId = 'se_google';
       localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines)); toggleSettingsDropdown(); toggleSettingsDropdown(); renderEngineDropdown();
+    }
+    function moveSearchEngine(id, delta) {
+      const idx = state.searchEngines.findIndex(e => e.id === id); if (idx < 0) return;
+      const next = idx + delta; if (next < 0 || next >= state.searchEngines.length) return;
+      pushUndoSnapshot('Reorder Search Engines');
+      [state.searchEngines[idx], state.searchEngines[next]] = [state.searchEngines[next], state.searchEngines[idx]];
+      localStorage.setItem('dash_search_engines', JSON.stringify(state.searchEngines));
+      renderEngineDropdown();
+      toggleSettingsDropdown(); toggleSettingsDropdown();
     }
 
     let newsResizeTimer = null;
