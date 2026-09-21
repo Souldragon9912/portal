@@ -608,7 +608,7 @@
       <div style="display: flex; align-items: center; margin-left: 10px;">
         <!-- Clock toggles the built-in calendar -->
         <div id="live-clock" onclick="toggleInlineCalendar()" title="Toggle Calendar" style="cursor: pointer; font-weight: 600; font-size: 14px; margin-right: 12px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); transition: color 0.2s;"></div>
-        <button class="nav-btn" onclick="toggleSettingsDropdown()">⚙ Settings</button>
+        <button class="nav-btn" type="button" onclick="toggleSettingsDropdown()">⚙ Settings</button>
       </div>
     </div>
     
@@ -667,7 +667,7 @@
     <div class="dropdown-panel" id="settings-dropdown">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
         <h3 style="margin: 0; font-size: 16px;">Dashboard Settings</h3>
-        <button style="background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="toggleSettingsDropdown()">&times;</button>
+        <button type="button" style="background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="toggleSettingsDropdown()">&times;</button>
       </div>
       
       <div class="form-group">
@@ -3127,67 +3127,123 @@
     function toggleSettingsDropdown() {
       closeAllDropdownsExcept('settings-dropdown');
       const wrapper = document.getElementById('settings-dropdown');
-      
-      if (!wrapper.classList.contains('open')) {
-          document.getElementById('settings-wallpaper').value = state.wallpaper; 
-          document.getElementById('settings-client-id').value = state.googleClientId;
-          const originDisplay = document.getElementById('oauth-origin-display');
-          if (originDisplay) originDisplay.textContent = `Current origin: ${window.location.origin || 'file:// (not a web origin)'}`;
-          
-          let savedShape = localStorage.getItem('dash_shape') || '20px|none|1 / 1';
-          if (savedShape.split('|').length < 3) savedShape = `${savedShape}|1 / 1`;
-          document.getElementById('settings-shape').value = savedShape;
-          document.getElementById('settings-size').value = localStorage.getItem('dash_min_width') || '130px';
-          document.getElementById('settings-grid-cols').value = localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))';
-          state.newsLayout = normalizeNewsLayout(state.newsLayout);
-          document.getElementById('settings-news-columns').value = String(state.newsLayout.columns);
-          document.getElementById('settings-news-rows').value = String(state.newsLayout.rows);
-          document.getElementById('settings-news-size').value = state.newsLayout.size;
-          document.getElementById('settings-blur-num').value = parseInt(localStorage.getItem('dash_blur')) || 16;
-          document.getElementById('settings-opacity-num').value = parseInt(localStorage.getItem('dash_opacity')) || 55;
-          document.getElementById('settings-theme').value = state.theme;
-          document.getElementById('settings-search-width').value = state.searchWidth;
-          document.getElementById('settings-show-engine').checked = state.showEngineSelector;
-          document.getElementById('settings-clock-format').value = state.clockPrefs.format === '24' ? '24' : '12';
-          document.getElementById('settings-clock-seconds').checked = !!state.clockPrefs.seconds;
-          document.getElementById('settings-clock-date').checked = !!state.clockPrefs.date;
-          document.getElementById('settings-clock-day').checked = !!state.clockPrefs.day;
-          document.getElementById('settings-mobile-columns').value = String(state.mobileColumns);
-          document.getElementById('settings-news-refresh').value = String(state.newsAutoRefresh);
-          document.getElementById('settings-news-favorites-only').checked = !!state.newsFavoritesOnly;
-          document.getElementById('settings-shortcuts-enabled').checked = !!state.shortcutsEnabled;
-          document.getElementById('settings-backup-interval').value = String(state.backupInterval);
-          document.getElementById('settings-backup-retention').value = String(state.backupRetention);
-          document.getElementById('settings-minimal-mode').checked = !!state.minimalMode;
-          refreshProfileSelect(); refreshFolderStylePicker(); updateBackupStatus();
+      if (!wrapper) return;
 
-          const safeCheck = (id, defaultVal) => { const el = document.getElementById(id); if(el) {el.checked = defaultVal;} };
-          safeCheck('toggle-mod-dials', state.modules.dials);
-          safeCheck('toggle-mod-services', state.modules.services);
-          safeCheck('toggle-mod-news', state.modules.news);
-          safeCheck('toggle-mod-gcal', state.modules.gcal);
-          safeCheck('toggle-mod-bookmarks', state.modules.bookmarks);
-          const folderPicker = document.getElementById('settings-folder-name'); if (folderPicker) folderPicker.onchange = () => loadFolderStyleIntoSettings(folderPicker.value);
-          const profilePicker = document.getElementById('settings-profile-select'); if (profilePicker) profilePicker.onchange = () => switchProfile(profilePicker.value);
-          
-          const listContainer = document.getElementById('custom-engines-list');
+      // Open the panel first. Settings must remain reachable even if an optional
+      // personalization value is malformed or missing from an older config.
+      const opening = !wrapper.classList.contains('open');
+      wrapper.classList.toggle('open', opening);
+      if (!opening) return;
+
+      const safeValue = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value ?? '';
+      };
+      const safeChecked = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = !!value;
+      };
+
+      try {
+        safeValue('settings-wallpaper', state.wallpaper);
+        safeValue('settings-client-id', state.googleClientId);
+
+        const originDisplay = document.getElementById('oauth-origin-display');
+        if (originDisplay) originDisplay.textContent = `Current origin: ${window.location.origin || 'file:// (not a web origin)'}`;
+
+        let savedShape = localStorage.getItem('dash_shape') || '20px|none|1 / 1';
+        if (savedShape.split('|').length < 3) savedShape = `${savedShape}|1 / 1`;
+        safeValue('settings-shape', savedShape);
+        safeValue('settings-size', localStorage.getItem('dash_min_width') || '130px');
+        safeValue('settings-grid-cols', localStorage.getItem('dash_grid_cols') || 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))');
+
+        state.newsLayout = normalizeNewsLayout(state.newsLayout);
+        safeValue('settings-news-columns', String(state.newsLayout.columns));
+        safeValue('settings-news-rows', String(state.newsLayout.rows));
+        safeValue('settings-news-size', state.newsLayout.size);
+        safeValue('settings-blur-num', parseInt(localStorage.getItem('dash_blur')) || 16);
+        safeValue('settings-opacity-num', parseInt(localStorage.getItem('dash_opacity')) || 55);
+
+        safeValue('settings-theme', state.theme || 'midnight');
+        safeValue('settings-search-width', state.searchWidth || '680px');
+        safeChecked('settings-show-engine', state.showEngineSelector !== false);
+        safeValue('settings-clock-format', state.clockPrefs?.format === '24' ? '24' : '12');
+        safeChecked('settings-clock-seconds', state.clockPrefs?.seconds);
+        safeChecked('settings-clock-date', state.clockPrefs?.date);
+        safeChecked('settings-clock-day', state.clockPrefs?.day);
+        safeValue('settings-mobile-columns', String(state.mobileColumns || 3));
+        safeValue('settings-news-refresh', String(state.newsAutoRefresh || 0));
+        safeChecked('settings-news-favorites-only', state.newsFavoritesOnly);
+        safeChecked('settings-shortcuts-enabled', state.shortcutsEnabled !== false);
+        safeValue('settings-backup-interval', String(state.backupInterval || 0));
+        safeValue('settings-backup-retention', String(state.backupRetention || 5));
+        safeChecked('settings-minimal-mode', state.minimalMode);
+
+        refreshProfileSelect();
+        refreshFolderStylePicker();
+        updateBackupStatus();
+
+        safeChecked('toggle-mod-dials', state.modules?.dials !== false);
+        safeChecked('toggle-mod-services', state.modules?.services !== false);
+        safeChecked('toggle-mod-news', state.modules?.news !== false);
+        safeChecked('toggle-mod-gcal', state.modules?.gcal !== false);
+        safeChecked('toggle-mod-bookmarks', state.modules?.bookmarks !== false);
+
+        const folderPicker = document.getElementById('settings-folder-name');
+        if (folderPicker) folderPicker.onchange = () => loadFolderStyleIntoSettings(folderPicker.value);
+        const profilePicker = document.getElementById('settings-profile-select');
+        if (profilePicker) profilePicker.onchange = () => switchProfile(profilePicker.value);
+
+        const listContainer = document.getElementById('custom-engines-list');
+        if (listContainer) {
           listContainer.innerHTML = '';
-          state.searchEngines.forEach((e, i) => {
-            const row = document.createElement('div'); row.className='se-settings-item'; row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);';
-            const left=document.createElement('div'); left.style.cssText='display:flex;align-items:center;gap:7px;min-width:0;';
-            const dot=document.createElement('span'); dot.className='se-color-dot'; dot.style.background=e.colors[0];
-            const name=document.createElement('strong'); name.textContent=e.name; name.style.cssText='font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-            left.append(dot,name);
-            const actions=document.createElement('div'); actions.style.cssText='display:flex;gap:3px;flex:0 0 auto;';
-            [['▲',-1],['▼',1]].forEach(([label,delta])=>{ const b=document.createElement('button'); b.type='button'; b.className='se-order-btn'; b.textContent=label; b.title='Move engine'; b.disabled=(i+delta<0||i+delta>=state.searchEngines.length); b.addEventListener('click',()=>moveSearchEngine(e.id,delta)); actions.appendChild(b); });
-            if(e.isCustom){ const b=document.createElement('button'); b.type='button'; b.className='se-order-btn'; b.textContent='×'; b.title='Remove engine'; b.style.color='var(--danger)'; b.addEventListener('click',()=>removeSearchEngine(e.id)); actions.appendChild(b); }
-            row.append(left,actions); listContainer.appendChild(row);
+          (Array.isArray(state.searchEngines) ? state.searchEngines : []).forEach((engine, i) => {
+            const row = document.createElement('div');
+            row.className = 'se-settings-item';
+            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);';
+
+            const left = document.createElement('div');
+            left.style.cssText = 'display:flex;align-items:center;gap:7px;min-width:0;';
+            const dot = document.createElement('span');
+            dot.className = 'se-color-dot';
+            dot.style.background = engine.colors?.[0] || 'var(--accent)';
+            const name = document.createElement('strong');
+            name.textContent = engine.name || 'Search Engine';
+            name.style.cssText = 'font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+            left.append(dot, name);
+
+            const actions = document.createElement('div');
+            actions.style.cssText = 'display:flex;gap:3px;flex:0 0 auto;';
+            [['▲', -1], ['▼', 1]].forEach(([label, delta]) => {
+              const b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'se-order-btn';
+              b.textContent = label;
+              b.title = 'Move engine';
+              b.disabled = (i + delta < 0 || i + delta >= state.searchEngines.length);
+              b.addEventListener('click', () => moveSearchEngine(engine.id, delta));
+              actions.appendChild(b);
+            });
+            if (engine.isCustom) {
+              const b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'se-order-btn';
+              b.textContent = '×';
+              b.title = 'Remove engine';
+              b.style.color = 'var(--danger)';
+              b.addEventListener('click', () => removeSearchEngine(engine.id));
+              actions.appendChild(b);
+            }
+            row.append(left, actions);
+            listContainer.appendChild(row);
           });
-          
-          renderRSSManager();
-          wrapper.classList.add('open');
-      } else {
-          wrapper.classList.remove('open');
+        }
+
+        renderRSSManager();
+      } catch (error) {
+        console.error('Settings panel population error:', error);
+        const status = document.getElementById('oauth-origin-display');
+        if (status) status.textContent = 'Settings opened; one optional saved setting could not be restored.';
       }
     }
 
