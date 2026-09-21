@@ -908,7 +908,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-primary" onclick="saveSettings()">Save Configuration</button>
+        <button class="btn-primary" type="button" onclick="saveSettings()">Save Configuration</button>
       </div>
     </div>
   </div>
@@ -1339,16 +1339,38 @@
       { id: 'se_ddg', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', colors: ['#DE5833', '#FFA07A', '#DE5833', '#FFA07A'], isCustom: false }
     ];
 
+    function safeJSONStorage(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw === null || raw === '') return fallback;
+        const parsed = JSON.parse(raw);
+        return parsed ?? fallback;
+      } catch (e) {
+        console.warn(`Invalid saved setting for ${key}; using a safe default.`, e);
+        return fallback;
+      }
+    }
+
+    function safeArrayStorage(key, fallback = []) {
+      const value = safeJSONStorage(key, fallback);
+      return Array.isArray(value) ? value : fallback;
+    }
+
+    function safeObjectStorage(key, fallback = {}) {
+      const value = safeJSONStorage(key, fallback);
+      return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
+    }
+
     let state = {
       wallpaper: localStorage.getItem('dash_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070',
       googleClientId: localStorage.getItem('dash_google_client_id') || '',
       googleToken: null,
-      dials: JSON.parse(localStorage.getItem('dash_dials')) || [], 
-      bookmarks: JSON.parse(localStorage.getItem('dash_bookmarks')) || [],
-      services: JSON.parse(localStorage.getItem('dash_services')) || [], 
-      rssFeeds: JSON.parse(localStorage.getItem('dash_rss_feeds')) || ['https://www.theverge.com', 'https://9to5google.com'],
-      modules: JSON.parse(localStorage.getItem('dash_modules')) || { dials: true, services: true, news: true, builtin_cal: true, gcal: true, bookmarks: true },
-      searchEngines: JSON.parse(localStorage.getItem('dash_search_engines')) || defaultSearchEngines,
+      dials: safeArrayStorage('dash_dials', []),
+      bookmarks: safeArrayStorage('dash_bookmarks', []),
+      services: safeArrayStorage('dash_services', []),
+      rssFeeds: safeArrayStorage('dash_rss_feeds', ['https://www.theverge.com', 'https://9to5google.com']),
+      modules: { dials: true, services: true, news: true, builtin_cal: true, gcal: true, bookmarks: true, ...safeObjectStorage('dash_modules', {}) },
+      searchEngines: safeArrayStorage('dash_search_engines', defaultSearchEngines),
       activeEngineId: localStorage.getItem('dash_active_engine') || 'se_google',
       newsLayout: (() => {
         const defaults = { columns: 6, rows: 1, size: 'standard' };
@@ -3261,12 +3283,26 @@
       reader.onload=function(e){
         try{
           const imported=JSON.parse(e.target.result);
-          if(imported.localStorage){ CONFIG_KEYS.forEach(k=>localStorage.removeItem(k)); Object.entries(imported.localStorage).forEach(([k,v])=>localStorage.setItem(k,v)); }
-          else {
-            // Backward compatibility with older exports.
-            const map={wallpaper:'dash_wallpaper',googleClientId:'dash_google_client_id',dials:'dash_dials',bookmarks:'dash_bookmarks',services:'dash_services',rssFeeds:'dash_rss_feeds',modules:'dash_modules',searchEngines:'dash_search_engines',activeEngineId:'dash_active_engine',newsLayout:'dash_news_layout'};
-            Object.entries(map).forEach(([src,dst])=>{ if(imported[src]!==undefined) localStorage.setItem(dst,typeof imported[src]==='string'?imported[src]:JSON.stringify(imported[src])); });
+          if(imported && imported.localStorage && typeof imported.localStorage === 'object') {
+            CONFIG_KEYS.forEach(k=>localStorage.removeItem(k));
+            Object.entries(imported.localStorage).forEach(([k,v])=>{ if (CONFIG_KEYS.includes(k) && typeof v === 'string') localStorage.setItem(k,v); });
+          } else if (imported && typeof imported === 'object') {
+            // Backward compatibility with every earlier dashboard export shape.
+            const map={wallpaper:'dash_wallpaper',googleClientId:'dash_google_client_id',dials:'dash_dials',bookmarks:'dash_bookmarks',services:'dash_services',rssFeeds:'dash_rss_feeds',modules:'dash_modules',searchEngines:'dash_search_engines',activeEngineId:'dash_active_engine',newsLayout:'dash_news_layout',theme:'dash_theme',searchWidth:'dash_search_width',showEngineSelector:'dash_show_engine',clockPrefs:'dash_clock_prefs',mobileColumns:'dash_mobile_columns',newsAutoRefresh:'dash_news_refresh',newsFavoritesOnly:'dash_news_favorites_only',favoriteFeeds:'dash_news_favorites',shortcutsEnabled:'dash_shortcuts_enabled',backupInterval:'dash_backup_interval',backupRetention:'dash_backup_retention',minimalMode:'dash_minimal_mode',folderStyles:'dash_folder_styles',dialLayout:'dash_dial_layout'};
+            Object.entries(map).forEach(([src,dst])=>{
+              if(imported[src]!==undefined) {
+                const value = typeof imported[src] === 'string' ? imported[src] : JSON.stringify(imported[src]);
+                localStorage.setItem(dst,value);
+              }
+            });
+          } else {
+            throw new Error('The selected file does not contain a recognized dashboard backup.');
           }
+          // Normalize the core collections immediately so a legacy export can never poison startup.
+          ['dash_dials','dash_bookmarks','dash_services','dash_rss_feeds','dash_search_engines'].forEach(key=>{
+            const value = safeJSONStorage(key, null);
+            if (value !== null && !Array.isArray(value)) localStorage.removeItem(key);
+          });
           if(imported.profiles) localStorage.setItem('dash_profiles',JSON.stringify(imported.profiles));
           if(imported.activeProfile) localStorage.setItem('dash_active_profile',imported.activeProfile);
           if(imported.autoBackups) localStorage.setItem('dash_auto_backups',JSON.stringify(imported.autoBackups));
@@ -3277,28 +3313,31 @@
 
     // ===== SAVE CONFIGURATION =====
     function saveSettings() {
-      pushUndoSnapshot('Save Settings');
-      const wp = document.getElementById('settings-wallpaper').value.trim();
-      const cid = document.getElementById('settings-client-id').value.trim();
-      const shapeVal = document.getElementById('settings-shape').value;
-      const sizeVal = document.getElementById('settings-size').value;
-      const gridColsVal = document.getElementById('settings-grid-cols').value;
-      const newsColumnsVal = document.getElementById('settings-news-columns').value;
-      const newsRowsVal = document.getElementById('settings-news-rows').value;
-      const newsSizeVal = document.getElementById('settings-news-size').value;
-      const blurVal = document.getElementById('settings-blur-num').value;
-      const opacityVal = document.getElementById('settings-opacity-num').value;
-      const theme = document.getElementById('settings-theme').value;
-      const searchWidth = document.getElementById('settings-search-width').value;
-      const showEngine = document.getElementById('settings-show-engine').checked;
-      const clockPrefs = { format:document.getElementById('settings-clock-format').value, seconds:document.getElementById('settings-clock-seconds').checked, date:document.getElementById('settings-clock-date').checked, day:document.getElementById('settings-clock-day').checked };
-      const mobileColumns = Math.min(4, Math.max(2, parseInt(document.getElementById('settings-mobile-columns').value,10) || 3));
-      const newsRefresh = parseInt(document.getElementById('settings-news-refresh').value,10) || 0;
-      const favoritesOnly = document.getElementById('settings-news-favorites-only').checked;
-      const shortcutsEnabled = document.getElementById('settings-shortcuts-enabled').checked;
-      const backupInterval = parseInt(document.getElementById('settings-backup-interval').value,10) || 0;
-      const backupRetention = parseInt(document.getElementById('settings-backup-retention').value,10) || 5;
-      const minimalMode = document.getElementById('settings-minimal-mode').checked;
+      try {
+        pushUndoSnapshot('Save Settings');
+        const val = (id, fallback = '') => document.getElementById(id)?.value ?? fallback;
+        const checked = (id, fallback = false) => document.getElementById(id)?.checked ?? fallback;
+        const wp = val('settings-wallpaper').trim();
+        const cid = val('settings-client-id').trim();
+        const shapeVal = val('settings-shape', '20px|none|1 / 1');
+        const sizeVal = val('settings-size', '130px');
+        const gridColsVal = val('settings-grid-cols', 'repeat(auto-fill, minmax(var(--card-min-width), 1fr))');
+        const newsColumnsVal = val('settings-news-columns', '6');
+        const newsRowsVal = val('settings-news-rows', '1');
+        const newsSizeVal = val('settings-news-size', 'standard');
+        const blurVal = val('settings-blur-num', '16');
+        const opacityVal = val('settings-opacity-num', '55');
+        const theme = val('settings-theme', 'midnight');
+        const searchWidth = val('settings-search-width', '680px');
+        const showEngine = checked('settings-show-engine', true);
+        const clockPrefs = { format:val('settings-clock-format','12'), seconds:checked('settings-clock-seconds'), date:checked('settings-clock-date'), day:checked('settings-clock-day') };
+        const mobileColumns = Math.min(4, Math.max(2, parseInt(val('settings-mobile-columns','3'),10) || 3));
+        const newsRefresh = parseInt(val('settings-news-refresh','0'),10) || 0;
+        const favoritesOnly = checked('settings-news-favorites-only');
+        const shortcutsEnabled = checked('settings-shortcuts-enabled', true);
+        const backupInterval = parseInt(val('settings-backup-interval','0'),10) || 0;
+        const backupRetention = parseInt(val('settings-backup-retention','5'),10) || 5;
+        const minimalMode = checked('settings-minimal-mode');
 
       if (wp) { state.wallpaper=wp; localStorage.setItem('dash_wallpaper',wp); document.body.style.backgroundImage=`url('${state.wallpaper}')`; }
       if (state.googleClientId !== cid) { clearCalendarToken(); tokenClient=null; googleAuthClientId=''; }
@@ -3324,8 +3363,12 @@
       localStorage.setItem('dash_modules',JSON.stringify(state.modules));
       applyGlassPreferences(); applyTheme(); applyNewsLayout(); scheduleNewsRefresh(); scheduleBackups();
       if(lastRSSArticles.length) renderRSSCarousel(lastRSSArticles);
-      applyModuleVisibility(); initGoogleAuth();
-      toggleSettingsDropdown();
+        applyModuleVisibility(); initGoogleAuth();
+        toggleSettingsDropdown();
+      } catch (error) {
+        console.error('Settings save failed:', error);
+        alert(`Settings could not be saved safely: ${error.message || error}`);
+      }
     }
 
     function applyModuleVisibility() {
