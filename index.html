@@ -1302,44 +1302,93 @@
     }
 
     // ===== ICONIFY API SEARCH =====
+    const ICONIFY_API_HOSTS = [
+      'https://api.iconify.design',
+      'https://api.simplesvg.com',
+      'https://api.unisvg.com'
+    ];
+
+    function getIconifyIconUrl(iconName, host = ICONIFY_API_HOSTS[0]) {
+      const parts = String(iconName || '').split(':');
+      if (parts.length < 2 || !parts[0] || !parts.slice(1).join(':')) return '';
+      const prefix = encodeURIComponent(parts[0]);
+      const name = encodeURIComponent(parts.slice(1).join(':'));
+      return `${host}/${prefix}/${name}.svg`;
+    }
+
+    async function fetchIconifySearch(query, limit = 30) {
+      let lastError = null;
+      for (const host of ICONIFY_API_HOSTS) {
+        try {
+          const url = `${host}/search?query=${encodeURIComponent(query)}&limit=${limit}`;
+          const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+          if (!res.ok) throw new Error(`Iconify returned HTTP ${res.status}`);
+          const data = await res.json();
+          return { ...data, host };
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error('Unable to reach Iconify');
+    }
+
     async function searchIcons(mode) {
-       const prefix = mode === 'add' ? 'add' : 'edit';
-       const query = document.getElementById(`${prefix}-icon-search-input`).value.trim();
-       const resultsContainer = document.getElementById(`${prefix}-icon-results`);
-       if (!query) return;
-       
-       resultsContainer.style.display = 'grid';
-       resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">Searching...</span>';
-       
-       try {
-           const res = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=30`);
-           const data = await res.json();
-           if (data.icons && data.icons.length > 0) {
-               resultsContainer.innerHTML = '';
-               data.icons.forEach(iconName => {
-                   const iconUrl = `https://api.iconify.design/${iconName}.svg`;
-                   const img = document.createElement('img');
-                   img.src = iconUrl;
-                   img.style.width = '100%';
-                   img.style.height = 'auto';
-                   img.style.cursor = 'pointer';
-                   img.style.background = 'rgba(255,255,255,0.1)';
-                   img.style.padding = '4px';
-                   img.style.borderRadius = '6px';
-                   img.title = iconName;
-                   img.onclick = () => {
-                       document.getElementById(mode === 'add' ? 'dial-img' : 'edit-dial-img').value = iconUrl;
-                       resultsContainer.querySelectorAll('img').forEach(i => i.style.border = 'none');
-                       img.style.border = '2px solid var(--accent)';
-                   };
-                   resultsContainer.appendChild(img);
-               });
-           } else {
-               resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">No icons found.</span>';
-           }
-       } catch (e) {
-           resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--danger); grid-column:1/-1;">Search failed.</span>';
-       }
+      const prefix = mode === 'add' ? 'add' : 'edit';
+      const input = document.getElementById(`${prefix}-icon-search-input`);
+      const resultsContainer = document.getElementById(`${prefix}-icon-results`);
+      const query = input ? input.value.trim() : '';
+      if (!resultsContainer || !query) return;
+
+      resultsContainer.style.display = 'grid';
+      resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">Searching Iconify…</span>';
+
+      try {
+        const data = await fetchIconifySearch(query, 30);
+        const icons = Array.isArray(data.icons) ? data.icons : [];
+
+        if (!icons.length) {
+          resultsContainer.innerHTML = '<span style="font-size:11px; color:var(--text-muted); grid-column:1/-1;">No icons found.</span>';
+          return;
+        }
+
+        const imageInput = document.getElementById(mode === 'add' ? 'dial-img' : 'edit-dial-img');
+        resultsContainer.innerHTML = '';
+
+        icons.forEach(iconName => {
+          const iconUrl = getIconifyIconUrl(iconName, data.host);
+          if (!iconUrl) return;
+
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.title = iconName;
+          button.setAttribute('aria-label', `Use ${iconName}`);
+          button.style.cssText = 'display:flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;padding:4px;border:1px solid transparent;border-radius:7px;background:rgba(255,255,255,0.08);cursor:pointer;';
+
+          const img = document.createElement('img');
+          img.src = iconUrl;
+          img.alt = '';
+          img.loading = 'lazy';
+          img.style.cssText = 'width:32px;height:32px;object-fit:contain;display:block;';
+          img.onerror = () => {
+            const fallbackIndex = ICONIFY_API_HOSTS.indexOf(data.host) + 1;
+            const fallbackHost = ICONIFY_API_HOSTS[fallbackIndex];
+            if (fallbackHost) img.src = getIconifyIconUrl(iconName, fallbackHost);
+            else button.remove();
+          };
+
+          button.appendChild(img);
+          button.addEventListener('click', () => {
+            if (imageInput) imageInput.value = iconUrl;
+            resultsContainer.querySelectorAll('button').forEach(b => { b.style.border = '1px solid transparent'; b.style.boxShadow = 'none'; });
+            button.style.border = '2px solid var(--accent)';
+            button.style.boxShadow = '0 0 0 2px rgba(88,166,255,0.18)';
+          });
+          resultsContainer.appendChild(button);
+        });
+      } catch (e) {
+        console.error('Iconify search failed:', e);
+        resultsContainer.innerHTML = `<span style="font-size:11px; color:var(--danger); grid-column:1/-1;">Icon search unavailable right now. ${String(e.message || '').replace(/[<>]/g, '')}</span>`;
+      }
     }
 
     // ===== SMART URL PARSER =====
@@ -2208,7 +2257,7 @@
 
     function getServiceIconUrl(service) {
       const meta = getServiceMeta(service);
-      return `https://api.iconify.design/${meta.icon}.svg?color=%23c9d1d9`;
+      return `${getIconifyIconUrl(meta.icon)}?color=%23c9d1d9`;
     }
 
     function getServiceHealthUrl(service) {
