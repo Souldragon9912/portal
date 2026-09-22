@@ -405,6 +405,7 @@
     .shortcut-list code { color:var(--accent); background:rgba(88,166,255,.08); border:1px solid rgba(88,166,255,.16); border-radius:6px; padding:2px 6px; }
 
     @media (max-width: 768px) {
+      .mobile-settings-note { display: none; }
       .feature-grid { grid-template-columns: 1fr; }
       .undo-toast { left: 10px; right: 10px; bottom: 10px; justify-content:space-between; }
       .profile-controls { grid-template-columns: 1fr 1fr; }
@@ -417,6 +418,20 @@
     /* Mobile: focused browser start-page experience */
     @media (max-width: 768px) {
       body { padding: 8px; }
+
+      .mobile-settings-note {
+        display: block;
+        font-size: 10px;
+        line-height: 1.45;
+        color: var(--text-muted);
+        background: rgba(88,166,255,.06);
+        border: 1px solid rgba(88,166,255,.14);
+        border-radius: 10px;
+        padding: 9px 10px;
+        margin: -6px 0 10px;
+      }
+      .settings-desktop-only { display: none !important; }
+      .settings-mobile-feature-group { display: block !important; }
 
       /* Keep only the essentials in the mobile top bar:
          Bookmarks + clock + Settings. Google Calendar remains a desktop feature;
@@ -526,17 +541,17 @@
       /* Tile size now follows the same Tile Size Scale setting used on desktop.
          The grid uses fixed-width tracks so Micro/Compact/Standard/Large actually
          change the tile size instead of stretching every tile to fill the phone. */
-       .speed-dial-grid {
+      .speed-dial-grid {
         width: 100%;
         max-width: 100%;
-        grid-template-columns: repeat(var(--mobile-dial-columns, 3), minmax(0, 1fr));
+        grid-template-columns: repeat(var(--mobile-dial-columns, 3), var(--mobile-card-width, 110px));
         justify-content: center;
         gap: 10px;
       }
-      #section-dials.grid-fixed  .speed-dial-grid {
+      #section-dials.grid-fixed .speed-dial-grid {
         width: 100%;
         max-width: 100%;
-        grid-template-columns: repeat(var(--mobile-dial-columns, 3), minmax(0, 1fr));
+        grid-template-columns: repeat(var(--mobile-dial-columns, 3), var(--mobile-card-width, 110px));
         justify-content: center;
       }
       .dial-card, .add-dial-tile, .dial-folder-tile {
@@ -585,7 +600,7 @@
     }
 
     @media (max-width: 520px) {
-      .speed-dial-grid, #section-dials.grid-fixed .speed-dial-grid { grid-template-columns: repeat(min(2, var(--mobile-dial-columns, 3)), minmax(0, 1fr)); }
+      .speed-dial-grid, #section-dials.grid-fixed .speed-dial-grid { grid-template-columns: repeat(min(2, var(--mobile-dial-columns, 3)), var(--mobile-card-width, 110px)); }
       .widget-toggles { grid-template-columns: 1fr 1fr; }
       .rss-carousel { grid-template-columns: 30px minmax(0, 1fr) 30px; }
       .rss-carousel-arrow { width: 30px; height: 30px; font-size: 18px; }
@@ -669,8 +684,9 @@
         <h3 style="margin: 0; font-size: 16px;">Dashboard Settings</h3>
         <button type="button" style="background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;" onclick="toggleSettingsDropdown()">&times;</button>
       </div>
+      <div class="mobile-settings-note">Mobile settings are limited to the essentials: wallpaper, tile shape, tile size, columns, clock, and basic appearance.</div>
       
-      <div class="form-group">
+      <div class="form-group settings-basic-wallpaper">
         <label>Custom Wallpaper (URL or Upload Image)</label>
         <div style="display: flex; gap: 8px;">
           <input type="url" id="settings-wallpaper" placeholder="https://..." style="flex: 1;" />
@@ -679,10 +695,10 @@
         </div>
       </div>
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
+      <div class="form-group settings-appearance" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Appearance & Layout Control</label>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
+        <div class="settings-desktop-only" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;">
           <span style="font-size: 12px;">Move & Reposition Major Sections</span>
           <button class="badge-btn" id="editModeBtn" onclick="toggleEditMode()" style="background: #333;">✏ Unlock Sections</button>
         </div>
@@ -716,7 +732,7 @@
           </div>
         </div>
 
-        <div style="margin-bottom: 10px;">
+        <div class="settings-desktop-only" style="margin-bottom: 10px;">
           <label style="font-size: 11px;">Speed Dial Grid Layout</label>
           <select id="settings-grid-cols" style="width:100%; margin-top:4px;">
             <option value="repeat(auto-fill, minmax(var(--card-min-width), 1fr))" selected>Auto-Fill (Responsive)</option>
@@ -726,7 +742,7 @@
           </select>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div class="settings-desktop-only" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
           <div>
             <label style="font-size: 11px;">News Feed Columns</label>
             <select id="settings-news-columns" style="width:100%; margin-top:4px;">
@@ -747,7 +763,7 @@
           </div>
         </div>
 
-        <div style="margin-bottom: 10px;">
+        <div class="settings-desktop-only" style="margin-bottom: 10px;">
           <label style="font-size: 11px;">News Card Size</label>
           <select id="settings-news-size" style="width:100%; margin-top:4px;">
             <option value="compact">Compact</option>
@@ -756,17 +772,17 @@
           </select>
         </div>
 
-        <div style="font-size: 10px; color: var(--text-muted); margin: -2px 0 10px;">
+        <div class="settings-desktop-only" style="font-size: 10px; color: var(--text-muted); margin: -2px 0 10px;">
           Columns control how many stories fit across. Rows control how many appear on each page.
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="settings-desktop-only" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div><label style="font-size: 11px;">Glass Blur (px)</label><input type="number" id="settings-blur-num" min="0" max="40" value="16" style="width:100%; margin-top:4px;" /></div>
           <div><label style="font-size: 11px;">Glass Opacity (%)</label><input type="number" id="settings-opacity-num" min="10" max="100" value="55" style="width:100%; margin-top:4px;" /></div>
         </div>
       </div>
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
+      <div class="form-group settings-desktop-only" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Search Engines</label>
         <div style="display: flex; gap: 6px;">
           <input type="text" id="new-se-name" placeholder="Name" style="flex: 1;" />
@@ -777,7 +793,7 @@
         <div class="se-settings-list" id="custom-engines-list"></div>
       </div>
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
+      <div class="form-group settings-desktop-only" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Manage News Feeds</label>
         <div style="display: flex; gap: 8px; margin-bottom: 5px;">
           <input type="url" id="newRssInput" placeholder="https://theverge.com" style="flex: 1;" />
@@ -787,10 +803,10 @@
       </div>
 
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
-        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Personalization & Power Features</label>
+      <div class="form-group settings-mobile-feature-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
+        <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 8px;">Personalization</label>
         <div class="feature-grid">
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>Dashboard Profile</label>
             <div class="profile-controls">
               <select id="settings-profile-select"></select>
@@ -800,24 +816,24 @@
             <div class="feature-row"><label>Profile actions</label><button class="badge-btn" type="button" onclick="deleteCurrentProfile()">Delete</button></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>Quick Layout Preset</label>
             <div class="feature-row"><label>Choose a starting arrangement</label><select id="settings-layout-preset"><option value="">Choose preset…</option><option value="compact">Compact</option><option value="balanced">Balanced</option><option value="large">Large Tiles</option><option value="minimal">Minimal</option><option value="news-focus">News Focus</option></select></div>
             <div class="feature-actions"><button class="badge-btn" type="button" onclick="applySelectedLayoutPreset()">Apply Preset</button></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card mobile-basic-feature">
             <label>Theme</label>
             <div class="feature-row"><label>Interface theme</label><select id="settings-theme"><option value="midnight">Midnight</option><option value="azure">Azure</option><option value="carbon">Carbon</option><option value="frost">Frost</option><option value="solarized">Solarized</option><option value="oled">OLED Black</option></select></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>Search Bar</label>
             <div class="feature-row"><label>Width</label><select id="settings-search-width"><option value="520px">Compact</option><option value="680px">Standard</option><option value="860px">Wide</option><option value="1100px">Extra Wide</option></select></div>
             <div class="feature-row"><label>Show engine selector</label><input type="checkbox" id="settings-show-engine"></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card mobile-basic-feature">
             <label>Clock</label>
             <div class="feature-row"><label>Format</label><select id="settings-clock-format"><option value="12">12-hour</option><option value="24">24-hour</option></select></div>
             <div class="feature-row"><label>Show seconds</label><input type="checkbox" id="settings-clock-seconds"></div>
@@ -825,18 +841,18 @@
             <div class="feature-row"><label>Show day</label><input type="checkbox" id="settings-clock-day"></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card mobile-basic-feature">
             <label>Mobile Speed Dials</label>
             <div class="feature-row"><label>Columns</label><select id="settings-mobile-columns"><option value="2">2 Columns</option><option value="3">3 Columns</option><option value="4">4 Columns</option></select></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>News</label>
             <div class="feature-row"><label>Auto refresh</label><select id="settings-news-refresh"><option value="0">Manual</option><option value="15">Every 15 min</option><option value="30">Every 30 min</option><option value="60">Every hour</option></select></div>
             <div class="feature-row"><label>Favorites only</label><input type="checkbox" id="settings-news-favorites-only"></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>Folder Appearance</label>
             <div class="feature-row"><label>Folder</label><select id="settings-folder-name"></select></div>
             <div class="feature-row"><label>Icon</label><input type="text" id="settings-folder-icon" maxlength="4" value="📁" style="max-width:70px;"></div>
@@ -846,13 +862,13 @@
             <div class="feature-actions"><button class="badge-btn" type="button" onclick="saveFolderStyleFromSettings()">Save Folder Style</button></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>Keyboard Shortcuts</label>
             <div class="feature-row"><label>Enable shortcuts</label><input type="checkbox" id="settings-shortcuts-enabled"></div>
             <div class="shortcut-list" style="margin-top:8px;"><span>Focus search</span><code>Ctrl/⌘ K</code><span>Bookmarks</span><code>Ctrl/⌘ Shift B</code><span>Settings</span><code>Ctrl/⌘ Shift S</code><span>Speed Dial 1–9</span><code>Alt + 1…9</code></div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>Local Browser Backups</label>
             <div class="feature-row"><label>Automatic snapshot</label><select id="settings-backup-interval"><option value="0">Off</option><option value="60">Hourly</option><option value="360">Every 6 hours</option><option value="1440">Daily</option><option value="10080">Weekly</option></select></div>
             <div class="feature-row"><label>Keep snapshots</label><select id="settings-backup-retention"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select></div>
@@ -860,14 +876,14 @@
             <div id="backup-status" class="backup-status">No local browser snapshots yet.</div>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card settings-desktop-only">
             <label>Minimal Mode</label>
             <div class="feature-row"><label>Search + Speed Dials + Clock + Settings</label><input type="checkbox" id="settings-minimal-mode"></div>
           </div>
         </div>
       </div>
 
-      <div class="form-group" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
+      <div class="form-group settings-desktop-only" style="background: rgba(0,0,0,0.2); padding: 12px; border: 1px solid var(--border-glass); border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Reset Individual Layouts</label>
         <div class="feature-actions">
           <button class="badge-btn" type="button" onclick="resetSectionLayout('dials')">Reset Speed Dials</button>
@@ -877,7 +893,7 @@
         </div>
       </div>
 
-      <div class="form-group" style="margin-top: 10px;">
+      <div class="form-group settings-desktop-only" style="margin-top: 10px;">
         <label>Google OAuth Client ID</label>
         <input type="text" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" />
         <div class="oauth-help-box">
@@ -887,7 +903,7 @@
         </div>
       </div>
 
-      <div class="form-group" style="margin-top: 10px;">
+      <div class="form-group settings-desktop-only" style="margin-top: 10px;">
         <label>Visible Modules & Sections</label>
         <div class="modules-toggle-list">
           <div class="toggle-row"><span>⚡ Speed Dials Grid</span><label class="toggle-switch"><input type="checkbox" id="toggle-mod-dials"><span class="slider"></span></label></div>
@@ -898,7 +914,7 @@
         </div>
       </div>
 
-      <div class="form-group" style="margin-top: 10px; border-top: 1px solid var(--border-glass); padding-top: 14px;">
+      <div class="form-group settings-desktop-only" style="margin-top: 10px; border-top: 1px solid var(--border-glass); padding-top: 14px;">
         <label style="color: var(--text-main); font-weight: 500; font-size: 13px; margin-bottom: 4px;">Backup & Sync Configuration</label>
         <div style="display: flex; gap: 8px;">
           <button class="badge-btn" onclick="exportConfig()" style="padding: 8px 12px;">Export Config</button>
@@ -1430,6 +1446,7 @@
       'dash_news_favorites','dash_shortcuts_enabled','dash_backup_interval','dash_backup_retention','dash_minimal_mode','dash_folder_styles',...LAYOUT_KEYS
     ];
     let undoStack = [];
+    let undoToastTimer = null;
     let backupTimer = null;
     let newsAutoRefreshTimer = null;
 
@@ -1444,11 +1461,19 @@
         if (undoStack.length && JSON.stringify(undoStack[undoStack.length-1].keys) === sig) return;
         undoStack.push(snap); if (undoStack.length > 12) undoStack.shift();
         const toast = document.getElementById('undoToast'); const text = document.getElementById('undoToastText');
-        if (text) text.textContent = `${snap.label} saved.`; if (toast) toast.classList.add('show');
+        if (text) text.textContent = `${snap.label} saved.`;
+        if (toast) {
+          if (undoToastTimer) clearTimeout(undoToastTimer);
+          toast.classList.add('show');
+          undoToastTimer = setTimeout(() => { toast.classList.remove('show'); }, 5000);
+        }
       } catch(e) {}
     }
     function undoLastChange() {
       const snap = undoStack.pop(); if (!snap) return;
+      const toast = document.getElementById('undoToast');
+      if (undoToastTimer) clearTimeout(undoToastTimer);
+      if (toast) toast.classList.remove('show');
       CONFIG_KEYS.forEach(k => localStorage.removeItem(k));
       Object.entries(snap.keys).forEach(([k,v]) => localStorage.setItem(k,v));
       location.reload();
@@ -1462,7 +1487,10 @@
       document.body.classList.toggle('minimal-mode', !!state.minimalMode);
       document.body.classList.toggle('hide-search-engine', !state.showEngineSelector);
       root.style.setProperty('--search-width', state.searchWidth || '680px');
-      root.style.setProperty('--mobile-dial-columns', String(Math.min(4, Math.max(2, state.mobileColumns || 3))));
+      const mobileCols = Math.min(4, Math.max(2, state.mobileColumns || 3));
+      const requestedMobileWidth = parseInt(localStorage.getItem('dash_min_width') || '130', 10) || 130;
+      root.style.setProperty('--mobile-dial-columns', String(mobileCols));
+      root.style.setProperty('--mobile-card-width', `min(${requestedMobileWidth}px, calc((100vw - 32px - (${mobileCols} - 1) * 10px) / ${mobileCols}))`);
     }
 
     function applyClockPreferences() { updateClock(); }
